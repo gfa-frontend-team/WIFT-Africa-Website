@@ -1,0 +1,195 @@
+// Core types matching backend models
+
+// ============================================
+// USER & AUTH TYPES
+// ============================================
+
+export enum AccountType {
+  CHAPTER_MEMBER = 'CHAPTER_MEMBER',
+  HQ_MEMBER = 'HQ_MEMBER',
+  CHAPTER_ADMIN = 'CHAPTER_ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+}
+
+export enum MembershipStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+}
+
+export enum AuthProvider {
+  LOCAL = 'LOCAL',
+  GOOGLE = 'GOOGLE',
+  LINKEDIN = 'LINKEDIN',
+}
+
+export enum MemberType {
+  NEW = 'NEW',
+  EXISTING = 'EXISTING',
+}
+
+export interface User {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  profilePhoto?: string
+  authProvider: AuthProvider
+  emailVerified: boolean
+  accountType: AccountType
+  membershipStatus: MembershipStatus
+  onboardingComplete: boolean
+  onboardingStep: number
+  termsAccepted: boolean
+  termsAcceptedAt?: Date
+  chapterId?: string
+  memberType?: MemberType
+  lastLoginAt?: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface AuthTokens {
+  accessToken: string
+  refreshToken: string
+}
+
+export interface AuthResponse {
+  user: User
+  tokens: AuthTokens
+}
+
+// ============================================
+// PROFILE & ROLES
+// ============================================
+
+export enum Role {
+  PRODUCER = 'PRODUCER',
+  DIRECTOR = 'DIRECTOR',
+  WRITER = 'WRITER',
+  ACTRESS = 'ACTRESS',
+  CREW = 'CREW',
+  BUSINESS = 'BUSINESS',
+}
+
+export enum WriterSpecialization {
+  TV = 'TV',
+  FILM = 'FILM',
+  BOTH = 'BOTH',
+}
+
+export enum CrewSpecialization {
+  CINEMATOGRAPHER = 'CINEMATOGRAPHER',
+  EDITOR = 'EDITOR',
+  COMPOSER = 'COMPOSER',
+  SOUND_DESIGNER = 'SOUND_DESIGNER',
+  PRODUCTION_DESIGNER = 'PRODUCTION_DESIGNER',
+  COSTUME_DESIGNER = 'COSTUME_DESIGNER',
+  MAKEUP_ARTIST = 'MAKEUP_ARTIST',
+  GAFFER = 'GAFFER',
+}
+
+export enum BusinessSpecialization {
+  ENTERTAINMENT_LAW = 'ENTERTAINMENT_LAW',
+  DISTRIBUTION = 'DISTRIBUTION',
+  FINANCE = 'FINANCE',
+  MARKETING = 'MARKETING',
+  REPRESENTATION = 'REPRESENTATION',
+  PUBLIC_RELATIONS = 'PUBLIC_RELATIONS',
+}
+
+export enum AvailabilityStatus {
+  AVAILABLE = 'AVAILABLE',
+  BUSY = 'BUSY',
+  NOT_LOOKING = 'NOT_LOOKING',
+}
+
+export interface Profile {
+  id: string
+  userId: string
+  roles: Role[]
+  primaryRole: Role
+  isMultihyphenate: boolean
+  writerSpecialization?: WriterSpecialization
+  crewSpecialization?: CrewSpecialization
+  businessSpecialization?: BusinessSpecialization
+  headline?: string
+  bio?: string
+  skills: string[]
+  location?: string
+  availabilityStatus: AvailabilityStatus
+  portfolioLinks: string[]
+  website?: string
+  imdbUrl?: string
+  linkedinUrl?: string
+  instagramHandle?: string
+  twitterHandle?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// ============================================
+// ONBOARDING
+// ============================================
+
+export interface OnboardingProgress {
+  currentStep: number
+  isComplete: boolean
+  emailVerified: boolean
+  steps: {
+    roleSelection: boolean
+    specialization: boolean
+    chapterSelection: boolean
+    profileSetup: boolean
+    termsAccepted: boolean
+  }
+  data: {
+    roles: Role[]
+    primaryRole?: Role
+    specializations: {
+      writer?: WriterSpecialization
+      crew?: CrewSpecialization
+      business?: BusinessSpecialization
+    }
+    chapterId?: string
+    membershipStatus: MembershipStatus
+  }
+}
+
+// ============================================
+// CHAPTER
+// ============================================
+
+export interface Chapter {
+  id: string
+  name: string
+  code: string
+  country: string
+  description?: string
+  memberCount: number
+  isActive: boolean
+  adminIds: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// ============================================
+// API REQUEST/RESPONSE TYPES
+// ============================================
+
+export interface ApiError {
+  error: string
+  message: string
+  statusCode: number
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
