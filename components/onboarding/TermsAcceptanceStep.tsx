@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, CheckCircle, Briefcase, Users, Clock } from 'lucide-react'
 import { onboardingApi } from '@/lib/api/onboarding'
+import { useUserStore } from '@/lib/stores/userStore'
 
 interface TermsAcceptanceStepProps {
   onPrevious: () => void
@@ -17,6 +18,7 @@ export default function TermsAcceptanceStep({
   setIsSaving,
 }: TermsAcceptanceStepProps) {
   const router = useRouter()
+  const { updateUser } = useUserStore()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
@@ -29,12 +31,18 @@ export default function TermsAcceptanceStep({
     setIsSaving(true)
 
     try {
-      await onboardingApi.acceptTerms()
+      const response = await onboardingApi.acceptTerms()
 
       console.log('✅ Terms accepted - Onboarding complete!')
       
-      // Redirect to home page
-      window.location.href = '/in/home'
+      // Update user state to reflect onboarding completion
+      updateUser({ 
+        onboardingComplete: true,
+        termsAccepted: true 
+      })
+      
+      // Redirect to home page after successful completion
+      router.push('/feed')
     } catch (error: any) {
       console.error('❌ Failed to accept terms:', error)
       alert(error.response?.data?.error || 'Failed to complete onboarding')

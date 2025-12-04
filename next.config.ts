@@ -1,26 +1,27 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
+  async redirects() {
+    return [
+      // Redirect old /in/* routes to new /username structure
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
+        source: '/in/:username',
+        destination: '/:username',
+        permanent: true,
       },
       {
-        protocol: 'https',
-        hostname: 'flagsapi.com',
+        source: '/in/:username/edit',
+        destination: '/:username/edit',
+        permanent: true,
       },
+      // Redirect old /@username to /username
       {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        source: '/@:username',
+        destination: '/:username',
+        permanent: true,
       },
-    ],
+    ]
   },
-  // Enable experimental features if needed
-  experimental: {
-    // Add any experimental features here
-  },
-};
+}
 
-export default nextConfig;
+export default nextConfig

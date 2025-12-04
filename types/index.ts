@@ -35,6 +35,14 @@ export interface User {
   firstName: string
   lastName: string
   profilePhoto?: string
+  
+  // CV/Resume fields
+  cvFileName?: string
+  cvFileUrl?: string
+  cvUploadedAt?: Date
+  
+  username?: string
+  profileSlug: string
   authProvider: AuthProvider
   emailVerified: boolean
   accountType: AccountType
@@ -111,9 +119,9 @@ export interface Profile {
   roles: Role[]
   primaryRole: Role
   isMultihyphenate: boolean
-  writerSpecialization?: WriterSpecialization
-  crewSpecialization?: CrewSpecialization
-  businessSpecialization?: BusinessSpecialization
+  writerSpecialization?: WriterSpecialization  // Singular - only one writer specialization
+  crewSpecializations?: CrewSpecialization[]  // Array - multiple crew specializations allowed
+  businessSpecializations?: BusinessSpecialization[]  // Array - multiple business specializations allowed
   headline?: string
   bio?: string
   skills: string[]
@@ -148,9 +156,9 @@ export interface OnboardingProgress {
     roles: Role[]
     primaryRole?: Role
     specializations: {
-      writer?: WriterSpecialization
-      crew?: CrewSpecialization
-      business?: BusinessSpecialization
+      writer?: WriterSpecialization  // Singular - matches backend
+      crew?: CrewSpecialization[]  // Array - matches backend
+      business?: BusinessSpecialization[]  // Array - matches backend
     }
     chapterId?: string
     membershipStatus: MembershipStatus

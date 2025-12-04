@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, ArrowRight, Link as LinkIcon, Film, Globe, MapPin } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Link as LinkIcon, Film, Globe, MapPin, Upload } from 'lucide-react'
 import { onboardingApi } from '@/lib/api/onboarding'
 
 interface ProfileSetupStepProps {
@@ -26,6 +26,7 @@ export default function ProfileSetupStep({
   const [instagramHandle, setInstagramHandle] = useState('')
   const [twitterHandle, setTwitterHandle] = useState('')
   const [availabilityStatus, setAvailabilityStatus] = useState<'AVAILABLE' | 'BUSY' | 'NOT_LOOKING'>('AVAILABLE')
+  const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   const validateAndSubmit = () => {
@@ -53,6 +54,20 @@ export default function ProfileSetupStep({
       newErrors.linkedinUrl = 'Please enter a valid URL starting with http:// or https://'
     }
 
+    // CV file validation (optional)
+    if (cvFile) {
+      const maxSize = 10 * 1024 * 1024 // 10MB
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+      
+      if (cvFile.size > maxSize) {
+        newErrors.cv = 'CV file must be less than 10MB'
+      }
+      
+      if (!allowedTypes.includes(cvFile.type)) {
+        newErrors.cv = 'CV must be a PDF, DOC, or DOCX file'
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return false
@@ -69,20 +84,46 @@ export default function ProfileSetupStep({
     setIsSaving(true)
 
     try {
-      const data: any = {
-        availabilityStatus,
+      // Use FormData if CV file is present, otherwise use JSON
+      if (cvFile) {
+        const formData = new FormData()
+        
+        // Add text fields
+        formData.append('availabilityStatus', availabilityStatus)
+        if (headline.trim()) formData.append('headline', headline.trim())
+        if (bio.trim()) formData.append('bio', bio.trim())
+        if (location.trim()) formData.append('location', location.trim())
+        if (website.trim()) formData.append('website', website.trim())
+        if (imdbUrl.trim()) formData.append('imdbUrl', imdbUrl.trim())
+        if (linkedinUrl.trim()) formData.append('linkedinUrl', linkedinUrl.trim())
+        if (instagramHandle.trim()) formData.append('instagramHandle', instagramHandle.trim())
+        if (twitterHandle.trim()) formData.append('twitterHandle', twitterHandle.trim())
+        
+        // Add CV file
+        formData.append('cv', cvFile)
+
+        // Import apiClient for direct FormData upload
+        const { apiClient } = await import('@/lib/api/client')
+        await apiClient.post('/onboarding/profile', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+      } else {
+        // No CV file, use regular JSON
+        const data: any = {
+          availabilityStatus,
+        }
+
+        if (headline.trim()) data.headline = headline.trim()
+        if (bio.trim()) data.bio = bio.trim()
+        if (location.trim()) data.location = location.trim()
+        if (website.trim()) data.website = website.trim()
+        if (imdbUrl.trim()) data.imdbUrl = imdbUrl.trim()
+        if (linkedinUrl.trim()) data.linkedinUrl = linkedinUrl.trim()
+        if (instagramHandle.trim()) data.instagramHandle = instagramHandle.trim()
+        if (twitterHandle.trim()) data.twitterHandle = twitterHandle.trim()
+
+        await onboardingApi.submitProfile(data)
       }
-
-      if (headline.trim()) data.headline = headline.trim()
-      if (bio.trim()) data.bio = bio.trim()
-      if (location.trim()) data.location = location.trim()
-      if (website.trim()) data.website = website.trim()
-      if (imdbUrl.trim()) data.imdbUrl = imdbUrl.trim()
-      if (linkedinUrl.trim()) data.linkedinUrl = linkedinUrl.trim()
-      if (instagramHandle.trim()) data.instagramHandle = instagramHandle.trim()
-      if (twitterHandle.trim()) data.twitterHandle = twitterHandle.trim()
-
-      await onboardingApi.submitProfile(data)
 
       console.log('✅ Profile setup saved successfully')
       onNext()
@@ -321,11 +362,64 @@ export default function ProfileSetupStep({
         </div>
       </div>
 
+      {/* CV Upload */}
+      <div className="space-y-4">
+        <h3 className="font-semibold text-foreground">CV / Resume (Optional)</h3>
+        <p className="text-sm text-muted-foreground">
+          Upload your CV to showcase your experience and qualifications
+        </p>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Upload CV / Resume
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null
+                setCvFile(file)
+                if (errors.cv) {
+                  setErrors((prev) => ({ ...prev, cv: '' }))
+                }
+              }}
+              className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Accepted formats: PDF, DOC, DOCX (Max 10MB)
+          </p>
+          {cvFile && (
+            <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-green-800 font-medium">{cvFile.name}</span>
+                <span className="text-xs text-green-600">({(cvFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCvFile(null)}
+                className="text-green-600 hover:text-green-800"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          )}
+          {errors.cv && (
+            <p className="mt-1 text-sm text-destructive">{errors.cv}</p>
+          )}
+        </div>
+      </div>
+
       {/* Info Note */}
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> You can always update your profile information later in your account settings. 
-          CV upload is available in profile settings after onboarding.
+          <strong>Note:</strong> You can always update your profile information and CV later in your account settings.
         </p>
       </div>
 

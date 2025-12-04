@@ -22,8 +22,8 @@ export default function OnboardingPage() {
   const [roles, setRoles] = useState<string[]>([])
   const [primaryRole, setPrimaryRole] = useState<string>('')
   const [writerSpecialization, setWriterSpecialization] = useState<string>('')
-  const [crewSpecialization, setCrewSpecialization] = useState<string>('')
-  const [businessSpecialization, setBusinessSpecialization] = useState<string>('')
+  const [crewSpecializations, setCrewSpecializations] = useState<string[]>([])
+  const [businessSpecializations, setBusinessSpecializations] = useState<string[]>([])
 
   // Check auth and load progress on mount
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function OnboardingPage() {
 
       // Redirect if onboarding already complete
       if (user?.onboardingComplete) {
-        router.push('/in/home')
+        router.push('/feed')
         return
       }
 
@@ -61,10 +61,16 @@ export default function OnboardingPage() {
             setWriterSpecialization(progress.data.specializations.writer)
           }
           if (progress.data.specializations?.crew) {
-            setCrewSpecialization(progress.data.specializations.crew)
+            // Ensure it's an array
+            setCrewSpecializations(Array.isArray(progress.data.specializations.crew) 
+              ? progress.data.specializations.crew 
+              : [])
           }
           if (progress.data.specializations?.business) {
-            setBusinessSpecialization(progress.data.specializations.business)
+            // Ensure it's an array
+            setBusinessSpecializations(Array.isArray(progress.data.specializations.business) 
+              ? progress.data.specializations.business 
+              : [])
           }
         }
       } catch (error) {
@@ -114,11 +120,11 @@ export default function OnboardingPage() {
         <SpecializationsStep
           roles={roles}
           writerSpecialization={writerSpecialization}
-          crewSpecialization={crewSpecialization}
-          businessSpecialization={businessSpecialization}
+          crewSpecializations={crewSpecializations}
+          businessSpecializations={businessSpecializations}
           onWriterSpecChange={setWriterSpecialization}
-          onCrewSpecChange={setCrewSpecialization}
-          onBusinessSpecChange={setBusinessSpecialization}
+          onCrewSpecsChange={setCrewSpecializations}
+          onBusinessSpecsChange={setBusinessSpecializations}
           onNext={handleNext}
           onPrevious={handlePrevious}
           isSaving={isSaving}

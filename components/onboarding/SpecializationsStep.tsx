@@ -7,11 +7,11 @@ import { onboardingApi } from '@/lib/api/onboarding'
 interface SpecializationsStepProps {
   roles: string[]
   writerSpecialization: string
-  crewSpecialization: string
-  businessSpecialization: string
+  crewSpecializations: string[]
+  businessSpecializations: string[]
   onWriterSpecChange: (spec: string) => void
-  onCrewSpecChange: (spec: string) => void
-  onBusinessSpecChange: (spec: string) => void
+  onCrewSpecsChange: (specs: string[]) => void
+  onBusinessSpecsChange: (specs: string[]) => void
   onNext: () => void
   onPrevious: () => void
   isSaving: boolean
@@ -47,11 +47,11 @@ const BUSINESS_SPECIALIZATIONS = [
 export default function SpecializationsStep({
   roles,
   writerSpecialization,
-  crewSpecialization,
-  businessSpecialization,
+  crewSpecializations,
+  businessSpecializations,
   onWriterSpecChange,
-  onCrewSpecChange,
-  onBusinessSpecChange,
+  onCrewSpecsChange,
+  onBusinessSpecsChange,
   onNext,
   onPrevious,
   isSaving,
@@ -78,12 +78,12 @@ export default function SpecializationsStep({
       newErrors.writer = 'Please select your writer specialization'
     }
 
-    if (needsCrewSpec && !crewSpecialization) {
-      newErrors.crew = 'Please select your crew specialization'
+    if (needsCrewSpec && crewSpecializations.length === 0) {
+      newErrors.crew = 'Please select at least one crew specialization'
     }
 
-    if (needsBusinessSpec && !businessSpecialization) {
-      newErrors.business = 'Please select your business specialization'
+    if (needsBusinessSpec && businessSpecializations.length === 0) {
+      newErrors.business = 'Please select at least one business specialization'
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -108,12 +108,12 @@ export default function SpecializationsStep({
         data.writerSpecialization = writerSpecialization
       }
       
-      if (needsCrewSpec && crewSpecialization) {
-        data.crewSpecialization = crewSpecialization
+      if (needsCrewSpec && crewSpecializations.length > 0) {
+        data.crewSpecializations = crewSpecializations  // Send array
       }
       
-      if (needsBusinessSpec && businessSpecialization) {
-        data.businessSpecialization = businessSpecialization
+      if (needsBusinessSpec && businessSpecializations.length > 0) {
+        data.businessSpecializations = businessSpecializations  // Send array
       }
 
       await onboardingApi.submitSpecializations(data)
@@ -195,34 +195,47 @@ export default function SpecializationsStep({
         </div>
       )}
 
-      {/* Crew Specialization */}
+      {/* Crew Specializations (Multi-Select) */}
       {needsCrewSpec && (
         <div>
           <h3 className="font-semibold text-foreground mb-4">
-            Crew Specialization
+            Crew Specializations
             <span className="text-red-500 ml-1">*</span>
           </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Select all that apply - you can choose multiple specializations
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {CREW_SPECIALIZATIONS.map((spec) => {
               const Icon = spec.icon
-              const isSelected = crewSpecialization === spec.value
+              const isSelected = crewSpecializations.includes(spec.value)
 
               return (
                 <button
                   key={spec.value}
                   type="button"
                   onClick={() => {
-                    onCrewSpecChange(spec.value)
+                    const newSpecs = isSelected
+                      ? crewSpecializations.filter(s => s !== spec.value)
+                      : [...crewSpecializations, spec.value]
+                    onCrewSpecsChange(newSpecs)
                     if (errors.crew) {
                       setErrors((prev) => ({ ...prev, crew: '' }))
                     }
                   }}
-                  className={`p-4 border rounded-lg text-center transition-all hover:shadow-md ${
+                  className={`p-4 border rounded-lg text-center transition-all hover:shadow-md relative ${
                     isSelected
                       ? 'border-primary bg-primary/10 ring-2 ring-primary/20'
                       : 'border-border hover:border-primary/50'
                   }`}
                 >
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
                   <div className="mb-2">
                     <Icon className={`h-8 w-8 mx-auto ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                   </div>
@@ -231,40 +244,58 @@ export default function SpecializationsStep({
               )
             })}
           </div>
+          {crewSpecializations.length > 0 && (
+            <p className="mt-2 text-sm text-primary">
+              {crewSpecializations.length} specialization{crewSpecializations.length > 1 ? 's' : ''} selected
+            </p>
+          )}
           {errors.crew && (
             <p className="mt-2 text-sm text-destructive">{errors.crew}</p>
           )}
         </div>
       )}
 
-      {/* Business Specialization */}
+      {/* Business Specializations (Multi-Select) */}
       {needsBusinessSpec && (
         <div>
           <h3 className="font-semibold text-foreground mb-4">
-            Business Specialization
+            Business Specializations
             <span className="text-red-500 ml-1">*</span>
           </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Select all that apply - you can choose multiple specializations
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {BUSINESS_SPECIALIZATIONS.map((spec) => {
               const Icon = spec.icon
-              const isSelected = businessSpecialization === spec.value
+              const isSelected = businessSpecializations.includes(spec.value)
 
               return (
                 <button
                   key={spec.value}
                   type="button"
                   onClick={() => {
-                    onBusinessSpecChange(spec.value)
+                    const newSpecs = isSelected
+                      ? businessSpecializations.filter(s => s !== spec.value)
+                      : [...businessSpecializations, spec.value]
+                    onBusinessSpecsChange(newSpecs)
                     if (errors.business) {
                       setErrors((prev) => ({ ...prev, business: '' }))
                     }
                   }}
-                  className={`p-5 border rounded-lg text-center transition-all hover:shadow-md ${
+                  className={`p-5 border rounded-lg text-center transition-all hover:shadow-md relative ${
                     isSelected
                       ? 'border-primary bg-primary/10 ring-2 ring-primary/20'
                       : 'border-border hover:border-primary/50'
                   }`}
                 >
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
                   <div className="mb-2">
                     <Icon className={`h-8 w-8 mx-auto ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                   </div>
@@ -273,6 +304,11 @@ export default function SpecializationsStep({
               )
             })}
           </div>
+          {businessSpecializations.length > 0 && (
+            <p className="mt-2 text-sm text-primary">
+              {businessSpecializations.length} specialization{businessSpecializations.length > 1 ? 's' : ''} selected
+            </p>
+          )}
           {errors.business && (
             <p className="mt-2 text-sm text-destructive">{errors.business}</p>
           )}

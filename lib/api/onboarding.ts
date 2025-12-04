@@ -16,8 +16,8 @@ export interface OnboardingProgress {
     primaryRole?: string
     specializations?: {
       writer?: string
-      crew?: string
-      business?: string
+      crew?: string[]      // Backend returns array
+      business?: string[]  // Backend returns array
     }
     chapterId?: string
     membershipStatus?: string
@@ -31,8 +31,8 @@ export interface RoleSelectionInput {
 
 export interface SpecializationInput {
   writerSpecialization?: string
-  crewSpecialization?: string
-  businessSpecialization?: string
+  crewSpecializations?: string[]      // Changed to array for multiple selections
+  businessSpecializations?: string[]  // Changed to array for multiple selections
 }
 
 export interface ChapterSelectionInput {

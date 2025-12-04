@@ -20,7 +20,7 @@ export function useAuth() {
       setUser(response.user)
       
       // Determine redirect path based on user state
-      let redirectPath = '/in/home' // Default for fully onboarded users
+      let redirectPath = '/feed' // Default for fully onboarded users
       
       if (!response.user.emailVerified) {
         redirectPath = '/verify-email'
@@ -28,7 +28,7 @@ export function useAuth() {
         redirectPath = '/onboarding'
       }
       
-      // Use Next.js router for client-side navigation (no page reload)
+      // Always redirect to appropriate page after login
       router.push(redirectPath)
       
       return response
@@ -66,9 +66,19 @@ export function useAuth() {
       }
     } catch (error) {
       console.error('Logout error:', error)
+      // Even if API call fails, clear local state
     } finally {
+      // Clear user state
       clearUser()
-      router.push('/login')
+      
+      // Clear any remaining tokens (belt and suspenders approach)
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      
+      // Force redirect to login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+      }
     }
   }
 

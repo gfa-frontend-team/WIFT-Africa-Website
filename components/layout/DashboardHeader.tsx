@@ -1,0 +1,241 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { 
+  Home, 
+  User, 
+  MessageCircle, 
+  Briefcase, 
+  BookOpen, 
+  Users, 
+  Calendar,
+  Search,
+  Bell,
+  Settings,
+  LogOut,
+  ChevronDown
+} from 'lucide-react';
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  profilePhoto?: string;
+}
+
+interface DashboardHeaderProps {
+  user: User;
+}
+
+const navigationItems = [
+  { name: 'Home', href: '/feed', icon: Home },
+  { name: 'Messages', href: '/messages', icon: MessageCircle },
+  { name: 'Opportunities', href: '/opportunities', icon: Briefcase },
+  { name: 'Resources', href: '/resources', icon: BookOpen },
+  { name: 'Directory', href: '/members', icon: Users },
+  { name: 'Events', href: '/events', icon: Calendar },
+];
+
+export default function DashboardHeader({ user }: DashboardHeaderProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { logout } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const isActiveRoute = (href: string) => {
+    return pathname === href || pathname.startsWith(href + '/');
+  };
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border">
+      <div className="max-w-screen-xl mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="/feed" className="flex items-center space-x-3">
+            <img 
+              src="/WIFT.png" 
+              alt="WIFT Africa" 
+              className="h-8 w-auto"
+            />
+            <span className="text-xl font-bold text-foreground hidden sm:block">
+              WIFT Africa
+            </span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-1">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = isActiveRoute(item.href);
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Tablet Navigation (Icons Only) */}
+          <nav className="hidden md:flex lg:hidden items-center space-x-1">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = isActiveRoute(item.href);
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`p-2 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                  title={item.name}
+                >
+                  <Icon className="h-5 w-5" />
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right Side */}
+          <div className="flex items-center space-x-3">
+            {/* Search Bar (Hidden on Mobile) */}
+            <div className="hidden md:block relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-64 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Notifications */}
+            <div className="relative">
+              <button
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+              >
+                <Bell className="h-5 w-5" />
+                {/* Notification Badge */}
+                <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                  0
+                </span>
+              </button>
+
+              {/* Notifications Dropdown */}
+              {isNotificationsOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setIsNotificationsOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-lg shadow-lg z-20">
+                    <div className="p-4 border-b border-border">
+                      <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+                    </div>
+                    <div className="p-8 text-center">
+                      <p className="text-sm text-muted-foreground">No notifications yet</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* User Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center space-x-2 p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+              >
+                <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+                  {user.profilePhoto ? (
+                    <img 
+                      src={user.profilePhoto} 
+                      alt={user.firstName}
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-primary-foreground">
+                      {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className="h-4 w-4 hidden sm:block" />
+              </button>
+
+              {/* User Dropdown */}
+              {isUserMenuOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setIsUserMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-lg z-20">
+                    <div className="p-4 border-b border-border">
+                      <p className="text-sm font-medium text-foreground">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                    <div className="py-2">
+                      <Link
+                        href="/me"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        <span>My Profile</span>
+                      </Link>
+                      <Link
+                        href="/settings"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </div>
+                    <div className="border-t border-border py-2">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-destructive hover:bg-accent w-full text-left"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Sign out</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
