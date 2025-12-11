@@ -21,6 +21,7 @@ export function middleware(request: NextRequest) {
     '/register',
     '/verify-email',
     '/onboarding',
+    '/landing',
     '/api',
     '/_next',
     '/favicon.ico',
