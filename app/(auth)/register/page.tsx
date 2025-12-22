@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import Script from 'next/script'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useGoogleAuth } from '@/lib/hooks/useGoogleAuth'
 
 export default function RegisterPage() {
   const router = useRouter()
   const { register, isAuthenticated, isEmailVerified, onboardingComplete } = useAuth()
+  const { initializeGoogleAuth, signInWithGoogle, isGoogleLoading } = useGoogleAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -21,7 +24,39 @@ export default function RegisterPage() {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
   const [apiError, setApiError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [socialAuthLoading, setSocialAuthLoading] = useState(false)
+  const [isGoogleScriptLoaded, setIsGoogleScriptLoaded] = useState(false)
+
+  // Initialize Google Auth when script loads
+  useEffect(() => {
+    if (isGoogleScriptLoaded) {
+      initializeGoogleAuth()
+      
+      // Try to render the Google button
+      setTimeout(() => {
+        const buttonContainer = document.getElementById('google-signin-button')
+        const fallbackButton = document.getElementById('fallback-google-button')
+        
+        if (buttonContainer && window.google) {
+          try {
+            window.google.accounts.id.renderButton(buttonContainer, {
+              theme: 'outline',
+              size: 'large',
+              width: buttonContainer.offsetWidth,
+              text: 'signup_with',
+              shape: 'rectangular',
+              logo_alignment: 'left',
+            })
+          } catch (error) {
+            console.error('Failed to render Google button:', error)
+            // Show fallback button
+            if (fallbackButton) {
+              fallbackButton.style.display = 'flex'
+            }
+          }
+        }
+      }, 100)
+    }
+  }, [isGoogleScriptLoaded, initializeGoogleAuth])
 
   // Redirect if already logged in
   useEffect(() => {
@@ -91,6 +126,10 @@ export default function RegisterPage() {
         firstName: formData.firstName,
         lastName: formData.lastName
       })
+      
+      // Store email for resend verification functionality
+      localStorage.setItem('pendingVerificationEmail', formData.email)
+      
       // Navigation handled by useAuth hook
     } catch (error: any) {
       // Extract and display error message
@@ -103,64 +142,73 @@ export default function RegisterPage() {
     }
   }
 
-  const handleSocialLogin = async (provider: string) => {
-    setSocialAuthLoading(true)
-
-    console.log(`Social registration attempt with: ${provider}`)
-
-    // TODO: Implement OAuth flow
-    setTimeout(() => {
-      setSocialAuthLoading(false)
-      console.log(`${provider} social registration clicked!`)
-    }, 1000)
+  const handleGoogleRegister = async () => {
+    try {
+      await signInWithGoogle()
+    } catch (error) {
+      console.error('Google registration failed:', error)
+    }
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-background">
-        <div className="w-full max-w-md space-y-8 py-12">
-          {/* Header */}
-          <div className="text-center">
-            <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-              <img src="/WIFT.png" alt="WIFT Africa" className="h-10 w-auto" />
-              <span className="text-xl font-bold text-foreground">WIFT Africa</span>
-            </Link>
-            <h1 className="text-3xl font-bold text-foreground">Join WIFT Africa</h1>
-            <p className="mt-2 text-muted-foreground">
-              Create your professional profile and connect with the film community
-            </p>
-          </div>
-
-          {/* API Error Alert */}
-          {apiError && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-start">
-                <svg className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-red-800">{apiError}</p>
-                </div>
-                <button
-                  onClick={() => setApiError(null)}
-                  className="ml-3 text-red-600 hover:text-red-800"
-                >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </div>
+    <>
+      {/* Google Identity Services Script */}
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        onLoad={() => setIsGoogleScriptLoaded(true)}
+        strategy="afterInteractive"
+      />
+      
+      <div className="min-h-screen flex">
+        {/* Left Side - Form */}
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-background">
+          <div className="w-full max-w-md space-y-8 py-12">
+            {/* Header */}
+            <div className="text-center">
+              <Link href="/" className="inline-flex items-center space-x-2 mb-6">
+                <img src="/WIFT.png" alt="WIFT Africa" className="h-10 w-auto" />
+                <span className="text-xl font-bold text-foreground">WIFT Africa</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-foreground">Join WIFT Africa</h1>
+              <p className="mt-2 text-muted-foreground">
+                Create your professional profile and connect with the film community
+              </p>
             </div>
-          )}
 
-          {/* Social Registration Options */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            {/* API Error Alert */}
+            {apiError && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start">
+                  <svg className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-800">{apiError}</p>
+                  </div>
+                  <button
+                    onClick={() => setApiError(null)}
+                    className="ml-3 text-red-600 hover:text-red-800"
+                  >
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Google Registration */}
+            <div className="space-y-4">
+              {/* Custom Google Button */}
+              <div id="google-signin-button" className="w-full"></div>
+              
+              {/* Fallback Manual Button */}
               <button
-                onClick={() => handleSocialLogin('google')}
-                disabled={socialAuthLoading}
+                onClick={handleGoogleRegister}
+                disabled={isGoogleLoading || !isGoogleScriptLoaded}
                 className="w-full inline-flex justify-center items-center gap-3 py-3 px-4 border border-border rounded-lg bg-background hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ display: 'none' }} // Hidden by default, shown if renderButton fails
+                id="fallback-google-button"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
                   <path
@@ -181,228 +229,215 @@ export default function RegisterPage() {
                   />
                 </svg>
                 <span className="text-sm font-medium">
-                  {socialAuthLoading ? 'Connecting...' : 'Google'}
+                  {isGoogleLoading ? 'Creating account...' : 'Continue with Google'}
                 </span>
               </button>
 
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-background text-muted-foreground">
+                    Or create account with email
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-2">
+                    First Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.firstName ? 'border-destructive' : 'border-border'
+                        }`}
+                      placeholder="First name"
+                    />
+                  </div>
+                  {formErrors.firstName && (
+                    <p className="mt-1 text-sm text-destructive">{formErrors.firstName}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-2">
+                    Last Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.lastName ? 'border-destructive' : 'border-border'
+                        }`}
+                      placeholder="Last name"
+                    />
+                  </div>
+                  {formErrors.lastName && (
+                    <p className="mt-1 text-sm text-destructive">{formErrors.lastName}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                  Email address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.email ? 'border-destructive' : 'border-border'
+                      }`}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                {formErrors.email && (
+                  <p className="mt-1 text-sm text-destructive">{formErrors.email}</p>
+                )}
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.password ? 'border-destructive' : 'border-border'
+                      }`}
+                    placeholder="Create a password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+                {formErrors.password && (
+                  <p className="mt-1 text-sm text-destructive">{formErrors.password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Field */}
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.confirmPassword ? 'border-destructive' : 'border-border'
+                      }`}
+                    placeholder="Confirm your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+                {formErrors.confirmPassword && (
+                  <p className="mt-1 text-sm text-destructive">{formErrors.confirmPassword}</p>
+                )}
+              </div>
+
+              {/* Terms Agreement */}
+              <div className="flex items-start space-x-2">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  className="mt-1 h-4 w-4 text-primary focus:ring-ring border-border rounded"
+                  required
+                />
+                <label htmlFor="terms" className="text-sm text-muted-foreground">
+                  I agree to the{' '}
+                  <Link href="/terms" className="text-primary hover:text-primary/80 underline">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="text-primary hover:text-primary/80 underline">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
+
+              {/* Submit Button */}
               <button
-                onClick={() => handleSocialLogin('linkedin')}
-                disabled={socialAuthLoading}
-                className="w-full inline-flex justify-center items-center gap-3 py-3 px-4 border border-border rounded-lg bg-background hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center justify-center"
               >
-                <svg className="h-5 w-5" fill="#0A66C2" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-                <span className="text-sm font-medium">
-                  {socialAuthLoading ? 'Connecting...' : 'LinkedIn'}
-                </span>
+                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {!isLoading && <ArrowRight className="ml-2 h-5 w-5" />}
               </button>
-            </div>
+            </form>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-background text-muted-foreground">
-                  Or create account with email
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-2">
-                  First Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.firstName ? 'border-destructive' : 'border-border'
-                      }`}
-                    placeholder="First name"
-                  />
-                </div>
-                {formErrors.firstName && (
-                  <p className="mt-1 text-sm text-destructive">{formErrors.firstName}</p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-2">
-                  Last Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.lastName ? 'border-destructive' : 'border-border'
-                      }`}
-                    placeholder="Last name"
-                  />
-                </div>
-                {formErrors.lastName && (
-                  <p className="mt-1 text-sm text-destructive">{formErrors.lastName}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.email ? 'border-destructive' : 'border-border'
-                    }`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {formErrors.email && (
-                <p className="mt-1 text-sm text-destructive">{formErrors.email}</p>
-              )}
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.password ? 'border-destructive' : 'border-border'
-                    }`}
-                  placeholder="Create a password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {formErrors.password && (
-                <p className="mt-1 text-sm text-destructive">{formErrors.password}</p>
-              )}
-            </div>
-
-            {/* Confirm Password Field */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.confirmPassword ? 'border-destructive' : 'border-border'
-                    }`}
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {formErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-destructive">{formErrors.confirmPassword}</p>
-              )}
-            </div>
-
-            {/* Terms Agreement */}
-            <div className="flex items-start space-x-2">
-              <input
-                type="checkbox"
-                id="terms"
-                className="mt-1 h-4 w-4 text-primary focus:ring-ring border-border rounded"
-                required
-              />
-              <label htmlFor="terms" className="text-sm text-muted-foreground">
-                I agree to the{' '}
-                <Link href="/terms" className="text-primary hover:text-primary/80 underline">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="text-primary hover:text-primary/80 underline">
-                  Privacy Policy
+            {/* Sign in link */}
+            <div className="text-center">
+              <p className="text-muted-foreground">
+                Already have an account?{' '}
+                <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                  Sign in
                 </Link>
-              </label>
+              </p>
             </div>
+          </div>
+        </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center justify-center"
-            >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
-              {!isLoading && <ArrowRight className="ml-2 h-5 w-5" />}
-            </button>
-          </form>
-
-          {/* Sign in link */}
-          <div className="text-center">
-            <p className="text-muted-foreground">
-              Already have an account?{' '}
-              <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
-                Sign in
-              </Link>
-            </p>
+        {/* Right Side - Image */}
+        <div className="hidden lg:block lg:w-1/2 relative">
+          <img
+            src="https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            alt="WIFT Africa"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-black/50" />
+          <div className="absolute inset-0 flex items-center justify-center p-12">
+            <div className="text-white text-center max-w-md">
+              <h2 className="text-4xl font-bold mb-4">Join Our Community</h2>
+              <p className="text-xl text-white/90">
+                Connect with 300+ verified professionals across 10 countries and grow your career in African film & television.
+              </p>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Right Side - Image */}
-      <div className="hidden lg:block lg:w-1/2 relative">
-        <img
-          src="https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-          alt="WIFT Africa"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-black/50" />
-        <div className="absolute inset-0 flex items-center justify-center p-12">
-          <div className="text-white text-center max-w-md">
-            <h2 className="text-4xl font-bold mb-4">Join Our Community</h2>
-            <p className="text-xl text-white/90">
-              Connect with 300+ verified professionals across 10 countries and grow your career in African film & television.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   )
 }

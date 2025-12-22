@@ -3,25 +3,28 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
 import { 
   Home, 
   User, 
   MessageCircle, 
   Briefcase, 
-  Users
+  Users,
+  Lock
 } from 'lucide-react';
 
 const mobileNavItems = [
-  { name: 'Home', href: '/feed', icon: Home },
-  { name: 'Messages', href: '/messages', icon: MessageCircle },
-  { name: 'Opportunities', href: '/opportunities', icon: Briefcase },
-  { name: 'Directory', href: '/members', icon: Users },
-  { name: 'Profile', href: '/profile', icon: User, isProfile: true },
+  { name: 'Home', href: '/feed', icon: Home, requiredFeature: 'canViewFeed' as const },
+  { name: 'Messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
+  { name: 'Opportunities', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
+  { name: 'Directory', href: '/members', icon: Users, requiredFeature: 'canViewDirectory' as const },
+  { name: 'Profile', href: '/profile', icon: User, isProfile: true, requiredFeature: 'canEditProfile' as const },
 ];
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { access } = useFeatureAccess();
 
   const isActiveRoute = (href: string, isProfile?: boolean) => {
     if (isProfile && user) {
@@ -40,20 +43,39 @@ export default function MobileBottomNav() {
           const Icon = item.icon;
           const href = item.isProfile && user ? `/me` : item.href;
           const isActive = isActiveRoute(href, item.isProfile);
+          const hasAccess = access[item.requiredFeature];
+          const targetHref = hasAccess ? href : '/verification';
           
           return (
             <Link
               key={item.name}
-              href={href}
-              className={`flex flex-col items-center justify-center space-y-1 px-3 py-2 rounded-lg transition-colors min-w-0 flex-1 ${
-                isActive
+              href={targetHref}
+              className={`relative flex flex-col items-center justify-center space-y-1 px-3 py-2 rounded-lg transition-colors min-w-0 flex-1 ${
+                isActive && hasAccess
                   ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : hasAccess
+                    ? 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground/50'
               }`}
             >
-              <Icon className={`h-5 w-5 ${isActive ? 'text-primary' : ''}`} />
+              <div className="relative">
+                <Icon className={`h-5 w-5 ${
+                  isActive && hasAccess 
+                    ? 'text-primary' 
+                    : !hasAccess 
+                      ? 'opacity-50' 
+                      : ''
+                }`} />
+                {!hasAccess && (
+                  <Lock className="absolute -top-1 -right-1 h-3 w-3 bg-background rounded-full p-0.5" />
+                )}
+              </div>
               <span className={`text-xs font-medium truncate ${
-                isActive ? 'text-primary' : 'text-muted-foreground'
+                isActive && hasAccess
+                  ? 'text-primary'
+                  : !hasAccess
+                    ? 'text-muted-foreground/50'
+                    : 'text-muted-foreground'
               }`}>
                 {item.name}
               </span>

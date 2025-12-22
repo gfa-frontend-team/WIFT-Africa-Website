@@ -220,4 +220,18 @@ export const usersApi = {
 
     return await response.blob()
   },
+
+  // ============================================
+  // ACCOUNT MANAGEMENT
+  // ============================================
+
+  /**
+   * Delete user account permanently
+   * @param confirmationText - Must be "DELETE" to confirm
+   */
+  deleteAccount: async (confirmationText: string): Promise<{ message: string }> => {
+    return await apiClient.delete<{ message: string }>('/users/me', {
+      data: { confirmation: confirmationText }
+    })
+  },
 }

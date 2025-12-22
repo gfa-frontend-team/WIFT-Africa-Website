@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useState } from 'react'
 import DashboardHeader from '@/components/layout/DashboardHeader'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
+import VerificationStatusBanner from '@/components/layout/VerificationStatusBanner'
 
 export default function AuthenticatedLayout({
   children,
@@ -62,6 +63,9 @@ export default function AuthenticatedLayout({
     <div className="min-h-screen bg-background">
       {/* Fixed Header */}
       <DashboardHeader user={user} />
+      
+      {/* Verification Status Banner */}
+      <VerificationStatusBanner />
       
       {/* Main Content */}
       <main className="pt-16 pb-20 md:pb-0">

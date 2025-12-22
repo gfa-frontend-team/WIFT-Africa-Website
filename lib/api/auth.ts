@@ -63,4 +63,47 @@ export const authApi = {
     const response = await apiClient.post<{ message: string }>('/auth/reset-password', { token, newPassword })
     return response
   },
+
+  // Resend verification email
+  resendVerificationEmail: async (email: string) => {
+    const response = await apiClient.post<{ message: string }>('/auth/resend-verification', { email })
+    return response
+  },
+
+  // Google OAuth
+  googleAuth: async (idToken: string) => {
+    const response = await apiClient.post<{ message: string; user: User; tokens: { accessToken: string; refreshToken: string } }>('/auth/google', { idToken })
+    // Store tokens
+    apiClient.setTokens(response.tokens.accessToken, response.tokens.refreshToken)
+    return response
+  },
+
+  // Change password (for authenticated users)
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await apiClient.post<{ message: string }>('/auth/change-password', { 
+      currentPassword, 
+      newPassword 
+    })
+    return response
+  },
+
+  // Get active sessions
+  getActiveSessions: async () => {
+    const response = await apiClient.get<{ sessions: Array<{ id: string; deviceInfo: string; lastActive: string; current: boolean }> }>('/auth/sessions')
+    return response
+  },
+
+  // Logout from all devices
+  logoutAllDevices: async () => {
+    const response = await apiClient.post<{ message: string }>('/auth/logout-all')
+    // Clear tokens
+    apiClient.clearTokens()
+    return response
+  },
+
+  // Logout from specific session
+  logoutSession: async (sessionId: string) => {
+    const response = await apiClient.delete<{ message: string }>(`/auth/sessions/${sessionId}`)
+    return response
+  },
 }

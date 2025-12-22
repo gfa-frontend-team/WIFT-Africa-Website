@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { authApi } from '@/lib/api/auth'
 
 function VerifyEmailContent() {
   const router = useRouter()
@@ -15,6 +16,7 @@ function VerifyEmailContent() {
   const [isResending, setIsResending] = useState(false)
   const [resendCount, setResendCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   // Check for token in URL and verify automatically
   useEffect(() => {
@@ -32,6 +34,10 @@ function VerifyEmailContent() {
     try {
       await verifyEmail(token)
       setIsVerified(true)
+      
+      // Clear stored email since verification is complete
+      localStorage.removeItem('pendingVerificationEmail')
+      
       // Don't redirect here - let user click "Continue to Onboarding" button
     } catch (err: any) {
       console.error('Verification error:', err)
@@ -47,13 +53,29 @@ function VerifyEmailContent() {
     setError(null)
 
     try {
-      // TODO: Implement resend verification email API endpoint
-      // For now, just show success message
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log('Verification email resent')
+      // Get user email from localStorage or use a stored email
+      const userEmail = localStorage.getItem('pendingVerificationEmail')
+      
+      if (!userEmail) {
+        setError('Unable to resend email. Please try registering again.')
+        return
+      }
+
+      await authApi.resendVerificationEmail(userEmail)
+      
+      // Show success message
+      setSuccessMessage('Verification email sent! Please check your inbox.')
+      setError(null)
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => {
+        setSuccessMessage(null)
+      }, 5000)
+      
     } catch (err: any) {
       console.error('Resend error:', err)
-      setError('Failed to resend email. Please try again.')
+      const message = err.response?.data?.message || 'Failed to resend email. Please try again.'
+      setError(message)
     } finally {
       setIsResending(false)
     }
@@ -162,6 +184,13 @@ function VerifyEmailContent() {
             {error && (
               <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                 <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+
+            {/* Success message */}
+            {successMessage && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-800">{successMessage}</p>
               </div>
             )}
 

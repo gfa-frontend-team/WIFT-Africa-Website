@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
+import { MembershipStatus } from '@/types';
 import { 
   Home, 
   User, 
@@ -16,7 +18,11 @@ import {
   Bell,
   Settings,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  Lock
 } from 'lucide-react';
 
 interface User {
@@ -25,6 +31,7 @@ interface User {
   lastName: string;
   email: string;
   profilePhoto?: string;
+  membershipStatus: string;
 }
 
 interface DashboardHeaderProps {
@@ -32,18 +39,19 @@ interface DashboardHeaderProps {
 }
 
 const navigationItems = [
-  { name: 'Home', href: '/feed', icon: Home },
-  { name: 'Messages', href: '/messages', icon: MessageCircle },
-  { name: 'Opportunities', href: '/opportunities', icon: Briefcase },
-  { name: 'Resources', href: '/resources', icon: BookOpen },
-  { name: 'Directory', href: '/members', icon: Users },
-  { name: 'Events', href: '/events', icon: Calendar },
+  { name: 'Home', href: '/feed', icon: Home, requiredFeature: 'canViewFeed' as const },
+  { name: 'Messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
+  { name: 'Opportunities', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
+  { name: 'Resources', href: '/resources', icon: BookOpen, requiredFeature: 'canViewResources' as const },
+  { name: 'Directory', href: '/members', icon: Users, requiredFeature: 'canViewDirectory' as const },
+  { name: 'Events', href: '/events', icon: Calendar, requiredFeature: 'canViewEvents' as const },
 ];
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { access } = useFeatureAccess();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,6 +62,35 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
   const isActiveRoute = (href: string) => {
     return pathname === href || pathname.startsWith(href + '/');
+  };
+
+  const getVerificationStatusIcon = () => {
+    switch (user.membershipStatus) {
+      case MembershipStatus.PENDING:
+        return <Clock className="h-3 w-3 text-yellow-600" />;
+      case MembershipStatus.APPROVED:
+        return <CheckCircle2 className="h-3 w-3 text-green-600" />;
+      case MembershipStatus.REJECTED:
+      case MembershipStatus.SUSPENDED:
+        return <AlertTriangle className="h-3 w-3 text-red-600" />;
+      default:
+        return null;
+    }
+  };
+
+  const getVerificationStatusText = () => {
+    switch (user.membershipStatus) {
+      case MembershipStatus.PENDING:
+        return 'Verification Pending';
+      case MembershipStatus.APPROVED:
+        return 'Verified Member';
+      case MembershipStatus.REJECTED:
+        return 'Application Declined';
+      case MembershipStatus.SUSPENDED:
+        return 'Membership Suspended';
+      default:
+        return '';
+    }
   };
 
   return (
@@ -77,19 +114,24 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = isActiveRoute(item.href);
+              const hasAccess = access[item.requiredFeature];
               
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={hasAccess ? item.href : '/verification'}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
+                    isActive && hasAccess
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      : hasAccess
+                        ? 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                        : 'text-muted-foreground/50 hover:text-muted-foreground cursor-help'
                   }`}
+                  title={!hasAccess ? 'Complete membership verification to access this feature' : undefined}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.name}</span>
+                  <Icon className={`h-4 w-4 ${!hasAccess ? 'opacity-50' : ''}`} />
+                  <span className={!hasAccess ? 'opacity-50' : ''}>{item.name}</span>
+                  {!hasAccess && <Lock className="h-3 w-3 ml-1 opacity-50" />}
                 </Link>
               );
             })}
@@ -100,19 +142,25 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = isActiveRoute(item.href);
+              const hasAccess = access[item.requiredFeature];
               
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isActive
+                  href={hasAccess ? item.href : '/verification'}
+                  className={`relative p-2 rounded-lg transition-colors ${
+                    isActive && hasAccess
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      : hasAccess
+                        ? 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                        : 'text-muted-foreground/50 hover:text-muted-foreground cursor-help'
                   }`}
-                  title={item.name}
+                  title={!hasAccess ? `${item.name} - Complete membership verification to access` : item.name}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className={`h-5 w-5 ${!hasAccess ? 'opacity-50' : ''}`} />
+                  {!hasAccess && (
+                    <Lock className="absolute -top-1 -right-1 h-3 w-3 bg-background rounded-full p-0.5" />
+                  )}
                 </Link>
               );
             })}
@@ -201,6 +249,13 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         {user.firstName} {user.lastName}
                       </p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
+                      {/* Verification Status */}
+                      <div className="flex items-center gap-1 mt-1">
+                        {getVerificationStatusIcon()}
+                        <span className="text-xs text-muted-foreground">
+                          {getVerificationStatusText()}
+                        </span>
+                      </div>
                     </div>
                     <div className="py-2">
                       <Link

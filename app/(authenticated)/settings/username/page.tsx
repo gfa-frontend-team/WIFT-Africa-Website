@@ -21,11 +21,11 @@ export default function UsernameSettingsPage() {
   const { user, isAuthenticated } = useAuth()
   const [username, setUsername] = useState('')
   const [isChecking, setIsChecking] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null)
-  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<string[]>([])
   const [checkTimeout, setCheckTimeout] = useState<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function UsernameSettingsPage() {
     }
 
     loadSuggestions()
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, router, user])
 
   const loadSuggestions = async () => {
     try {
@@ -158,7 +158,7 @@ export default function UsernameSettingsPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Username Settings</h1>
-              <p className="text-muted-foreground">Set your custom username for your profile URL</p>
+              <p className="text-muted-foreground">Set or change your custom username</p>
             </div>
           </div>
         </div>
@@ -268,10 +268,7 @@ export default function UsernameSettingsPage() {
         {/* Suggestions */}
         {suggestions.length > 0 && (
           <div className="bg-card border border-border rounded-lg p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Suggestions</h2>
-            </div>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Suggested Usernames</h2>
             <div className="flex flex-wrap gap-2">
               {suggestions.map((suggestion) => (
                 <button
@@ -289,14 +286,13 @@ export default function UsernameSettingsPage() {
         {/* Info Box */}
         <div className="bg-accent border border-border rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <Lightbulb className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div className="text-sm text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">Important Notes</p>
-              <ul className="space-y-1 list-disc list-inside">
-                <li>You can change your username up to 3 times per month</li>
-                <li>Your old username will become available for others to use</li>
-                <li>Links to your old profile URL will redirect to your new one</li>
-                <li>Choose carefully - frequent changes may confuse your connections</li>
+              <p className="font-medium text-foreground mb-1">Username Guidelines</p>
+              <ul className="space-y-1">
+                <li>• Choose something professional and memorable</li>
+                <li>• You can change your username up to 3 times per month</li>
+                <li>• Your username will be part of your public profile URL</li>
               </ul>
             </div>
           </div>
