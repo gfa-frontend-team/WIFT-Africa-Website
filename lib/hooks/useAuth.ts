@@ -1,6 +1,8 @@
 import { useUserStore, selectIsAuthenticated, selectIsEmailVerified, selectOnboardingComplete } from '../stores/userStore'
 import { authApi } from '../api/auth'
+import { usersApi } from '../api/users'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { AccountType } from '@/types'
 
 export function useAuth() {
@@ -10,14 +12,59 @@ export function useAuth() {
   const isEmailVerified = useUserStore(selectIsEmailVerified)
   const onboardingComplete = useUserStore(selectOnboardingComplete)
 
+  // Check for token state mismatch on mount and when user changes
+  useEffect(() => {
+    if (currentUser && typeof window !== 'undefined') {
+      const accessToken = localStorage.getItem('accessToken')
+      const refreshToken = localStorage.getItem('refreshToken')
+      
+      // If user exists but no tokens, clear user state (force logout)
+      if (!accessToken && !refreshToken) {
+        console.warn('🔄 Token state mismatch detected: User exists but no tokens found. Logging out...')
+        clearUser()
+        // Don't redirect here - let the page handle it based on auth requirements
+        return
+      }
+
+      // If user exists but missing critical fields (membershipStatus, accountType), load full user data
+      if (!currentUser.membershipStatus || !currentUser.accountType) {
+        console.log('🔄 Loading full user data (missing membershipStatus or accountType)...')
+        loadCurrentUser()
+      }
+    }
+  }, [currentUser, clearUser])
+
+  // Load full user data from /users/me endpoint
+  const loadCurrentUser = async () => {
+    try {
+      const response = await usersApi.getCurrentUser()
+      console.log('✅ Full user data loaded:', response.user)
+      setUser(response.user)
+    } catch (error) {
+      console.error('❌ Failed to load current user:', error)
+      // If we can't load user data, the tokens might be invalid
+      clearUser()
+    }
+  }
+
   const login = async (email: string, password: string) => {
     try {
       setLoading(true)
       setError(null)
       const response = await authApi.login({ email, password })
       
-      // Set user in store first
+      // Set basic user data from auth response first
       setUser(response.user)
+      
+      // Load full user data with membershipStatus and accountType
+      try {
+        const fullUserResponse = await usersApi.getCurrentUser()
+        console.log('✅ Full user data loaded after login:', fullUserResponse.user)
+        setUser(fullUserResponse.user)
+      } catch (userError) {
+        console.warn('⚠️ Failed to load full user data after login, using auth response data:', userError)
+        // Continue with basic user data from auth response
+      }
       
       // Determine redirect path based on user state
       let redirectPath = '/feed' // Default for fully onboarded users
@@ -122,5 +169,6 @@ export function useAuth() {
     register,
     logout,
     verifyEmail,
+    refreshUserData: loadCurrentUser,
   }
 }

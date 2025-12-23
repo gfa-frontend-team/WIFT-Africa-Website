@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, CheckCircle, Briefcase, Users, Clock } from 'lucide-react'
 import { onboardingApi } from '@/lib/api/onboarding'
 import { useUserStore } from '@/lib/stores/userStore'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface TermsAcceptanceStepProps {
   onPrevious: () => void
@@ -19,6 +20,7 @@ export default function TermsAcceptanceStep({
 }: TermsAcceptanceStepProps) {
   const router = useRouter()
   const { updateUser } = useUserStore()
+  const { refreshUserData } = useAuth()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
@@ -40,6 +42,14 @@ export default function TermsAcceptanceStep({
         onboardingComplete: true,
         termsAccepted: true 
       })
+
+      // Refresh full user data to get updated membershipStatus and accountType
+      try {
+        await refreshUserData()
+        console.log('✅ User data refreshed after onboarding completion')
+      } catch (refreshError) {
+        console.warn('⚠️ Failed to refresh user data after onboarding:', refreshError)
+      }
       
       // Redirect to home page after successful completion
       router.push('/feed')

@@ -5,10 +5,10 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
-import { MembershipStatus } from '@/types';
+import { MembershipStatus, type User } from '@/types';
 import { 
   Home, 
-  User, 
+  User as UserIcon, 
   MessageCircle, 
   Briefcase, 
   BookOpen, 
@@ -24,15 +24,6 @@ import {
   AlertTriangle,
   Lock
 } from 'lucide-react';
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  profilePhoto?: string;
-  membershipStatus: string;
-}
 
 interface DashboardHeaderProps {
   user: User;
@@ -263,7 +254,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         className="flex items-center space-x-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <User className="h-4 w-4" />
+                        <UserIcon className="h-4 w-4" />
                         <span>My Profile</span>
                       </Link>
                       <Link

@@ -17,6 +17,7 @@ export function middleware(request: NextRequest) {
     '/settings',
     '/me',
     '/profile',
+    '/verification',
     '/login',
     '/register',
     '/verify-email',

@@ -14,12 +14,12 @@ export default function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { user, isAuthenticated, isEmailVerified, onboardingComplete } = useAuth()
+  const { user, isAuthenticated, isEmailVerified, onboardingComplete, refreshUserData } = useAuth()
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
     // Check authentication and onboarding status
-    const checkAuth = () => {
+    const checkAuth = async () => {
       if (!isAuthenticated) {
         router.push('/login')
         return
@@ -35,12 +35,22 @@ export default function AuthenticatedLayout({
         return
       }
 
+      // If user is missing critical fields, try to refresh user data
+      if (user && (!user.membershipStatus || !user.accountType)) {
+        console.log('🔄 Authenticated layout: Refreshing user data (missing fields)...')
+        try {
+          await refreshUserData()
+        } catch (error) {
+          console.warn('⚠️ Failed to refresh user data in authenticated layout:', error)
+        }
+      }
+
       // All checks passed
       setIsChecking(false)
     }
 
     checkAuth()
-  }, [isAuthenticated, isEmailVerified, onboardingComplete, router])
+  }, [isAuthenticated, isEmailVerified, onboardingComplete, user, router, refreshUserData])
 
   // Show loading while checking auth
   if (isChecking) {

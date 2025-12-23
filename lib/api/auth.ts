@@ -106,4 +106,12 @@ export const authApi = {
     const response = await apiClient.delete<{ message: string }>(`/auth/sessions/${sessionId}`)
     return response
   },
+
+  // Manual refresh tokens
+  refreshTokens: async (refreshToken: string) => {
+    const response = await apiClient.post<{ message: string; tokens: { accessToken: string; refreshToken: string } }>('/auth/refresh', { refreshToken })
+    // Store new tokens
+    apiClient.setTokens(response.tokens.accessToken, response.tokens.refreshToken)
+    return response
+  },
 }
