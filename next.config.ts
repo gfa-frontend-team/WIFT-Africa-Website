@@ -44,10 +44,12 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-eval' 'unsafe-inline';
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com;
               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-              img-src 'self' blob: data: https://api.dicebear.com;
+              img-src 'self' blob: data: https://api.dicebear.com https://images.unsplash.com https://lh3.googleusercontent.com;
               font-src 'self' https://fonts.gstatic.com;
+              connect-src 'self' http://localhost:3001 https://api.dicebear.com https://accounts.google.com;
+              frame-src 'self' https://accounts.google.com;
               object-src 'none';
               base-uri 'self';
               form-action 'self';

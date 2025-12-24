@@ -106,6 +106,31 @@ export interface SavedCollectionsResponse {
 // POSTS API
 // ============================================
 
+// Helper to ensure ID exists (mapping _id to id if needed)
+const mapPost = (post: any): Post => {
+  if (!post) return post
+  return {
+    ...post,
+    id: post.id || post._id,
+    author: post.author ? {
+      ...post.author,
+      id: post.author.id || post.author._id
+    } : post.author
+  }
+}
+
+const mapComment = (comment: any): Comment => {
+  if (!comment) return comment
+  return {
+    ...comment,
+    id: comment.id || comment._id,
+    author: comment.author ? {
+      ...comment.author,
+      id: comment.author.id || comment.author._id
+    } : comment.author
+  }
+}
+
 export const postsApi = {
   // ============================================
   // FEED & POSTS
@@ -119,6 +144,12 @@ export const postsApi = {
     try {
       const response = await apiClient.get<FeedResponse>(`/posts/feed?page=${page}&limit=${limit}`)
       console.log('✅ Feed response received:', response)
+      
+      // Map posts to ensure IDs exist
+      if (response && response.posts) {
+        response.posts = response.posts.map(mapPost)
+      }
+      
       return response
     } catch (error) {
       console.error('❌ Feed API error:', error)
@@ -130,21 +161,33 @@ export const postsApi = {
    * Create a new post
    */
   createPost: async (data: CreatePostInput): Promise<{ post: Post }> => {
-    return await apiClient.post<{ post: Post }>('/posts', data)
+    const response = await apiClient.post<{ post: Post }>('/posts', data)
+    if (response && response.post) {
+      response.post = mapPost(response.post)
+    }
+    return response
   },
 
   /**
    * Get a specific post
    */
   getPost: async (postId: string): Promise<{ post: Post }> => {
-    return await apiClient.get<{ post: Post }>(`/posts/${postId}`)
+    const response = await apiClient.get<{ post: Post }>(`/posts/${postId}`)
+    if (response && response.post) {
+      response.post = mapPost(response.post)
+    }
+    return response
   },
 
   /**
    * Update a post (author only)
    */
   updatePost: async (postId: string, data: Partial<CreatePostInput>): Promise<{ post: Post }> => {
-    return await apiClient.patch<{ post: Post }>(`/posts/${postId}`, data)
+    const response = await apiClient.patch<{ post: Post }>(`/posts/${postId}`, data)
+    if (response && response.post) {
+      response.post = mapPost(response.post)
+    }
+    return response
   },
 
   /**
@@ -169,10 +212,14 @@ export const postsApi = {
    * Share a post with optional comment
    */
   sharePost: async (postId: string, shareComment?: string, visibility?: 'PUBLIC' | 'CHAPTER_ONLY' | 'CONNECTIONS_ONLY'): Promise<{ post: Post; message: string }> => {
-    return await apiClient.post<{ post: Post; message: string }>(`/posts/${postId}/share`, {
+    const response = await apiClient.post<{ post: Post; message: string }>(`/posts/${postId}/share`, {
       shareComment,
       visibility
     })
+    if (response && response.post) {
+      response.post = mapPost(response.post)
+    }
+    return response
   },
 
   /**
@@ -199,17 +246,25 @@ export const postsApi = {
    * Get comments for a post
    */
   getComments: async (postId: string, page = 1, limit = 20): Promise<CommentsResponse> => {
-    return await apiClient.get<CommentsResponse>(`/posts/${postId}/comments?page=${page}&limit=${limit}`)
+    const response = await apiClient.get<CommentsResponse>(`/posts/${postId}/comments?page=${page}&limit=${limit}`)
+    if (response && response.comments) {
+      response.comments = response.comments.map(mapComment)
+    }
+    return response
   },
 
   /**
    * Add a comment to a post
    */
   addComment: async (postId: string, content: string, parentCommentId?: string): Promise<{ comment: Comment }> => {
-    return await apiClient.post<{ comment: Comment }>(`/posts/${postId}/comments`, {
+    const response = await apiClient.post<{ comment: Comment }>(`/posts/${postId}/comments`, {
       content,
       parentCommentId
     })
+    if (response && response.comment) {
+      response.comment = mapComment(response.comment)
+    }
+    return response
   },
 
   /**
@@ -234,7 +289,11 @@ export const postsApi = {
     if (collection) {
       params.append('collection', collection)
     }
-    return await apiClient.get<SavedPostsResponse>(`/posts/saved?${params}`)
+    const response = await apiClient.get<SavedPostsResponse>(`/posts/saved?${params}`)
+    if (response && response.posts) {
+      response.posts = response.posts.map(mapPost)
+    }
+    return response
   },
 
   /**
@@ -255,7 +314,11 @@ export const postsApi = {
     targetChapters?: string[]
     isPinned?: boolean 
   }): Promise<{ post: Post; message: string }> => {
-    return await apiClient.post<{ post: Post; message: string }>('/posts/admin', data)
+    const response = await apiClient.post<{ post: Post; message: string }>('/posts/admin', data)
+    if (response && response.post) {
+      response.post = mapPost(response.post)
+    }
+    return response
   },
 
   /**
