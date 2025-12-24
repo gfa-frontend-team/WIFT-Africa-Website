@@ -28,7 +28,6 @@ export function useAuth() {
 
       // If user exists but missing critical fields (membershipStatus, accountType), load full user data
       if (!currentUser.membershipStatus || !currentUser.accountType) {
-        console.log('🔄 Loading full user data (missing membershipStatus or accountType)...')
         loadCurrentUser()
       }
     }
@@ -38,7 +37,6 @@ export function useAuth() {
   const loadCurrentUser = async () => {
     try {
       const response = await usersApi.getCurrentUser()
-      console.log('✅ Full user data loaded:', response.user)
       setUser(response.user)
     } catch (error) {
       console.error('❌ Failed to load current user:', error)
@@ -59,7 +57,6 @@ export function useAuth() {
       // Load full user data with membershipStatus and accountType
       try {
         const fullUserResponse = await usersApi.getCurrentUser()
-        console.log('✅ Full user data loaded after login:', fullUserResponse.user)
         setUser(fullUserResponse.user)
       } catch (userError) {
         console.warn('⚠️ Failed to load full user data after login, using auth response data:', userError)

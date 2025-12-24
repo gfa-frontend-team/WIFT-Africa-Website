@@ -7,88 +7,14 @@ import { MembershipStatus } from '@/types'
 import { RestrictedFeatureBanner } from '@/components/access/RestrictedFeatureMessage'
 import FeatureGate from '@/components/access/FeatureGate'
 import { useFeedStore } from '@/lib/stores/feedStore'
+import { FeedFilters } from '@/components/feed/FeedFilters'
+import { CreatePostTrigger } from '@/components/feed/CreatePostTrigger'
+import { FeedSkeleton } from '@/components/feed/FeedSkeleton'
 import LeftSidebar from '@/components/feed/LeftSidebar'
 import RightSidebar from '@/components/feed/RightSidebar'
 import PostCard from '@/components/feed/PostCard'
 import CreatePostModal from '@/components/feed/CreatePostModal'
-import Avatar from '@/components/ui/Avatar'
 
-const CreatePost = ({ onOpenModal }: { onOpenModal: () => void }) => {
-  const { user } = useAuth()
-  
-  if (!user) return null
-  
-  return (
-    <div className="bg-card border border-border rounded-lg p-4 mb-4">
-      <div className="flex items-center gap-3">
-        <Avatar 
-          src={user.profilePhoto} 
-          name={`${user.firstName} ${user.lastName}`} 
-          size="md" 
-        />
-        <button
-          onClick={onOpenModal}
-          className="flex-1 text-left px-4 py-3 bg-muted hover:bg-muted/80 rounded-full text-muted-foreground transition-colors"
-        >
-          What&apos;s on your mind, {user.firstName}?
-        </button>
-      </div>
-    </div>
-  )
-}
-
-const FeedFilters = () => {
-  const { filters, setFilters } = useFeedStore()
-  
-  const filterOptions = [
-    { value: 'all' as const, label: 'All' },
-    { value: 'posts' as const, label: 'Posts' },
-    { value: 'admin' as const, label: 'Announcements' },
-  ]
-
-  return (
-    <div className="bg-card border border-border rounded-lg p-3 mb-4">
-      <div className="flex items-center gap-2 overflow-x-auto">
-        {filterOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => setFilters({ type: option.value })}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-              filters.type === option.value
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const SkeletonLoader = () => (
-  <div className="space-y-4">
-    {[1, 2, 3].map((i) => (
-      <div
-        key={i}
-        className="bg-card border border-border rounded-lg p-6 animate-pulse"
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-muted rounded-full"></div>
-          <div className="flex-1">
-            <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
-            <div className="h-3 bg-muted rounded w-1/4"></div>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="h-4 bg-muted rounded"></div>
-          <div className="h-4 bg-muted rounded w-5/6"></div>
-        </div>
-      </div>
-    ))}
-  </div>
-)
 
 const FeedContainer = () => {
   const { posts, isLoading, hasMore, fetchFeed, loadMore, refreshFeed, error } = useFeedStore()
@@ -206,7 +132,7 @@ const FeedContainer = () => {
   }, [pullDistance, refreshFeed])
 
   if (isLoading && posts.length === 0) {
-    return <SkeletonLoader />
+    return <FeedSkeleton />
   }
 
   if (error && posts.length === 0) {
@@ -385,7 +311,7 @@ export default function HomePage() {
                 </div>
               }
             >
-              <CreatePost onOpenModal={() => setIsCreatePostModalOpen(true)} />
+              <CreatePostTrigger onOpenModal={() => setIsCreatePostModalOpen(true)} />
               <FeedFilters />
               <FeedContainer />
             </FeatureGate>

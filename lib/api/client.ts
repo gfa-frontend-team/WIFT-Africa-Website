@@ -8,7 +8,7 @@ const MAX_RETRIES = 3
 
 class ApiClient {
   private client: AxiosInstance
-  private requestQueue: Array<() => Promise<any>> = []
+  private requestQueue: Array<() => Promise<unknown>> = []
   private isProcessingQueue = false
   private lastRequestTime = 0
   private minRequestInterval = 100 // Minimum 100ms between requests

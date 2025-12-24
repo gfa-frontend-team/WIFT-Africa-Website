@@ -125,7 +125,6 @@ export default function ProfileSetupStep({
         await onboardingApi.submitProfile(data)
       }
 
-      console.log('✅ Profile setup saved successfully')
       onNext()
     } catch (error: any) {
       console.error('❌ Failed to save profile setup:', error)
