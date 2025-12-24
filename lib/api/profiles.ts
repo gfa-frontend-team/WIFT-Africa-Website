@@ -8,6 +8,8 @@ import type { User, Profile } from '@/types'
 export interface PublicProfileResponse {
   profile: {
     // User fields
+    id: string
+    _id?: string
     firstName: string
     lastName: string
     username?: string

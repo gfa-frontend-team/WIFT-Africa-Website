@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { profilesApi, type PublicProfileResponse } from '@/lib/api/profiles'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useConnectionStore } from '@/lib/stores/connectionStore'
+import { useRouter } from 'next/navigation'
 import ProfileLayout from '@/components/layout/ProfileLayout'
 import ProfileContent from '@/components/profile/ProfileContent'
 
@@ -13,29 +15,54 @@ export default function PublicProfilePage() {
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
   
+  const { checkConnection, sendRequest, requests, fetchRequests } = useConnectionStore()
+  const router = useRouter()
+  
   const [profile, setProfile] = useState<PublicProfileResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [connectionStatus, setConnectionStatus] = useState<'NONE' | 'PENDING' | 'CONNECTED'>('NONE')
 
   // Check if user is viewing their own profile based on loaded profile data
   const isViewingOwnProfile = !!(profile && user && profile.profile.email === user.email)
 
   useEffect(() => {
-    console.log('PublicProfilePage - params:', params)
-    console.log('PublicProfilePage - username:', username)
-    
-    const loadProfile = async () => {
+    const loadProfileAndConnection = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        console.log('Loading profile for username:', username)
+        
+        // Load profile first
         const data = await profilesApi.getPublicProfile(username)
-        console.log('Profile loaded successfully:', data)
         setProfile(data)
+
+        // If authenticated and not own profile, check connection status
+        if (isAuthenticated && user && data.profile.id !== user.id) {
+            // Check established connection
+            const isConnected = await checkConnection(data.profile.id)
+            if (isConnected) {
+                setConnectionStatus('CONNECTED')
+            } else {
+                // Check if there is a pending outgoing request
+                // We ensure requests are loaded (or we could fetch just outgoing)
+                await fetchRequests('outgoing')
+                // Note: fetchRequests updates the store, we need to read from store state. 
+                // However, we can't read 'requests' from state immediately inside this async function if it's from the hook reference closing over initial state? 
+                // Actually 'requests' from useConnectionStore() will update on re-render. 
+                // But we can check the *result* if fetchRequests returned it, but it returns void.
+                // Better: checkConnectionStore state in a separate effect or use get() in store.
+                // For now, let's just optimistically rely on checkStatus and if false, wait for store actions?
+                // Actually, let's just use the store's requests list if it's already populated or wait for it.
+                // Simple hack: Assume 'NONE' and let the store sync update it? 
+                // No, we want to set it correctly.
+                // Let's rely on a separate specific check or just the boolean for connected.
+                // For pending... we need the list.
+                // Let's peek at the store state directly via the hook in the component body
+            }
+        }
       } catch (err: unknown) {
         console.error('Failed to load profile:', err)
         const error = err as { response?: { data?: { error?: string } } }
-        console.error('Error response:', error.response)
         setError(error.response?.data?.error || 'Profile not found')
       } finally {
         setIsLoading(false)
@@ -43,18 +70,37 @@ export default function PublicProfilePage() {
     }
     
     if (username) {
-      loadProfile()
+        loadProfileAndConnection()
     }
-  }, [username, params])
+  }, [username, params, isAuthenticated, user, checkConnection, fetchRequests])
 
-  const handleConnect = () => {
-    // TODO: Implement connection request
-    console.log('Connect with user')
+  // Sync pending status from requests list
+  useEffect(() => {
+    if (profile && requests.length > 0 && connectionStatus !== 'CONNECTED') {
+        const hasPending = requests.find(r => 
+            (r.receiver.id === profile.profile.id || r.sender.id === profile.profile.id) && 
+            r.status === 'PENDING'
+        )
+        if (hasPending) {
+            setConnectionStatus('PENDING')
+        }
+    }
+  }, [requests, profile, connectionStatus])
+
+  const handleConnect = async () => {
+    if (!profile) return
+    try {
+        await sendRequest(profile.profile.id)
+        setConnectionStatus('PENDING')
+    } catch (error) {
+        console.error('Failed to send request:', error)
+        alert('Failed to send connection request')
+    }
   }
 
   const handleMessage = () => {
-    // TODO: Implement messaging
-    console.log('Message user')
+    if (!profile) return
+    router.push(`/messages?userId=${profile.profile.id}`)
   }
 
   if (isLoading) {
@@ -96,6 +142,7 @@ export default function PublicProfilePage() {
         isOwnProfile={isViewingOwnProfile}
         onConnect={handleConnect}
         onMessage={handleMessage}
+        connectionStatus={connectionStatus}
       />
     </ProfileLayout>
   )

@@ -13,6 +13,7 @@ interface ConnectionState {
   sendRequest: (receiverId: string, message?: string) => Promise<void>
   respondToRequest: (requestId: string, action: 'accept' | 'decline' | 'cancel', reason?: string) => Promise<void>
   removeConnection: (connectionId: string) => Promise<void>
+  checkConnection: (userId: string) => Promise<boolean>
 }
 
 export const useConnectionStore = create<ConnectionState>((set, get) => ({
@@ -76,6 +77,16 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
     } catch (error: any) {
       set({ error: error.message || 'Failed to remove connection', isLoading: false })
       throw error
+    }
+  },
+
+  checkConnection: async (userId) => {
+    try {
+      const { connected } = await connectionsApi.checkStatus(userId)
+      return connected
+    } catch (error) {
+      console.error('Failed to check connection status:', error)
+      return false
     }
   },
 }))

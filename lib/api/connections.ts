@@ -33,7 +33,7 @@ export const connectionsApi = {
    * Send a connection request
    */
   sendRequest: async (receiverId: string, message?: string): Promise<{ request: ConnectionRequest; message: string }> => {
-    return await apiClient.post<{ request: ConnectionRequest; message: string }>('/connections/request', {
+    return await apiClient.post<{ request: ConnectionRequest; message: string }>('/connections/requests', {
       receiverId,
       message,
     })

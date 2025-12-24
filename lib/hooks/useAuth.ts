@@ -7,10 +7,13 @@ import { AccountType } from '@/types'
 
 export function useAuth() {
   const router = useRouter()
-  const { currentUser, setUser, clearUser, setLoading, setError } = useUserStore()
+  const { currentUser, setUser, clearUser, setLoading, setError, _hasHydrated, isLoading: isStoreLoading } = useUserStore()
   const isAuthenticated = useUserStore(selectIsAuthenticated)
   const isEmailVerified = useUserStore(selectIsEmailVerified)
   const onboardingComplete = useUserStore(selectOnboardingComplete)
+  
+  // Unified loading state: true if store is rehydrating OR if an async action is valid
+  const isLoading = !_hasHydrated || isStoreLoading
 
   // Check for token state mismatch on mount and when user changes
   useEffect(() => {
@@ -166,6 +169,7 @@ export function useAuth() {
     register,
     logout,
     verifyEmail,
+    isLoading,
     refreshUserData: loadCurrentUser,
   }
 }
