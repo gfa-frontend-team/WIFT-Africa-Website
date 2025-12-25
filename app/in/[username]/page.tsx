@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { profilesApi, type PublicProfileResponse } from '@/lib/api/profiles'
+import { isUsernameReserved } from '@/lib/constants/reserved-usernames'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useConnectionStore } from '@/lib/stores/connectionStore'
 import { useRouter } from 'next/navigation'
@@ -14,9 +15,26 @@ export default function PublicProfilePage() {
   const params = useParams()
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
+  const router = useRouter()
+
+  // Handle reserved usernames (smart redirect)
+  useEffect(() => {
+    // Only check if we have a username and it's not a loading state
+    if (username && isUsernameReserved(username)) {
+      if (username === 'edit') {
+        router.replace('/me/edit')
+      } else {
+        router.replace(`/${username}`)
+      }
+    }
+  }, [username, router])
+
+  // If reserved, show nothing while redirecting
+  if (isUsernameReserved(username)) {
+    return null
+  }
   
   const { checkConnection, sendRequest, requests, fetchRequests } = useConnectionStore()
-  const router = useRouter()
   
   const [profile, setProfile] = useState<PublicProfileResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -72,7 +90,7 @@ export default function PublicProfilePage() {
     if (username) {
         loadProfileAndConnection()
     }
-  }, [username, params, isAuthenticated, user, checkConnection, fetchRequests])
+  }, [username, isAuthenticated, user?.id])
 
   // Sync pending status from requests list
   useEffect(() => {
@@ -90,7 +108,9 @@ export default function PublicProfilePage() {
   const handleConnect = async () => {
     if (!profile) return
     try {
-        await sendRequest(profile.profile.id)
+        const targetId = profile.profile.id || profile.profile._id
+        if (!targetId) throw new Error('User ID not found')
+        await sendRequest(targetId)
         setConnectionStatus('PENDING')
     } catch (error) {
         console.error('Failed to send request:', error)

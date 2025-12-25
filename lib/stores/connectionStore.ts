@@ -7,6 +7,7 @@ interface ConnectionState {
   stats: ConnectionStats | null
   isLoading: boolean
   error: string | null
+  lastStatsFetch: number
   
   fetchRequests: (type?: 'incoming' | 'outgoing' | 'all') => Promise<void>
   fetchStats: () => Promise<void>
@@ -22,6 +23,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
   stats: null,
   isLoading: false,
   error: null,
+  lastStatsFetch: 0,
 
   fetchRequests: async (type = 'all') => {
     set({ isLoading: true, error: null })
@@ -34,9 +36,15 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
   },
 
   fetchStats: async () => {
+    // Throttle to 60 seconds
+    const state = get()
+    if (state.stats && Date.now() - state.lastStatsFetch < 60000) {
+      return
+    }
+
     try {
       const stats = await connectionsApi.getStats()
-      set({ stats })
+      set({ stats, lastStatsFetch: Date.now() })
     } catch (error) {
       console.error('Failed to fetch connection stats:', error)
     }
@@ -46,6 +54,8 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       await connectionsApi.sendRequest(receiverId, message)
+      // Force refresh of stats
+      set({ lastStatsFetch: 0 }) 
       await get().fetchRequests()
       await get().fetchStats()
       set({ isLoading: false })
@@ -59,6 +69,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       await connectionsApi.respondToRequest(requestId, action, reason)
+      set({ lastStatsFetch: 0 })
       await get().fetchRequests()
       await get().fetchStats()
       set({ isLoading: false })
@@ -72,6 +83,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       await connectionsApi.removeConnection(connectionId)
+      set({ lastStatsFetch: 0 })
       await get().fetchStats()
       set({ isLoading: false })
     } catch (error: any) {
