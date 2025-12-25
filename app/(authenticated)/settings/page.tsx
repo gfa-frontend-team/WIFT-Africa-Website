@@ -18,7 +18,7 @@ import Link from 'next/link'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -144,7 +144,7 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <Link
-                href="/me"
+                href={user?.username ? `/in/${user.username}` : '#'}
                 className="block text-primary hover:underline text-sm"
               >
                 View My Profile

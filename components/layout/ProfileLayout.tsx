@@ -19,7 +19,9 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const [isChecking, setIsChecking] = useState(true)
 
   // Determine if we should use dashboard layout
-  const useDashboardLayout = shouldUseDashboardLayout(pathname, isAuthenticated)
+  // Refined logic: If authenticated and user data exists, we should show the dashboard header 
+  // even if on a "public" route like /in/[username], so logged-in users get the full app experience.
+  const useDashboardLayout = isAuthenticated && user || shouldUseDashboardLayout(pathname, isAuthenticated)
   const isViewingOwnProfile = isOwnProfile(pathname, user?.username)
 
   useEffect(() => {

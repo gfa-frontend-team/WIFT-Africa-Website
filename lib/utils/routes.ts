@@ -2,6 +2,8 @@
  * Route utility functions for generating URLs
  */
 
+import { User } from "@/types"
+
 /**
  * Generate profile URL
  * @param username - User's username or profileSlug
@@ -13,6 +15,11 @@ export function getProfileUrl(username: string): string {
 
 export function getProfileEditUrl(username: string): string {
   return `/in/${username}/edit`
+}
+
+export function getOwnProfileUrl(user: User | null): string {
+  if (!user || !user.username) return '/login'
+  return `/in/${user.username}`
 }
 
 export function getProfilePostsUrl(username: string): string {

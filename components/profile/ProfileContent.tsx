@@ -183,7 +183,7 @@ export default function ProfileContent({
                 // Own profile: Show Edit and Share buttons
                 <>
                   <button
-                    onClick={() => router.push('/me/edit')}
+                    onClick={() => router.push(`/in/${profileData.username || profileData.id}/edit`)}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     <Edit className="h-4 w-4" />

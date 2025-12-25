@@ -29,7 +29,7 @@ export default function LeftSidebar() {
           </div>
           
           <Link
-            href="/me"
+            href={user.username || user.id ? `/in/${user.username || user.id}` : '#'}
             className="block hover:underline"
           >
             <h3 className="font-semibold text-foreground">
@@ -146,7 +146,7 @@ export default function LeftSidebar() {
         
         <div className="space-y-1">
           <Link
-            href="/me"
+            href={user.username || user.id ? `/in/${user.username || user.id}` : '#'}
             className="block text-sm text-muted-foreground hover:text-primary hover:bg-accent p-2 rounded-lg transition-colors"
           >
             My Profile

@@ -41,7 +41,7 @@ export default function MobileBottomNav() {
       <div className="flex items-center justify-around h-16 px-2">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
-          const href = item.isProfile && user ? `/me` : item.href;
+          const href = item.isProfile && user ? `/in/${user.username || user.id}` : item.href;
           const isActive = isActiveRoute(href, item.isProfile);
           const hasAccess = access[item.requiredFeature];
           const targetHref = hasAccess ? href : '/verification';
