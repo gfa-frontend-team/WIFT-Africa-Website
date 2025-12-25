@@ -35,12 +35,31 @@ export interface NotificationPreferences {
   emailDigestFrequency: 'instant' | 'daily' | 'weekly'
 }
 
+// Helper to ensure ID exists (mapping _id to id if needed)
+const mapNotification = (notification: any): Notification => {
+  if (!notification) return notification
+  return {
+    ...notification,
+    id: notification.id || notification._id,
+    sender: notification.sender ? {
+      ...notification.sender,
+      id: notification.sender.id || notification.sender._id
+    } : notification.sender
+  }
+}
+
 export const notificationsApi = {
   /**
    * Get notifications
    */
   getNotifications: async (page = 1, limit = 20, unreadOnly = false): Promise<NotificationsResponse> => {
-    return await apiClient.get<NotificationsResponse>(`/notifications?page=${page}&limit=${limit}&unreadOnly=${unreadOnly}`)
+    const response = await apiClient.get<NotificationsResponse>(`/notifications?page=${page}&limit=${limit}&unreadOnly=${unreadOnly}`)
+    
+    if (response && response.notifications) {
+      response.notifications = response.notifications.map(mapNotification)
+    }
+    
+    return response
   },
 
   /**
