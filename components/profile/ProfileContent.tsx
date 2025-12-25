@@ -22,6 +22,7 @@ interface ProfileContentProps {
   onConnect?: () => void
   onMessage?: () => void
   onShare?: () => void
+  connectionStatus?: 'NONE' | 'PENDING' | 'CONNECTED'
 }
 
 export default function ProfileContent({ 
@@ -30,7 +31,8 @@ export default function ProfileContent({
   isOwnProfile = false,
   onConnect,
   onMessage,
-  onShare
+  onShare,
+  connectionStatus = 'NONE'
 }: ProfileContentProps) {
   const router = useRouter()
   const { profile: profileData } = profile
@@ -198,20 +200,36 @@ export default function ProfileContent({
               ) : (
                 // Others' profiles: Show Connect, Message, Share buttons
                 <>
-                  <button
-                    onClick={handleConnect}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    <UserPlus className="h-4 w-4" />
-                    {isAuthenticated ? 'Connect' : 'Sign in to Connect'}
-                  </button>
-                  <button
-                    onClick={handleMessage}
-                    className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    {isAuthenticated ? 'Message' : 'Sign in to Message'}
-                  </button>
+                    {connectionStatus === 'CONNECTED' ? (
+                      <button
+                        onClick={handleMessage}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Message
+                      </button>
+                    ) : connectionStatus === 'PENDING' ? (
+                      <button
+                        disabled
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground rounded-lg cursor-not-allowed"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        Pending
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleConnect}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        {isAuthenticated ? 'Connect' : 'Sign in to Connect'}
+                      </button>
+                    )}
+                    {/* Only show secondary message button if NOT connected (e.g. cold message if allowed, or just remove it) 
+                        For now, removing duplicate Message button since it's merged into the primary action for connected users. 
+                        If we want to allow messaging non-connections, we can keep it. 
+                        Let's keep it simple: Connect -> Connected -> Message. 
+                    */}
                   <button
                     onClick={handleShare}
                     className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors"

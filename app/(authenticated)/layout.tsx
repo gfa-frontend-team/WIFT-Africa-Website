@@ -14,11 +14,13 @@ export default function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { user, isAuthenticated, isEmailVerified, onboardingComplete, refreshUserData } = useAuth()
-  const [isChecking, setIsChecking] = useState(true)
+  const { user, isAuthenticated, isEmailVerified, onboardingComplete, refreshUserData, isLoading } = useAuth()
+  // const [isChecking, setIsChecking] = useState(true) // Removed local state in favor of hook state
 
   useEffect(() => {
-    // Check authentication and onboarding status
+    // Only check auth when hydration is done
+    if (isLoading) return
+
     const checkAuth = async () => {
       if (!isAuthenticated) {
         router.push('/login')
@@ -44,16 +46,13 @@ export default function AuthenticatedLayout({
           console.warn('⚠️ Failed to refresh user data in authenticated layout:', error)
         }
       }
-
-      // All checks passed
-      setIsChecking(false)
     }
 
     checkAuth()
-  }, [isAuthenticated, isEmailVerified, onboardingComplete, user, router, refreshUserData])
+  }, [isAuthenticated, isEmailVerified, onboardingComplete, user, router, refreshUserData, isLoading])
 
   // Show loading while checking auth
-  if (isChecking) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">

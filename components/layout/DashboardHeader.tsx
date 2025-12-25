@@ -22,8 +22,11 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
-  Lock
+  Lock,
+  UserPlus
 } from 'lucide-react';
+import { useNotificationStore } from '@/lib/stores/notificationStore';
+import { useEffect } from 'react';
 
 interface DashboardHeaderProps {
   user: User;
@@ -46,6 +49,11 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { unreadCount, fetchUnreadCount } = useNotificationStore();
+  
+  useEffect(() => {
+    fetchUnreadCount();
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -168,6 +176,12 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault()
+                        router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
+                    }
+                  }}
                   className="pl-10 pr-4 py-2 w-64 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
               </div>
@@ -175,34 +189,18 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
             {/* Notifications */}
             <div className="relative">
-              <button
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+              <Link
+                href="/notifications"
+                className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors block"
               >
                 <Bell className="h-5 w-5" />
                 {/* Notification Badge */}
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
-                  0
-                </span>
-              </button>
-
-              {/* Notifications Dropdown */}
-              {isNotificationsOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setIsNotificationsOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-lg shadow-lg z-20">
-                    <div className="p-4 border-b border-border">
-                      <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
-                    </div>
-                    <div className="p-8 text-center">
-                      <p className="text-sm text-muted-foreground">No notifications yet</p>
-                    </div>
-                  </div>
-                </>
-              )}
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
             </div>
 
             {/* User Menu */}
@@ -256,6 +254,14 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                       >
                         <UserIcon className="h-4 w-4" />
                         <span>My Profile</span>
+                      </Link>
+                      <Link
+                        href="/connections"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        <span>Connections</span>
                       </Link>
                       <Link
                         href="/settings"

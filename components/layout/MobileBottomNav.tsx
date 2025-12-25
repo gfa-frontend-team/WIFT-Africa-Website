@@ -18,7 +18,7 @@ const mobileNavItems = [
   { name: 'Messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
   { name: 'Opportunities', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
   { name: 'Directory', href: '/members', icon: Users, requiredFeature: 'canViewDirectory' as const },
-  { name: 'Profile', href: '/profile', icon: User, isProfile: true, requiredFeature: 'canEditProfile' as const },
+  { name: 'Profile', href: '/me', icon: User, isProfile: true, requiredFeature: 'canEditProfile' as const },
 ];
 
 export default function MobileBottomNav() {

@@ -56,7 +56,7 @@ export default function ConnectionList({ connections, onRemove, onBlock }: Conne
             </div>
             
             <Link 
-              href={`/profile/${user.profileSlug || user.username}`}
+              href={`/in/${user.profileSlug || user.username}`}
               className="font-bold text-lg text-foreground hover:underline mb-1"
             >
               {user.firstName} {user.lastName}

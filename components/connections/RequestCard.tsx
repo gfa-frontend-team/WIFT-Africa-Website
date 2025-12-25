@@ -48,7 +48,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
         </Link>
         <div>
           <Link 
-            href={`/profile/${user.profileSlug || user.username}`}
+            href={`/in/${user.profileSlug || user.username}`}
             className="font-semibold text-foreground hover:underline"
           >
             {user.firstName} {user.lastName}

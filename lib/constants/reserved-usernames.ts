@@ -15,7 +15,9 @@ export const RESERVED_USERNAMES = [
   'connections',
   'settings',
   'me',
-  'profile',
+  'in',
+  'search',
+  'edit',
   
   // Auth routes
   'login',

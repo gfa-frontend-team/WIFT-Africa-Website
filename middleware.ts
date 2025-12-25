@@ -32,8 +32,9 @@ export function middleware(request: NextRequest) {
   const isReservedRoute = reservedRoutes.some(route => pathname.startsWith(route))
 
   // If it's a single-segment path (like /username) and not reserved, treat as profile
+  // Rewrite it to /in/username so the app/in/[username] page handles it
   if (!isReservedRoute && pathname.match(/^\/[\w-]+$/)) {
-    const newPath = pathname.replace(/^\//, '/profile/')
+    const newPath = pathname.replace(/^\//, '/in/')
     const response = NextResponse.rewrite(new URL(newPath, request.url))
     
     // Pass original path for client-side use
@@ -42,14 +43,14 @@ export function middleware(request: NextRequest) {
     return response
   }
 
-  // Handle /username/edit pattern (must come before single-segment check)
+  // Handle /username/edit pattern
   if (pathname.match(/^\/[\w-]+\/edit$/)) {
     // Check if it's not a reserved route with /edit
     const baseRoute = pathname.replace('/edit', '')
     const isReservedBase = reservedRoutes.some(route => baseRoute.startsWith(route))
     
     if (!isReservedBase) {
-      const newPath = pathname.replace(/^\//, '/profile/')
+      const newPath = pathname.replace(/^\//, '/in/')
       const response = NextResponse.rewrite(new URL(newPath, request.url))
       
       response.headers.set('x-original-path', pathname)

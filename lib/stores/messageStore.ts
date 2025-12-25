@@ -9,6 +9,7 @@ interface MessageState {
   unreadCount: { direct: number; broadcast: number; total: number }
   isLoading: boolean
   error: string | null
+  lastUnreadFetch: number
 
   fetchConversations: (type?: 'DIRECT' | 'BROADCAST') => Promise<void>
   fetchMessages: (conversationId: string) => Promise<void>
@@ -25,6 +26,7 @@ export const useMessageStore = create<MessageState>((set, get) => ({
   unreadCount: { direct: 0, broadcast: 0, total: 0 },
   isLoading: false,
   error: null,
+  lastUnreadFetch: 0,
 
   fetchConversations: async (type) => {
     set({ isLoading: true, error: null })
@@ -84,9 +86,15 @@ export const useMessageStore = create<MessageState>((set, get) => ({
   },
 
   getUnreadCount: async () => {
+    // Throttle to 30s
+    const state = get()
+    if (Date.now() - state.lastUnreadFetch < 30000) {
+      return
+    }
+
     try {
       const counts = await messagesApi.getUnreadCount()
-      set({ unreadCount: counts })
+      set({ unreadCount: counts, lastUnreadFetch: Date.now() })
     } catch (error) {
       console.error('Failed to fetch unread count:', error)
     }
