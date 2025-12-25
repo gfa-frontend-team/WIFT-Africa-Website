@@ -92,7 +92,7 @@ export default function PostCard({ post }: PostCardProps) {
       {/* Post Header */}
       <div className="p-4 flex items-start justify-between">
         <div className="flex items-start gap-3 flex-1">
-          <Link href={`/${post.author.username}`}>
+          <Link href={`/in/${post.author.username || post.author.id}`}>
             <Avatar
               src={post.author.profilePhoto}
               name={`${post.author.firstName} ${post.author.lastName}`}
@@ -102,7 +102,7 @@ export default function PostCard({ post }: PostCardProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <Link
-                href={`/${post.author.username}`}
+                href={`/in/${post.author.username || post.author.id}`}
                 className="font-semibold text-foreground hover:underline block truncate"
               >
                 {post.author.firstName} {post.author.lastName}

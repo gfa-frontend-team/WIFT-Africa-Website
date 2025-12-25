@@ -248,7 +248,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                     </div>
                     <div className="py-2">
                       <Link
-                        href="/me"
+                        href={`/in/${user.username || user.id}`}
                         className="flex items-center space-x-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
