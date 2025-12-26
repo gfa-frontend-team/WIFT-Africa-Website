@@ -2,7 +2,7 @@ import { useUserStore, selectIsAuthenticated, selectIsEmailVerified, selectOnboa
 import { authApi } from '../api/auth'
 import { usersApi } from '../api/users'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { AccountType } from '@/types'
 
 export function useAuth() {
@@ -15,6 +15,14 @@ export function useAuth() {
   // Unified loading state: true if store is rehydrating OR if an async action is valid
   const isLoading = !_hasHydrated || isStoreLoading
 
+  /* 
+    Prevention of Infinite Loops:
+    Use a ref to track if we've already attempted to fetch the full user data for this mount.
+    This prevents the useEffect from firing repeatedly if the user object keeps updating 
+    (changing reference) but still lacks the required fields.
+  */
+  const refreshAttempted = useRef(false)
+
   // Check for token state mismatch on mount and when user changes
   useEffect(() => {
     if (currentUser && typeof window !== 'undefined') {
@@ -25,12 +33,14 @@ export function useAuth() {
       if (!accessToken && !refreshToken) {
         console.warn('🔄 Token state mismatch detected: User exists but no tokens found. Logging out...')
         clearUser()
-        // Don't redirect here - let the page handle it based on auth requirements
         return
       }
 
       // If user exists but missing critical fields (membershipStatus, accountType), load full user data
-      if (!currentUser.membershipStatus || !currentUser.accountType) {
+      // BUT only if we haven't already tried to refresh in this session
+      if ((!currentUser.membershipStatus || !currentUser.accountType) && !refreshAttempted.current) {
+        console.log('🔄 Detected incomplete user data, attempting to refresh...')
+        refreshAttempted.current = true // Mark as attempted immediately
         loadCurrentUser()
       }
     }

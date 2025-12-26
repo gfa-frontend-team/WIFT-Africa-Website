@@ -36,20 +36,10 @@ export default function AuthenticatedLayout({
         router.push('/onboarding')
         return
       }
-
-      // If user is missing critical fields, try to refresh user data
-      if (user && (!user.membershipStatus || !user.accountType)) {
-        console.log('🔄 Authenticated layout: Refreshing user data (missing fields)...')
-        try {
-          await refreshUserData()
-        } catch (error) {
-          console.warn('⚠️ Failed to refresh user data in authenticated layout:', error)
-        }
-      }
     }
 
     checkAuth()
-  }, [isAuthenticated, isEmailVerified, onboardingComplete, user, router, refreshUserData, isLoading])
+  }, [isAuthenticated, isEmailVerified, onboardingComplete, router])
 
   // Show loading while checking auth
   if (isLoading) {

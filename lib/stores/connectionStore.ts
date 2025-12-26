@@ -8,6 +8,7 @@ interface ConnectionState {
   isLoading: boolean
   error: string | null
   lastStatsFetch: number
+  lastRequestsFetch: Record<string, number>
   
   fetchRequests: (type?: 'incoming' | 'outgoing' | 'all') => Promise<void>
   fetchStats: () => Promise<void>
@@ -24,12 +25,27 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
   isLoading: false,
   error: null,
   lastStatsFetch: 0,
+  lastRequestsFetch: {},
 
   fetchRequests: async (type = 'all') => {
+    const { lastRequestsFetch, isLoading } = get()
+    const now = Date.now()
+    const lastFetch = lastRequestsFetch[type] || 0
+    
+    // Throttle: Don't fetch if less than 2 seconds have passed since last fetch for this type
+    if (isLoading || (now - lastFetch < 2000)) {
+       return
+    }
+
     set({ isLoading: true, error: null })
     try {
       const response = await connectionsApi.getRequests(type)
-      set({ requests: response.requests, totalRequests: response.total, isLoading: false })
+      set(state => ({ 
+        requests: response.requests, 
+        totalRequests: response.total, 
+        isLoading: false,
+        lastRequestsFetch: { ...state.lastRequestsFetch, [type]: now }
+      }))
     } catch (error: any) {
       set({ error: error.message || 'Failed to fetch requests', isLoading: false })
     }
