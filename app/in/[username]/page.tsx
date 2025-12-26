@@ -30,6 +30,15 @@ export default function UnifiedProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [connectionStatus, setConnectionStatus] = useState<'NONE' | 'PENDING' | 'CONNECTED'>('NONE')
 
+  // Reset state when username changes to prevent stale data
+  useEffect(() => {
+    setProfile(null)
+    setPrivateProfileData(null)
+    setConnectionStatus('NONE')
+    setError(null)
+    setIsLoading(true)
+  }, [username])
+
   // Handle reserved usernames (smart redirect)
   useEffect(() => {
     if (username && isUsernameReserved(username)) {
@@ -141,8 +150,13 @@ export default function UnifiedProfilePage() {
   const handleConnect = async () => {
     if (!profile) return
     try {
-      const targetId = profile.profile.id || profile.profile._id
-      if (!targetId) throw new Error('User ID not found')
+      // Robustly find target ID
+      const targetId = profile.profile.id || profile.profile._id || (profile.profile as any).userId
+      if (!targetId) {
+        console.error('User ID not found in profile:', profile)
+        throw new Error('User ID not found')
+      }
+      
       await sendRequest(targetId)
       setConnectionStatus('PENDING')
     } catch (error) {

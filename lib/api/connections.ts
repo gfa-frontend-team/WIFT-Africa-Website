@@ -3,6 +3,7 @@ import { User } from '@/types'
 
 export interface ConnectionRequest {
   id: string
+  _id?: string
   sender: User
   receiver: User
   status: 'PENDING' | 'ACCEPTED' | 'DECLINED'
@@ -43,7 +44,17 @@ export const connectionsApi = {
    * Get connection requests
    */
   getRequests: async (type: 'incoming' | 'outgoing' | 'all' = 'all', page = 1, limit = 20): Promise<ConnectionsResponse> => {
-    return await apiClient.get<ConnectionsResponse>(`/connections/requests?type=${type}&page=${page}&limit=${limit}`)
+    const response = await apiClient.get<ConnectionsResponse>(`/connections/requests?type=${type}&page=${page}&limit=${limit}`)
+    
+    // Map _id to id if needed
+    if (response.requests && Array.isArray(response.requests)) {
+      response.requests = response.requests.map((req: any) => ({
+        ...req,
+        id: req.id || req._id
+      }))
+    }
+    
+    return response
   },
 
   /**

@@ -6,6 +6,7 @@ import ConversationList from '@/components/messages/ConversationList'
 import MessageThread from '@/components/messages/MessageThread'
 import MessageComposer from '@/components/messages/MessageComposer'
 import { useSearchParams } from 'next/navigation'
+import { profilesApi } from '@/lib/api/profiles'
 
 export default function MessagesPage() {
   const { 
@@ -29,27 +30,49 @@ export default function MessagesPage() {
     fetchConversations()
   }, [fetchConversations])
 
-  // Handle responsive view
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768
-      setIsMobileView(mobile)
-      if (!mobile) {
-        setShowConversationList(true)
-      }
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
   // Handle auto-selection from URL or just select first if desktop
+  // Modified to handle generic userId param for new conversations
   useEffect(() => {
-    if (!activeConversation && conversations.length > 0 && !isMobileView && !userIdToMessage) {
-       selectConversation(conversations[0].id)
+    const initSelection = async () => {
+        if (userIdToMessage) {
+            // Check if we already have a conversation with this user
+            const existing = conversations.find(c => 
+                c.type === 'DIRECT' && c.otherParticipant?.id === userIdToMessage
+            )
+            
+            if (existing) {
+                selectConversation(existing.id)
+            } else {
+                // Fetch user details to start new conversation
+                try {
+                    const response = await profilesApi.getPublicProfile(userIdToMessage)
+                    if (response.profile) {
+                         const user = {
+                             id: response.profile.id || response.profile._id,
+                             firstName: response.profile.firstName,
+                             lastName: response.profile.lastName,
+                             profilePhoto: response.profile.profilePhoto,
+                             username: response.profile.username,
+                             accountType: 'MEMBER'
+                         }
+                         // @ts-ignore
+                         useMessageStore.getState().startDirectConversation(user)
+                    }
+                } catch (err) {
+                    console.error("Failed to load user for new conversation", err)
+                }
+            }
+        } else if (!activeConversation && conversations.length > 0 && !isMobileView) {
+           selectConversation(conversations[0].id)
+        }
     }
-  }, [conversations, activeConversation, isMobileView, selectConversation, userIdToMessage])
+    
+    // Only run if we aren't already selecting/loading to avoid loops, 
+    // but conversations dependency handles updates.
+    if (!isLoading) {
+        initSelection()
+    }
+  }, [conversations, activeConversation, isMobileView, selectConversation, userIdToMessage, isLoading])
 
   // Helper handling
   const handleSelectConversation = (conversationId: string) => {

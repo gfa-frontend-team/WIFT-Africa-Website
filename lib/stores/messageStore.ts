@@ -14,6 +14,7 @@ interface MessageState {
   fetchConversations: (type?: 'DIRECT' | 'BROADCAST') => Promise<void>
   fetchMessages: (conversationId: string) => Promise<void>
   selectConversation: (conversationId: string) => Promise<void>
+  startDirectConversation: (user: User) => void
   sendMessage: (receiverId: string, content: string, media?: any[]) => Promise<void>
   getUnreadCount: () => Promise<void>
   addMessage: (conversationId: string, message: Message) => void
@@ -39,6 +40,9 @@ export const useMessageStore = create<MessageState>((set, get) => ({
   },
 
   fetchMessages: async (conversationId) => {
+    // Don't fetch for temporary new conversations
+    if (conversationId.startsWith('new_')) return
+    
     try {
       const response = await messagesApi.getMessages(conversationId)
       
@@ -66,19 +70,73 @@ export const useMessageStore = create<MessageState>((set, get) => ({
     }
   },
 
+  startDirectConversation: (user: User) => {
+    const state = get()
+    // Check if existing conversation exists
+    const existing = state.conversations.find(c => 
+      c.type === 'DIRECT' && c.otherParticipant?.id === user.id
+    )
+
+    if (existing) {
+      state.selectConversation(existing.id)
+      return
+    }
+
+    // Create temporary conversation
+    const tempId = `new_${user.id}`
+    const tempConversation: Conversation = {
+      id: tempId,
+      type: 'DIRECT',
+      otherParticipant: user,
+      unreadCount: 0,
+      updatedAt: new Date().toISOString()
+    }
+
+    set((state) => ({
+      activeConversation: tempConversation,
+      messages: {
+        ...state.messages,
+        [tempId]: []
+      }
+    }))
+  },
+
   sendMessage: async (receiverId, content, media) => {
     try {
       const response = await messagesApi.sendMessage(receiverId, content, media)
       const { message, conversation } = response
 
-      // Add message to store immediately
+      // If we were in a temporary conversation, switch to the real one
+      const currentActive = get().activeConversation
+      if (currentActive && currentActive.id.startsWith('new_')) {
+          // Construct the full conversation object based on what we know + backend ID
+          const realConversation: Conversation = {
+              ...currentActive,
+              id: conversation.id,
+              lastMessage: message,
+              unreadCount: 0
+          }
+           set((state) => ({
+              activeConversation: realConversation,
+              // Move messages if we had any optimistically? (Usually startDirectConversation creates empty)
+              // But we can just direct the new message to the new ID
+          }))
+      }
+
+      // Add message to store immediately (using real ID)
       get().addMessage(conversation.id, {
         ...message,
         isMine: true
       })
 
       // Refresh conversations to update last message
-      get().fetchConversations()
+      await get().fetchConversations()
+      
+      // Ensure we are selected on the real conversation if we aren't already
+      if (get().activeConversation?.id !== conversation.id) {
+          get().selectConversation(conversation.id)
+      }
+
     } catch (error: any) {
       set({ error: error.message || 'Failed to send message' })
       throw error

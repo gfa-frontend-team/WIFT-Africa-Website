@@ -54,7 +54,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
             {user.firstName} {user.lastName}
           </Link>
           <p className="text-sm text-muted-foreground line-clamp-1">
-            {user.accountType.replace('_', ' ').toLowerCase()}
+            {user.accountType ? user.accountType.replace('_', ' ').toLowerCase() : 'Member'}
           </p>
         </div>
       </div>

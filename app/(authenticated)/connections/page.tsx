@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useConnectionStore } from '@/lib/stores/connectionStore'
 import RequestCard from '@/components/connections/RequestCard'
 import { Users, UserPlus, ExternalLink } from 'lucide-react'
@@ -27,6 +27,22 @@ export default function ConnectionsPage() {
   useEffect(() => {
     fetchRequests(activeTab)
   }, [activeTab, fetchRequests])
+
+  // Deduplicate requests to prevent key errors
+  const uniqueRequests = useMemo(() => {
+    const seen = new Set()
+    return requests.filter((request) => {
+      if (!request || typeof request.id === 'undefined') return false
+      
+      const id = String(request.id) // Ensure string
+      if (seen.has(id)) {
+        console.warn('Duplicate connection request found:', request)
+        return false
+      }
+      seen.add(id)
+      return true
+    })
+  }, [requests])
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,10 +123,10 @@ export default function ConnectionsPage() {
                      <div className="flex justify-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
-                ) : requests.length > 0 ? (
+                ) : uniqueRequests.length > 0 ? (
                     <div className="grid grid-cols-1 gap-4">
-                        {requests.map((request) => (
-                            <RequestCard key={request.id} request={request} type={activeTab} />
+                        {uniqueRequests.map((request, index) => (
+                            <RequestCard key={`${request.id}-${index}`} request={request} type={activeTab} />
                         ))}
                     </div>
                 ) : (
