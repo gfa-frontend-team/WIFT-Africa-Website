@@ -30,16 +30,21 @@ const FeedContainer = () => {
   }, [fetchFeed])
 
   // Auto-retry for rate limited requests with countdown
+  // Auto-retry for rate limited requests with countdown
   useEffect(() => {
+    let countdownInterval: NodeJS.Timeout | undefined
+    
+    // Clear any existing timeout first
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = null
+    }
+
     if (error && (error.includes('Too many requests') || error.includes('Server is busy'))) {
-      // Clear any existing timeout
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current)
-      }
-      
       // Start countdown
       setRetryCountdown(5)
-      const countdownInterval = setInterval(() => {
+      
+      countdownInterval = setInterval(() => {
         setRetryCountdown(prev => {
           if (prev <= 1) {
             clearInterval(countdownInterval)
@@ -55,18 +60,12 @@ const FeedContainer = () => {
         setRetryCountdown(0)
         fetchFeed()
       }, 5000)
-      
-      return () => {
-        clearInterval(countdownInterval)
-        if (retryTimeoutRef.current) {
-          clearTimeout(retryTimeoutRef.current)
-        }
-      }
     } else {
       setRetryCountdown(0)
     }
     
     return () => {
+      if (countdownInterval) clearInterval(countdownInterval)
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current)
       }

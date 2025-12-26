@@ -9,6 +9,7 @@ export default function NotificationsPage() {
   const { 
     notifications, 
     fetchNotifications, 
+    fetchUnreadCount,
     markAllAsRead, 
     isLoading, 
     total,
@@ -18,7 +19,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     fetchNotifications()
     // Also fetch unread count to keep badge in sync
-    useNotificationStore.getState().fetchUnreadCount()
+    fetchUnreadCount()
   }, [])
 
   const handleLoadMore = () => {
