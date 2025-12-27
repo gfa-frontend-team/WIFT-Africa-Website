@@ -1,94 +1,155 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useMessageStore } from '@/lib/stores/messageStore'
+import { useEffect, useState, useMemo } from 'react'
+import { useMessages } from '@/lib/hooks/useMessages'
 import ConversationList from '@/components/messages/ConversationList'
 import MessageThread from '@/components/messages/MessageThread'
 import MessageComposer from '@/components/messages/MessageComposer'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { profilesApi } from '@/lib/api/profiles'
 
 export default function MessagesPage() {
-  const { 
-    conversations, 
-    activeConversation, 
-    messages,
-    isLoading,
-    fetchConversations,
-    selectConversation,
-    sendMessage
-  } = useMessageStore()
-  
+  const router = useRouter()
   const searchParams = useSearchParams()
   const userIdToMessage = searchParams.get('userId')
-  
+  const conversationIdParam = searchParams.get('id')
+
+  const { 
+    useConversations, 
+    useMessageThread, 
+    markAsRead 
+  } = useMessages()
+
+  const { data: convData, isLoading: isConvsLoading } = useConversations()
+  const conversations = convData?.conversations || []
+
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(conversationIdParam)
   const [isMobileView, setIsMobileView] = useState(false)
   const [showConversationList, setShowConversationList] = useState(true)
+  const [tempUser, setTempUser] = useState<any>(null)
+  const [initialSelectDone, setInitialSelectDone] = useState(false)
 
-  // Initial fetch
+  // Handle mobile view detection
   useEffect(() => {
-    fetchConversations()
-  }, [fetchConversations])
+    const checkMobile = () => {
+      setIsMobileView(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
-  // Handle auto-selection from URL or just select first if desktop
-  // Modified to handle generic userId param for new conversations
+  // Handle auto-selection and fetching temp user
   useEffect(() => {
-    const initSelection = async () => {
-        if (userIdToMessage) {
-            // Check if we already have a conversation with this user
-            const existing = conversations.find(c => 
-                c.type === 'DIRECT' && c.otherParticipant?.id === userIdToMessage
-            )
-            
-            if (existing) {
-                selectConversation(existing.id)
-            } else {
-                // Fetch user details to start new conversation
-                try {
-                    const response = await profilesApi.getPublicProfile(userIdToMessage)
-                    if (response.profile) {
-                         const user = {
-                             id: response.profile.id || response.profile._id,
-                             firstName: response.profile.firstName,
-                             lastName: response.profile.lastName,
-                             profilePhoto: response.profile.profilePhoto,
-                             username: response.profile.username,
-                             accountType: 'MEMBER'
-                         }
-                         // @ts-ignore
-                         useMessageStore.getState().startDirectConversation(user)
-                    }
-                } catch (err) {
-                    console.error("Failed to load user for new conversation", err)
-                }
+    const handleInitialState = async () => {
+      // If we are in the process of closing (activeId is null and URL still has params), 
+      // or if we've already done the initial load and there are no NEW specific params to handle, skip.
+      if (initialSelectDone && !userIdToMessage && !conversationIdParam) return
+      
+      // Prevent re-selection if we just manually cleared it
+      if (initialSelectDone && activeConversationId === null && (userIdToMessage || conversationIdParam)) {
+          // This means we just called handleBackToList but the URL hasn't cleared yet
+          return
+      }
+
+      if (userIdToMessage) {
+        const existing = conversations.find(c => 
+          c.type === 'DIRECT' && c.otherParticipant?.id === userIdToMessage
+        )
+        if (existing) {
+          if (activeConversationId !== existing.id) {
+            setActiveConversationId(existing.id)
+          }
+          setInitialSelectDone(true)
+        } else if (!tempUser) {
+          try {
+            const response = await profilesApi.getPublicProfile(userIdToMessage)
+            if (response.profile) {
+              setTempUser({
+                id: response.profile.id || response.profile._id || (response.profile as any).userId,
+                firstName: response.profile.firstName,
+                lastName: response.profile.lastName,
+                profilePhoto: response.profile.profilePhoto,
+                username: response.profile.username
+              })
+              setActiveConversationId(`new_${userIdToMessage}`)
+              setInitialSelectDone(true)
             }
-        } else if (!activeConversation && conversations.length > 0 && !isMobileView) {
-           selectConversation(conversations[0].id)
+          } catch (err) {
+            console.error("Failed to load user for new conversation", err)
+          }
         }
+      } else if (conversationIdParam) {
+          if (activeConversationId !== conversationIdParam) {
+            setActiveConversationId(conversationIdParam)
+          }
+          setInitialSelectDone(true)
+      } else if (!activeConversationId && conversations.length > 0 && !isMobileView && !initialSelectDone) {
+        // Only auto-select first conversation if requested (uncomment if desired)
+        // setActiveConversationId(conversations[0].id)
+        setInitialSelectDone(true)
+      } else if (!initialSelectDone) {
+        setInitialSelectDone(true)
+      }
     }
-    
-    // Only run if we aren't already selecting/loading to avoid loops, 
-    // but conversations dependency handles updates.
-    if (!isLoading) {
-        initSelection()
-    }
-  }, [conversations, activeConversation, isMobileView, selectConversation, userIdToMessage, isLoading])
 
-  // Helper handling
+    if (!isConvsLoading) {
+      handleInitialState()
+    }
+  }, [conversations, userIdToMessage, conversationIdParam, isConvsLoading, isMobileView, activeConversationId, tempUser, initialSelectDone])
+
+  // Sync activeConversationId with URL
+  useEffect(() => {
+    if (activeConversationId && !activeConversationId.startsWith('new_')) {
+      const currentId = searchParams.get('id')
+      if (currentId !== activeConversationId) {
+          // Handled via router.replace in handleSelectConversation
+      }
+    }
+  }, [activeConversationId, searchParams])
+
+  const activeConversation = useMemo(() => {
+    if (activeConversationId?.startsWith('new_') && tempUser) {
+      return {
+        id: activeConversationId,
+        type: 'DIRECT' as const,
+        otherParticipant: tempUser,
+        unreadCount: 0,
+        updatedAt: new Date().toISOString()
+      }
+    }
+    return conversations.find(c => c.id === activeConversationId) || null
+  }, [activeConversationId, conversations, tempUser])
+
+  const { data: threadData, isLoading: isMessagesLoading } = useMessageThread(activeConversationId || '', !!activeConversationId)
+  
+  const activeMessages = useMemo(() => {
+    return threadData?.pages.flatMap(page => page.messages).reverse() || []
+  }, [threadData])
+
+  useEffect(() => {
+    if (activeConversationId && !activeConversationId.startsWith('new_')) {
+        markAsRead(activeConversationId)
+    }
+  }, [activeConversationId, markAsRead])
+
   const handleSelectConversation = (conversationId: string) => {
-    selectConversation(conversationId)
+    setActiveConversationId(conversationId)
+    // Update URL without full refresh to sync state
+    if (!conversationId.startsWith('new_')) {
+        router.replace(`/messages?id=${conversationId}`, { scroll: false })
+    }
     if (isMobileView) {
       setShowConversationList(false)
     }
   }
 
   const handleBackToList = () => {
+    setActiveConversationId(null)
+    setTempUser(null)
     setShowConversationList(true)
+    router.replace('/messages', { scroll: false })
   }
-
-  const activeMessages = activeConversation 
-    ? messages[activeConversation.id] || []
-    : []
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,9 +171,9 @@ export default function MessagesPage() {
               </div>
               <ConversationList
                 conversations={conversations}
-                activeConversationId={activeConversation?.id}
+                activeConversationId={activeConversationId || undefined}
                 onSelectConversation={handleSelectConversation}
-                isLoading={isLoading}
+                isLoading={isConvsLoading}
               />
             </div>
           )}
@@ -125,11 +186,22 @@ export default function MessagesPage() {
               {activeConversation ? (
                 <>
                   <MessageThread
-                    conversation={activeConversation}
+                    conversation={activeConversation as any}
                     messages={activeMessages}
-                    onBack={isMobileView ? handleBackToList : undefined}
+                    onBack={handleBackToList}
                   />
-                  <MessageComposer conversationId={activeConversation.id} />
+                  <MessageComposer 
+                    conversationId={activeConversation.id} 
+                    receiverId={activeConversation.otherParticipant?.id || (activeConversation.otherParticipant as any)?._id}
+                    onMessageSent={() => {
+                        // If it was a temp conversation, the hook invalidation will fetch the new real conversation
+                        if (activeConversationId?.startsWith('new_')) {
+                             setTempUser(null)
+                             setActiveConversationId(null)
+                             router.replace('/messages', { scroll: false })
+                        }
+                    }}
+                  />
                 </>
               ) : (
                 <div className="flex-1 flex items-center justify-center p-8 text-center bg-muted/10">

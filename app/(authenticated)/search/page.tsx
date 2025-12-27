@@ -3,13 +3,16 @@
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { useSearchStore } from '@/lib/stores/searchStore'
+import { useSearch } from '@/lib/hooks/useSearch'
 import SearchBar from '@/components/search/SearchBar'
 import SearchFilters from '@/components/search/SearchFilters'
 import MemberCard from '@/components/search/MemberCard'
 import { Loader2, SearchX } from 'lucide-react'
 
 export default function SearchPage() {
-  const { results, isSearching, searchMembers, totalResults, setQuery } = useSearchStore()
+  const { currentQuery, activeFilters, setQuery } = useSearchStore()
+  const { useSearchMembers } = useSearch()
+  
   const searchParams = useSearchParams()
   const queryParam = searchParams.get('query')
 
@@ -17,11 +20,16 @@ export default function SearchPage() {
   useEffect(() => {
     if (queryParam) {
         setQuery(queryParam)
-        searchMembers({ query: queryParam })
-    } else if (results.length === 0 && !isSearching) {
-        searchMembers()
     }
-  }, [queryParam]) // React to URL changes
+  }, [queryParam])
+
+  const { data, isLoading: isSearching } = useSearchMembers({
+    query: currentQuery,
+    ...activeFilters
+  })
+
+  const results = data?.users || []
+  const totalResults = data?.total || 0
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
