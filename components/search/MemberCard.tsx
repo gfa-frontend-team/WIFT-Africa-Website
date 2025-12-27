@@ -1,7 +1,7 @@
 'use client'
 
 import { SearchUserResult } from '@/lib/api/search'
-import { useConnectionStore } from '@/lib/stores/connectionStore'
+import { useConnections } from '@/lib/hooks/useConnections'
 import { UserPlus, MessageCircle, Check, Clock } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,23 +16,19 @@ interface MemberCardProps {
 export default function MemberCard({ user }: MemberCardProps) {
   const router = useRouter()
   const { user: currentUser } = useAuth() 
-  const { sendRequest } = useConnectionStore()
+  const { sendRequest, isSending } = useConnections()
   const [status, setStatus] = useState(user.connectionStatus)
-  const [isLoading, setIsLoading] = useState(false)
   
   // Don't show connect button for self
   const isSelf = currentUser?.id === user.id
 
   const handleConnect = async () => {
     try {
-      setIsLoading(true)
       await sendRequest(user.id)
       setStatus('pending')
     } catch (error) {
       console.error('Failed to send request:', error)
       // Ideally show toast
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -101,10 +97,10 @@ export default function MemberCard({ user }: MemberCardProps) {
         ) : (
           <button
             onClick={handleConnect}
-            disabled={isLoading}
+            disabled={isSending}
             className="w-full py-2 border border-primary text-primary rounded-md text-sm font-medium hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {isLoading ? (
+            {isSending ? (
               <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : (
               <UserPlus className="h-4 w-4" />

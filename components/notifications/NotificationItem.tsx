@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Notification } from '@/lib/api/notifications'
-import { useNotificationStore } from '@/lib/stores/notificationStore'
+import { useNotifications } from '@/lib/hooks/useNotifications'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -14,7 +14,7 @@ interface NotificationItemProps {
 }
 
 export default function NotificationItem({ notification }: NotificationItemProps) {
-  const { markAsRead } = useNotificationStore()
+  const { markAsRead } = useNotifications()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const getIcon = () => {

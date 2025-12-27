@@ -25,7 +25,7 @@ import {
   Lock,
   UserPlus
 } from 'lucide-react';
-import { useNotificationStore } from '@/lib/stores/notificationStore';
+import { useNotifications } from '@/lib/hooks/useNotifications';
 import { useEffect } from 'react';
 
 interface DashboardHeaderProps {
@@ -49,11 +49,11 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { unreadCount, fetchUnreadCount } = useNotificationStore();
+  const { useUnreadCount } = useNotifications();
+  const { data: unreadData } = useUnreadCount();
+  const unreadCount = unreadData?.count || 0;
   
-  useEffect(() => {
-    fetchUnreadCount();
-  }, []);
+
 
   const handleLogout = async () => {
     await logout();

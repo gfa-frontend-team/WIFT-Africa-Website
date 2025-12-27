@@ -1,31 +1,44 @@
-import { useState } from 'react'
-import useMessageStore from '@/lib/stores/messageStore'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useMessages } from '@/lib/hooks/useMessages'
 import { Send, Image as ImageIcon, Paperclip } from 'lucide-react'
 
 interface MessageComposerProps {
-  conversationId: string // Used to get receiver ID if necessary, mostly just for context
+  conversationId?: string 
+  receiverId?: string
+  onMessageSent?: () => void
 }
 
-export default function MessageComposer({ conversationId }: MessageComposerProps) {
+export default function MessageComposer({ conversationId, receiverId, onMessageSent }: MessageComposerProps) {
   const [content, setContent] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const { sendMessage, activeConversation } = useMessageStore()
+  const { sendMessage, isSending } = useMessages()
 
   const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault()
-    if (!content.trim() || !activeConversation || isSending) return
+    if (!content.trim() || isSending || (!conversationId && !receiverId)) return
 
-    const receiverId = activeConversation.otherParticipant?.id
-    if (!receiverId) return
+    // Prefer receiverId if available (direct message), otherwise fall back to conversationId if broadcast/group logic supported later
+    // For now the API sendMessage requires receiverId for DM. 
+    // If conversationId is present but no receiverId, we might need to derive it props or assume this is only for DMs for now.
+    // Based on API: sendMessage(receiverId...)
+    
+    const resolvedReceiverId = receiverId
+    
+    if (!resolvedReceiverId) {
+        console.error("No receiver ID provided for message", { 
+            conversationId, 
+            receiverId
+        })
+        return
+    }
 
-    setIsSending(true)
     try {
-      await sendMessage(receiverId, content)
+      await sendMessage({ receiverId: resolvedReceiverId, content })
       setContent('')
+      onMessageSent?.()
     } catch (error) {
       console.error('Failed to send message:', error)
-    } finally {
-      setIsSending(false)
     }
   }
 

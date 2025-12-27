@@ -1,18 +1,14 @@
 'use client'
 
 import { useSearchStore } from '@/lib/stores/searchStore'
+import { useSearch } from '@/lib/hooks/useSearch'
 import { AvailabilityStatus, Role } from '@/lib/api/search'
 import { Filter, X } from 'lucide-react'
-import { useEffect } from 'react'
 
 export default function SearchFilters() {
-  const { filters, activeFilters, setFilter, clearFilters, fetchFilters } = useSearchStore()
-
-  useEffect(() => {
-    if (!filters) {
-      fetchFilters()
-    }
-  }, [filters, fetchFilters])
+  const { activeFilters, setFilter, clearFilters } = useSearchStore()
+  const { useSearchFilters } = useSearch()
+  const { data: filters } = useSearchFilters()
 
   const handleRoleChange = (role: string) => {
     const currentRoles = (activeFilters.roles as string[]) || []

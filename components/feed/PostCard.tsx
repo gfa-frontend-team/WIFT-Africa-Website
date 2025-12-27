@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Pin } from 'lucide-react'
 import { type Post } from '@/lib/api/posts'
 import Avatar from '@/components/ui/Avatar'
-import { useFeedStore } from '@/lib/stores/feedStore'
+import { usePostMutations } from '@/lib/hooks/usePostMutations'
 import CommentSection from './CommentSection'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -15,42 +15,22 @@ interface PostCardProps {
 
 export default function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false)
-  const { likePost, unlikePost, savePost, unsavePost } = useFeedStore()
+  const { likePost, savePost, isLiking, isSaving } = usePostMutations()
   const { user } = useAuth()
-  const [isLiking, setIsLiking] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-
+  
   const handleLike = async () => {
-    if (isLiking) return
-    
-    setIsLiking(true)
     try {
-      if (post.isLiked) {
-        await unlikePost(post.id)
-      } else {
-        await likePost(post.id)
-      }
+      await likePost(post.id)
     } catch (error) {
       console.error('Failed to like post:', error)
-    } finally {
-      setIsLiking(false)
     }
   }
 
   const handleSave = async () => {
-    if (isSaving) return
-    
-    setIsSaving(true)
     try {
-      if (post.isSaved) {
-        await unsavePost(post.id)
-      } else {
-        await savePost(post.id)
-      }
+      await savePost(post.id)
     } catch (error) {
       console.error('Failed to save post:', error)
-    } finally {
-      setIsSaving(false)
     }
   }
 

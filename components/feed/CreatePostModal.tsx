@@ -5,6 +5,7 @@ import { X, Image as ImageIcon, Video, Globe, Users, Lock } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import { usePostStore } from '@/lib/stores/postStore'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { usePostMutations } from '@/lib/hooks/usePostMutations'
 
 interface CreatePostModalProps {
   isOpen: boolean
@@ -13,7 +14,8 @@ interface CreatePostModalProps {
 
 export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const { user } = useAuth()
-  const { draft, saveDraft, clearDraft, createPost, isCreating } = usePostStore()
+  const { draft, saveDraft, clearDraft } = usePostStore()
+  const { createPost, isCreating } = usePostMutations()
   const [content, setContent] = useState(draft?.content || '')
   const [visibility, setVisibility] = useState<'PUBLIC' | 'CHAPTER_ONLY' | 'CONNECTIONS_ONLY'>(
     draft?.visibility || 'PUBLIC'
@@ -21,6 +23,8 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
   const [showVisibilityMenu, setShowVisibilityMenu] = useState(false)
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([])
+
+  console.log('CreatePostModal render:', { isOpen, draft, isCreating })
 
   const maxChars = 5000 // Based on API docs
   const charCount = content.length

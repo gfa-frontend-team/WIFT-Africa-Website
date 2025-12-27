@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { postsApi, type CreatePostInput } from '../api/posts'
-import { useFeedStore } from './feedStore'
 
 interface PostDraft {
   content: string
@@ -15,14 +14,10 @@ interface PostDraft {
 interface PostStore {
   // State
   draft: PostDraft | null
-  isCreating: boolean
-  error: string | null
 
   // Actions
   saveDraft: (draft: PostDraft) => void
   clearDraft: () => void
-  createPost: (data: CreatePostInput) => Promise<void>
-  clearError: () => void
 }
 
 export const usePostStore = create<PostStore>()(
@@ -30,8 +25,6 @@ export const usePostStore = create<PostStore>()(
     (set, get) => ({
       // Initial state
       draft: null,
-      isCreating: false,
-      error: null,
 
       // Actions
       saveDraft: (draft: PostDraft) => {
@@ -41,36 +34,9 @@ export const usePostStore = create<PostStore>()(
       clearDraft: () => {
         set({ draft: null })
       },
-
-      createPost: async (data: CreatePostInput) => {
-        try {
-          set({ isCreating: true, error: null })
-
-          const response = await postsApi.createPost(data)
-
-          // Add the new post to the feed
-          useFeedStore.getState().addPost(response.post)
-
-          // Clear draft and reset state
-          set({
-            draft: null,
-            isCreating: false
-          })
-
-          console.log('✅ Post created successfully:', response.post.id)
-        } catch (error: any) {
-          console.error('❌ Failed to create post:', error)
-          set({
-            error: error.response?.data?.error || 'Failed to create post',
-            isCreating: false
-          })
-          throw error
-        }
-      },
-
-      clearError: () => {
-        set({ error: null })
-      }
+      
+      // Removed createPost as it is handled by React Query mutation
+      // We keep the store logic for draft management only
     }),
     {
       name: 'post-storage',

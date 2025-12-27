@@ -5,7 +5,7 @@ import { Search } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export default function SearchBar() {
-  const { currentQuery, setQuery, searchMembers } = useSearchStore()
+  const { currentQuery, setQuery } = useSearchStore()
   const [localQuery, setLocalQuery] = useState(currentQuery)
 
   // Sync local state if store updates externally
@@ -16,7 +16,6 @@ export default function SearchBar() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setQuery(localQuery)
-    searchMembers({ query: localQuery })
   }
 
   return (

@@ -1,5 +1,5 @@
 import { ConnectionRequest } from '@/lib/api/connections'
-import { useConnectionStore } from '@/lib/stores/connectionStore'
+import { useConnections } from '@/lib/hooks/useConnections'
 import { UserCheck, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -11,19 +11,15 @@ interface RequestCardProps {
 }
 
 export default function RequestCard({ request, type }: RequestCardProps) {
-  const { respondToRequest } = useConnectionStore()
-  const [isProcessing, setIsProcessing] = useState(false)
+  const { respondToRequest, isResponding } = useConnections()
   
   const user = type === 'incoming' ? request.sender : request.receiver
 
   const handleAction = async (action: 'accept' | 'decline' | 'cancel') => {
-    setIsProcessing(true)
     try {
       await respondToRequest(request.id, action)
     } catch (error) {
       console.error(`Failed to ${action} request:`, error)
-    } finally {
-      setIsProcessing(false)
     }
   }
 
@@ -64,7 +60,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
           <>
             <button
               onClick={() => handleAction('accept')}
-              disabled={isProcessing}
+              disabled={isResponding}
               className="p-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-full transition-colors disabled:opacity-50"
               title="Accept"
             >
@@ -72,7 +68,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
             </button>
             <button
               onClick={() => handleAction('decline')}
-              disabled={isProcessing}
+              disabled={isResponding}
               className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-full transition-colors disabled:opacity-50"
               title="Decline"
             >
@@ -82,7 +78,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
         ) : (
           <button
             onClick={() => handleAction('cancel')}
-            disabled={isProcessing}
+            disabled={isResponding}
             className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-muted/50 transition-colors disabled:opacity-50"
           >
             Withdraw

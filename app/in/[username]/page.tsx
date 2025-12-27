@@ -7,7 +7,8 @@ import { profilesApi, type PublicProfileResponse } from '@/lib/api/profiles'
 import { usersApi } from '@/lib/api/users'
 import { isUsernameReserved } from '@/lib/constants/reserved-usernames'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useConnectionStore } from '@/lib/stores/connectionStore'
+import { useConnections } from '@/lib/hooks/useConnections'
+import { connectionsApi } from '@/lib/api/connections'
 import ProfileLayout from '@/components/layout/ProfileLayout'
 import ProfileContent from '@/components/profile/ProfileContent'
 import PrivateProfileSections from '@/components/profile/PrivateProfileSections'
@@ -20,8 +21,7 @@ export default function UnifiedProfilePage() {
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
   
-  // Connection store actions
-  const { checkConnection, sendRequest, requests, fetchRequests } = useConnectionStore()
+  const { sendRequest } = useConnections()
 
   // State
   const [profile, setProfile] = useState<PublicProfileResponse | null>(null)
@@ -110,12 +110,17 @@ export default function UnifiedProfilePage() {
              const targetId = publicData.profile.id || publicData.profile._id
              
              if (targetId && targetId !== user.id) {
-                const isConnected = await checkConnection(targetId)
-                if (isConnected) {
+                const { connected } = await connectionsApi.checkStatus(targetId)
+                if (connected) {
                   setConnectionStatus('CONNECTED')
                 } else {
                   // Check for pending requests
-                  await fetchRequests('outgoing')
+                  // We manually fetch to check explicitly
+                  const { requests } = await connectionsApi.getRequests('outgoing')
+                  const hasPending = requests.find(r => r.receiver.id === targetId && r.status === 'PENDING')
+                  if (hasPending) {
+                      setConnectionStatus('PENDING')
+                  }
                 }
              }
           }
@@ -131,20 +136,13 @@ export default function UnifiedProfilePage() {
     if (username) {
       loadProfileData()
     }
-  }, [username, isOwner, isAuthenticated, user, checkConnection, fetchRequests])
+  }, [username, isOwner, isAuthenticated, user])
 
   // Sync pending status from requests list (for visitors)
-  useEffect(() => {
-    if (profile && !isOwner && requests.length > 0 && connectionStatus !== 'CONNECTED') {
-      const hasPending = requests.find(r => 
-        (r.receiver.id === profile.profile.id || r.sender.id === profile.profile.id) && 
-        r.status === 'PENDING'
-      )
-      if (hasPending) {
-        setConnectionStatus('PENDING')
-      }
-    }
-  }, [requests, profile, connectionStatus, isOwner])
+  // Sync pending status is now handled during loadProfileData or via mutation success logic (if we stayed on page)
+  // Logic from loadProfileData covers initial state.
+  // Optimistic updates in handleConnect cover user action.
+  // So we can remove this side-effect.
 
   // Actions
   const handleConnect = async () => {

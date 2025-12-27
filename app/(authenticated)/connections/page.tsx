@@ -1,32 +1,21 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { useConnectionStore } from '@/lib/stores/connectionStore'
+import { useConnections } from '@/lib/hooks/useConnections'
 import RequestCard from '@/components/connections/RequestCard'
 import { Users, UserPlus, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ConnectionsPage() {
-  const { 
-    requests, 
-    stats, 
-    isLoading,
-    fetchRequests, 
-    fetchStats 
-  } = useConnectionStore()
-
   const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing'>('incoming')
-
-  useEffect(() => {
-    // fetchRequests('all') // handled by tab effect
-    fetchStats()
-  }, [fetchRequests, fetchStats])
-
-
   
-  useEffect(() => {
-    fetchRequests(activeTab)
-  }, [activeTab, fetchRequests])
+  const { useRequests, useStats } = useConnections()
+  const { data: requestsData, isLoading: isRequestsLoading } = useRequests(activeTab)
+  const { data: statsData } = useStats()
+
+  const requests = requestsData?.requests || []
+  const stats = statsData
+  const isLoading = isRequestsLoading
 
   // Deduplicate requests to prevent key errors
   const uniqueRequests = useMemo(() => {

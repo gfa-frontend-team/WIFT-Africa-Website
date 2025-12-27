@@ -6,7 +6,7 @@ import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess'
 import { MembershipStatus } from '@/types'
 import { RestrictedFeatureBanner } from '@/components/access/RestrictedFeatureMessage'
 import FeatureGate from '@/components/access/FeatureGate'
-import { useFeedStore } from '@/lib/stores/feedStore'
+import { useFeed } from '@/lib/hooks/useFeed'
 import { FeedFilters } from '@/components/feed/FeedFilters'
 import { CreatePostTrigger } from '@/components/feed/CreatePostTrigger'
 import { FeedSkeleton } from '@/components/feed/FeedSkeleton'
@@ -17,70 +17,20 @@ import CreatePostModal from '@/components/feed/CreatePostModal'
 
 
 const FeedContainer = () => {
-  const { posts, isLoading, hasMore, fetchFeed, loadMore, refreshFeed, error } = useFeedStore()
+  const { posts, isLoading, error, hasMore, fetchNextPage, isFetchingNextPage, refetch } = useFeed()
   const observerTarget = useRef<HTMLDivElement>(null)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [pullStartY, setPullStartY] = useState(0)
   const [pullDistance, setPullDistance] = useState(0)
-  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const [retryCountdown, setRetryCountdown] = useState(0)
-
-  useEffect(() => {
-    fetchFeed()
-  }, [fetchFeed])
-
-  // Auto-retry for rate limited requests with countdown
-  // Auto-retry for rate limited requests with countdown
-  useEffect(() => {
-    let countdownInterval: NodeJS.Timeout | undefined
-    
-    // Clear any existing timeout first
-    if (retryTimeoutRef.current) {
-      clearTimeout(retryTimeoutRef.current)
-      retryTimeoutRef.current = null
-    }
-
-    if (error && (error.includes('Too many requests') || error.includes('Server is busy'))) {
-      // Start countdown
-      setRetryCountdown(5)
-      
-      countdownInterval = setInterval(() => {
-        setRetryCountdown(prev => {
-          if (prev <= 1) {
-            clearInterval(countdownInterval)
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-      
-      // Set a timeout to retry after 5 seconds
-      retryTimeoutRef.current = setTimeout(() => {
-        console.log('🔄 Auto-retrying after rate limit...')
-        setRetryCountdown(0)
-        fetchFeed()
-      }, 5000)
-    } else {
-      setRetryCountdown(0)
-    }
-    
-    return () => {
-      if (countdownInterval) clearInterval(countdownInterval)
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current)
-      }
-    }
-  }, [error, fetchFeed])
 
   // Intersection Observer for infinite scroll
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [target] = entries
-      if (target.isIntersecting && hasMore && !isLoading) {
-        loadMore()
+      if (target.isIntersecting && hasMore && !isFetchingNextPage) {
+        fetchNextPage()
       }
     },
-    [hasMore, isLoading, loadMore]
+    [hasMore, isFetchingNextPage, fetchNextPage]
   )
 
   useEffect(() => {
@@ -122,21 +72,21 @@ const FeedContainer = () => {
 
   const handleTouchEnd = useCallback(async () => {
     if (pullDistance > 80) {
-      setIsRefreshing(true)
-      await refreshFeed()
-      setIsRefreshing(false)
+      await refetch()
     }
     setPullStartY(0)
     setPullDistance(0)
-  }, [pullDistance, refreshFeed])
+  }, [pullDistance, refetch])
 
-  if (isLoading && posts.length === 0) {
+  if (isLoading) {
     return <FeedSkeleton />
   }
 
+  // React Query handles errors, we can extract the message
+  const errorMessage = error instanceof Error ? error.message : 'Failed to load feed';
+  const isRateLimited = errorMessage.includes('429');
+
   if (error && posts.length === 0) {
-    const isRateLimited = error.includes('Too many requests') || error.includes('Server is busy')
-    
     return (
       <div className="bg-card border border-border rounded-lg p-12 text-center">
         <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
@@ -149,22 +99,16 @@ const FeedContainer = () => {
         </h3>
         <p className="text-muted-foreground mb-4">
           {isRateLimited 
-            ? 'The server is handling many requests right now. Please wait a moment before trying again.'
-            : error
+            ? 'The server is handling many requests right now. Please wait a moment.'
+            : errorMessage
           }
         </p>
         <button
-          onClick={() => fetchFeed()}
-          disabled={retryCountdown > 0}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
-          {retryCountdown > 0 ? `Retrying in ${retryCountdown}s` : isRateLimited ? 'Try Again' : 'Retry'}
+          Try Again
         </button>
-        {isRateLimited && retryCountdown === 0 && (
-          <p className="text-xs text-muted-foreground mt-2">
-            Tip: The page will automatically retry in a few moments
-          </p>
-        )}
       </div>
     )
   }
@@ -203,25 +147,6 @@ const FeedContainer = () => {
         </div>
       )}
 
-      {/* Refreshing indicator */}
-      {isRefreshing && (
-        <div className="flex items-center justify-center py-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-        </div>
-      )}
-
-      {/* Rate limit indicator */}
-      {retryCountdown > 0 && (
-        <div className="mb-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600"></div>
-            <span className="text-sm font-medium">
-              Server is busy. Auto-retrying in {retryCountdown} seconds...
-            </span>
-          </div>
-        </div>
-      )}
-
       <div className="space-y-4">
         {posts.map((post) => (
           <PostCard key={post.id} post={post} />
@@ -230,7 +155,7 @@ const FeedContainer = () => {
 
       {/* Infinite scroll trigger */}
       <div ref={observerTarget} className="py-4">
-        {isLoading && hasMore && (
+        {isFetchingNextPage && (
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>

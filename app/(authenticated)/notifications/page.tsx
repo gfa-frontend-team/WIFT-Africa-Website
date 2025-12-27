@@ -1,33 +1,31 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useNotificationStore } from '@/lib/stores/notificationStore'
+import { useNotifications } from '@/lib/hooks/useNotifications'
 import NotificationList from '@/components/notifications/NotificationList'
 import { CheckCheck } from 'lucide-react'
 
 export default function NotificationsPage() {
   const { 
-    notifications, 
-    fetchNotifications, 
-    fetchUnreadCount,
-    markAllAsRead, 
-    isLoading, 
-    total,
-    unreadCount
-  } = useNotificationStore()
+    useNotificationsList, 
+    useUnreadCount, 
+    markAllAsRead,
+    isMarkingAllRead
+  } = useNotifications()
 
-  useEffect(() => {
-    fetchNotifications()
-    // Also fetch unread count to keep badge in sync
-    fetchUnreadCount()
-  }, [])
+  const { 
+    data, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage,
+    isLoading: isListLoading
+  } = useNotificationsList()
 
-  const handleLoadMore = () => {
-    const currentPage = Math.ceil(notifications.length / 20)
-    fetchNotifications(currentPage + 1)
-  }
+  const { data: unreadData } = useUnreadCount()
+  const unreadCount = unreadData?.count || 0
 
-  const hasMore = notifications.length < total
+  const notifications = data?.pages.flatMap(page => page.notifications) || []
+  const isLoading = isListLoading
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -44,7 +42,8 @@ export default function NotificationsPage() {
         {unreadCount > 0 && (
             <button
             onClick={() => markAllAsRead()}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-primary hover:bg-primary/10 rounded-md transition-colors"
+            disabled={isMarkingAllRead}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50"
             >
             <CheckCheck className="h-4 w-4" />
             Mark all as read
@@ -54,14 +53,14 @@ export default function NotificationsPage() {
 
       <NotificationList notifications={notifications} isLoading={isLoading} />
 
-      {hasMore && (
+      {hasNextPage && (
         <div className="mt-6 text-center">
             <button
-                onClick={handleLoadMore}
-                disabled={isLoading}
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
                 className="px-4 py-2 bg-muted text-muted-foreground hover:text-foreground rounded-md text-sm font-medium transition-colors disabled:opacity-50"
             >
-                {isLoading ? 'Loading...' : 'Load More'}
+                {isFetchingNextPage ? 'Loading...' : 'Load More'}
             </button>
         </div>
       )}
