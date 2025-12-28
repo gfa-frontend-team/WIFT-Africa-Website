@@ -1,179 +1,150 @@
-import { useState, useEffect } from 'react'
-import { usersApi, type UserProfileResponse, type UpdateProfileInput } from '../api/users'
-import { profilesApi, type PublicProfileResponse } from '../api/profiles'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { usersApi, UpdateProfileInput } from '../api/users'
+import { useUserStore } from '../stores/userStore'
+import { toast } from 'sonner'
+import { apiClient } from '../api/client'
+import { authKeys } from './useAuthQuery'
 
-export function useProfile() {
-  const [profile, setProfile] = useState<UserProfileResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const loadProfile = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const data = await usersApi.getProfile()
-      setProfile(data)
-      return data
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Failed to load profile'
-      setError(message)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const updateProfile = async (data: UpdateProfileInput) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await usersApi.updateProfile(data)
-      
-      // Reload profile to get updated data
-      await loadProfile()
-      
-      return response
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Failed to update profile'
-      setError(message)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const uploadProfilePhoto = async (file: File) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await usersApi.uploadProfilePhoto(file)
-      
-      // Reload profile to get updated photo
-      await loadProfile()
-      
-      return response
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Failed to upload photo'
-      setError(message)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const deleteProfilePhoto = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await usersApi.deleteProfilePhoto()
-      
-      // Reload profile to reflect deletion
-      await loadProfile()
-      
-      return response
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Failed to delete photo'
-      setError(message)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const uploadCV = async (file: File) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await usersApi.uploadCV(file)
-      
-      // Reload profile to get updated CV info
-      await loadProfile()
-      
-      return response
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Failed to upload CV'
-      setError(message)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const deleteCV = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await usersApi.deleteCV()
-      
-      // Reload profile to reflect deletion
-      await loadProfile()
-      
-      return response
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Failed to delete CV'
-      setError(message)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const downloadCV = async () => {
-    try {
-      setError(null)
-      return await usersApi.downloadCV()
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Failed to download CV'
-      setError(message)
-      throw err
-    }
-  }
-
-  return {
-    profile,
-    isLoading,
-    error,
-    loadProfile,
-    updateProfile,
-    uploadProfilePhoto,
-    deleteProfilePhoto,
-    uploadCV,
-    deleteCV,
-    downloadCV
-  }
+export const profileKeys = {
+  all: ['profile'] as const,
+  me: () => [...profileKeys.all, 'me'] as const,
+  cv: () => [...profileKeys.all, 'cv'] as const,
 }
 
-export function usePublicProfile(identifier: string) {
-  const [profile, setProfile] = useState<PublicProfileResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export function useProfile() {
+  const queryClient = useQueryClient()
+  const { setUser, currentUser } = useUserStore()
 
-  useEffect(() => {
-    if (identifier) {
-      loadProfile()
+  // Query: Get full profile
+  const profileQuery = useQuery({
+    queryKey: profileKeys.me(),
+    queryFn: async () => {
+      const response = await usersApi.getProfile()
+      return response
+    },
+    // Don't refetch too often, but keep it fresh enough
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+
+  // Mutation: Update Profile
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: UpdateProfileInput) => usersApi.updateProfile(data),
+    onSuccess: (data) => {
+      // Invalidate profile query
+      queryClient.invalidateQueries({ queryKey: profileKeys.me() })
+      
+      // Also update the user store if basic user info changed (though profile update is mostly profile data)
+      // The updateProfile response returns { message, profile }
+      // We might want to refresh the user object too if we display profile fields in the header/etc
+      queryClient.invalidateQueries({ queryKey: authKeys.user })
+      
+      toast.success('Profile updated successfully')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update profile')
     }
-  }, [identifier])
+  })
 
-  const loadProfile = async () => {
+  // Mutation: Upload Profile Photo
+  const uploadPhotoMutation = useMutation({
+    mutationFn: (file: File) => usersApi.uploadProfilePhoto(file),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: profileKeys.me() })
+      queryClient.invalidateQueries({ queryKey: authKeys.user }) // Update user avatar everywhere
+      toast.success('Profile photo uploaded')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to upload photo')
+    }
+  })
+
+  // Mutation: Delete Profile Photo
+  const deletePhotoMutation = useMutation({
+    mutationFn: () => usersApi.deleteProfilePhoto(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: profileKeys.me() })
+      queryClient.invalidateQueries({ queryKey: authKeys.user })
+      toast.success('Profile photo removed')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to remove photo')
+    }
+  })
+
+  // Mutation: Upload CV
+  const uploadCVMutation = useMutation({
+    mutationFn: (file: File) => usersApi.uploadCV(file),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: profileKeys.me() })
+      toast.success('CV uploaded successfully')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to upload CV')
+    }
+  })
+
+  // Mutation: Delete CV
+  const deleteCVMutation = useMutation({
+    mutationFn: () => usersApi.deleteCV(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: profileKeys.me() })
+      toast.success('CV removed')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to remove CV')
+    }
+  })
+  
+  // Custom function for downloading CV (since it returns a Blob)
+  const downloadCV = async () => {
     try {
-      setIsLoading(true)
-      setError(null)
-      const data = await profilesApi.getPublicProfile(identifier)
-      setProfile(data)
-      return data
-    } catch (err: any) {
-      const message = err.response?.data?.error || 'Profile not found'
-      setError(message)
-      throw err
-    } finally {
-      setIsLoading(false)
+      const blob = await usersApi.downloadCV()
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+        
+      // Try to get filename from somewhere or default
+      // In a real app we might look at headers, but here we'll default
+      const filename = `${currentUser?.firstName || 'User'}_CV.pdf`
+        
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode?.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Download failed', error)
+      toast.error('Failed to download CV')
     }
   }
 
   return {
-    profile,
-    isLoading,
-    error,
-    reload: loadProfile
+    // Queries
+    profile: profileQuery.data?.profile,
+    user: profileQuery.data?.user,
+    isLoading: profileQuery.isLoading,
+    isError: profileQuery.isError,
+    error: profileQuery.error,
+    refetchProfile: profileQuery.refetch,
+    
+    // Mutations
+    updateProfile: updateProfileMutation.mutateAsync,
+    isUpdating: updateProfileMutation.isPending,
+    
+    uploadPhoto: uploadPhotoMutation.mutateAsync,
+    isUploadingPhoto: uploadPhotoMutation.isPending,
+    
+    deletePhoto: deletePhotoMutation.mutateAsync,
+    isDeletingPhoto: deletePhotoMutation.isPending,
+    
+    uploadCV: uploadCVMutation.mutateAsync,
+    isUploadingCV: uploadCVMutation.isPending,
+    
+    deleteCV: deleteCVMutation.mutateAsync,
+    isDeletingCV: deleteCVMutation.isPending,
+    
+    // Utils
+    downloadCV,
   }
 }

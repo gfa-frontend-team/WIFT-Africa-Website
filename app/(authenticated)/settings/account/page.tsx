@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { usersApi } from '@/lib/api/users'
+import { useAccount } from '@/lib/hooks/useSettings'
 import { onboardingApi, type Chapter } from '@/lib/api/onboarding'
 import { 
   User, 
@@ -25,9 +25,9 @@ import Link from 'next/link'
 export default function AccountSettingsPage() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
+  const { deleteAccount, isDeleting } = useAccount()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [chapter, setChapter] = useState<Chapter | null>(null)
   const [isLoadingChapter, setIsLoadingChapter] = useState(false)
@@ -65,10 +65,9 @@ export default function AccountSettingsPage() {
     }
 
     try {
-      setIsDeleting(true)
       setDeleteError(null)
       
-      await usersApi.deleteAccount('DELETE')
+      await deleteAccount('DELETE')
       
       // Account deleted successfully, logout and redirect
       await logout()
@@ -77,8 +76,6 @@ export default function AccountSettingsPage() {
       console.error('Failed to delete account:', err)
       const message = err.response?.data?.message || 'Failed to delete account. Please try again.'
       setDeleteError(message)
-    } finally {
-      setIsDeleting(false)
     }
   }
 

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { usersApi, type PrivacySettings } from '@/lib/api/users'
+import { usePrivacySettings } from '@/lib/hooks/useSettings'
+import type { PrivacySettings } from '@/lib/api/users'
 import { 
   Shield, 
   Eye, 
@@ -18,72 +19,47 @@ import Link from 'next/link'
 export default function PrivacySettingsPage() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
-  const [settings, setSettings] = useState<PrivacySettings | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const { settings, isLoading, isError, updateSettings, isUpdating } = usePrivacySettings()
+  const [localSettings, setLocalSettings] = useState<PrivacySettings | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login')
-      return
     }
-
-    loadSettings()
   }, [isAuthenticated, router])
 
-  const loadSettings = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const data = await usersApi.getPrivacySettings()
-      setSettings(data.privacySettings)
-    } catch (err: any) {
-      console.error('Failed to load privacy settings:', err)
-      setError(err.response?.data?.error || 'Failed to load privacy settings')
-    } finally {
-      setIsLoading(false)
+  // Sync local state with fetched settings
+  useEffect(() => {
+    if (settings) {
+      setLocalSettings(settings)
     }
-  }
+  }, [settings])
 
   const handleToggle = (key: keyof PrivacySettings) => {
-    if (!settings) return
+    if (!localSettings) return
     
-    setSettings({
-      ...settings,
-      [key]: typeof settings[key] === 'boolean' ? !settings[key] : settings[key]
+    setLocalSettings({
+      ...localSettings,
+      [key]: typeof localSettings[key] === 'boolean' ? !localSettings[key] : localSettings[key]
     })
-    setError(null)
-    setSuccessMessage(null)
   }
 
   const handleVisibilityChange = (visibility: PrivacySettings['profileVisibility']) => {
-    if (!settings) return
+    if (!localSettings) return
     
-    setSettings({
-      ...settings,
+    setLocalSettings({
+      ...localSettings,
       profileVisibility: visibility
     })
-    setError(null)
-    setSuccessMessage(null)
   }
 
   const handleSave = async () => {
-    if (!settings) return
-
+    if (!localSettings) return
     try {
-      setIsSaving(true)
-      setError(null)
-      setSuccessMessage(null)
-      
-      await usersApi.updatePrivacySettings(settings)
-      setSuccessMessage('Privacy settings updated successfully')
-    } catch (err: any) {
-      console.error('Failed to update privacy settings:', err)
-      setError(err.response?.data?.error || 'Failed to update privacy settings')
-    } finally {
-      setIsSaving(false)
+      await updateSettings(localSettings)
+    } catch (err) {
+      // Toast handled by hook
+      console.error('Failed to update privacy settings', err)
     }
   }
 
@@ -98,13 +74,13 @@ export default function PrivacySettingsPage() {
     )
   }
 
-  if (error && !settings) {
+  if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-destructive mb-4">{error}</p>
+          <p className="text-destructive mb-4">Failed to load privacy settings.</p>
           <button
-            onClick={loadSettings}
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             Try Again
@@ -136,19 +112,6 @@ export default function PrivacySettingsPage() {
           </div>
         </div>
 
-        {/* Messages */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-800">{successMessage}</p>
-          </div>
-        )}
-
         {/* Profile Visibility */}
         <div className="bg-card border border-border rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Profile Visibility</h2>
@@ -161,7 +124,7 @@ export default function PrivacySettingsPage() {
               <input
                 type="radio"
                 name="visibility"
-                checked={settings?.profileVisibility === 'PUBLIC'}
+                checked={localSettings?.profileVisibility === 'PUBLIC'}
                 onChange={() => handleVisibilityChange('PUBLIC')}
                 className="mt-1"
               />
@@ -180,7 +143,7 @@ export default function PrivacySettingsPage() {
               <input
                 type="radio"
                 name="visibility"
-                checked={settings?.profileVisibility === 'CHAPTER_ONLY'}
+                checked={localSettings?.profileVisibility === 'CHAPTER_ONLY'}
                 onChange={() => handleVisibilityChange('CHAPTER_ONLY')}
                 className="mt-1"
               />
@@ -199,7 +162,7 @@ export default function PrivacySettingsPage() {
               <input
                 type="radio"
                 name="visibility"
-                checked={settings?.profileVisibility === 'CONNECTIONS_ONLY'}
+                checked={localSettings?.profileVisibility === 'CONNECTIONS_ONLY'}
                 onChange={() => handleVisibilityChange('CONNECTIONS_ONLY')}
                 className="mt-1"
               />
@@ -218,7 +181,7 @@ export default function PrivacySettingsPage() {
               <input
                 type="radio"
                 name="visibility"
-                checked={settings?.profileVisibility === 'PRIVATE'}
+                checked={localSettings?.profileVisibility === 'PRIVATE'}
                 onChange={() => handleVisibilityChange('PRIVATE')}
                 className="mt-1"
               />
@@ -252,7 +215,7 @@ export default function PrivacySettingsPage() {
               </div>
               <input
                 type="checkbox"
-                checked={settings?.showEmail || false}
+                checked={localSettings?.showEmail || false}
                 onChange={() => handleToggle('showEmail')}
                 className="h-5 w-5"
               />
@@ -267,7 +230,7 @@ export default function PrivacySettingsPage() {
               </div>
               <input
                 type="checkbox"
-                checked={settings?.showPhone || false}
+                checked={localSettings?.showPhone || false}
                 onChange={() => handleToggle('showPhone')}
                 className="h-5 w-5"
               />
@@ -282,7 +245,7 @@ export default function PrivacySettingsPage() {
               </div>
               <input
                 type="checkbox"
-                checked={settings?.showSocialLinks || false}
+                checked={localSettings?.showSocialLinks || false}
                 onChange={() => handleToggle('showSocialLinks')}
                 className="h-5 w-5"
               />
@@ -297,7 +260,7 @@ export default function PrivacySettingsPage() {
               </div>
               <input
                 type="checkbox"
-                checked={settings?.showChapter || false}
+                checked={localSettings?.showChapter || false}
                 onChange={() => handleToggle('showChapter')}
                 className="h-5 w-5"
               />
@@ -312,7 +275,7 @@ export default function PrivacySettingsPage() {
               </div>
               <input
                 type="checkbox"
-                checked={settings?.showRoles || false}
+                checked={localSettings?.showRoles || false}
                 onChange={() => handleToggle('showRoles')}
                 className="h-5 w-5"
               />
@@ -339,10 +302,10 @@ export default function PrivacySettingsPage() {
         <div className="flex justify-end">
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isUpdating}
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isSaving ? (
+            {isUpdating ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Saving...

@@ -1,19 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { profilesApi, type PublicProfileResponse } from '@/lib/api/profiles'
-import { usersApi } from '@/lib/api/users'
 import { isUsernameReserved } from '@/lib/constants/reserved-usernames'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useConnections } from '@/lib/hooks/useConnections'
-import { connectionsApi } from '@/lib/api/connections'
+import { usePublicProfile } from '@/lib/hooks/usePublicProfile'
+import { useProfile } from '@/lib/hooks/useProfile'
 import ProfileLayout from '@/components/layout/ProfileLayout'
 import ProfileContent from '@/components/profile/ProfileContent'
 import PrivateProfileSections from '@/components/profile/PrivateProfileSections'
 import { mapPrivateToPublicProfile } from '@/lib/utils/profile-mapper'
-import type { UserProfileResponse } from '@/lib/api/users'
 
 export default function UnifiedProfilePage() {
   const params = useParams()
@@ -21,25 +19,31 @@ export default function UnifiedProfilePage() {
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
   
-  const { sendRequest } = useConnections()
+  const { sendRequest, useRequests, useConnectionStatus } = useConnections()
 
-  // State
-  const [profile, setProfile] = useState<PublicProfileResponse | null>(null)
-  const [privateProfileData, setPrivateProfileData] = useState<UserProfileResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [connectionStatus, setConnectionStatus] = useState<'NONE' | 'PENDING' | 'CONNECTED'>('NONE')
+  // Determine ownership
+  const isOwner = !!(user && (
+    (user.username && user.username === username) || 
+    user.id === username
+  ))
 
-  // Reset state when username changes to prevent stale data
-  useEffect(() => {
-    setProfile(null)
-    setPrivateProfileData(null)
-    setConnectionStatus('NONE')
-    setError(null)
-    setIsLoading(true)
-  }, [username])
+  // 1. Owner Data Query
+  const { 
+    profile: ownerProfile, 
+    user: ownerUser, 
+    isLoading: isOwnerLoading,
+    isError: isOwnerError
+  } = useProfile() 
 
-  // Handle reserved usernames (smart redirect)
+  // 2. Public Data Query
+  const { 
+    data: publicProfileData, 
+    isLoading: isPublicLoading,
+    isError: isPublicError,
+    error: publicError
+  } = usePublicProfile(username)
+
+  // Handle Reserved Routes
   useEffect(() => {
     if (username && isUsernameReserved(username)) {
       if (username === 'edit') {
@@ -50,130 +54,56 @@ export default function UnifiedProfilePage() {
     }
   }, [username, router])
 
-  // Determine ownership
-  // We check if the route username matches the logged-in user's username OR ID (in case of fallback links)
-  const isOwner = !!(user && (
-    (user.username && user.username === username) || 
-    user.id === username
-  ))
-
-  useEffect(() => {
-    const loadProfileData = async () => {
-      // If reserved, do nothing (will redirect)
-      if (isUsernameReserved(username)) return
-
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        if (isOwner) {
-          // ==============================
-          // OWNER VIEW: Fetch Private Data
-          // ==============================
-          const fullProfile = await usersApi.getProfile()
-          console.log('Owner Profile Fetch Result:', fullProfile) // Debug log
-          
-          if (!fullProfile) throw new Error('Failed to fetch private profile')
-          
-          setPrivateProfileData(fullProfile)
-          
-          // Map to public structure for the shared component
-          const mappedPublic = mapPrivateToPublicProfile(fullProfile)
-          console.log('Mapped Owner Profile:', mappedPublic) // Debug log
-          setProfile(mappedPublic)
-          
-        } else {
-          // ==============================
-          // VISITOR VIEW: Fetch Public Data
-          // ==============================
-          const publicData = await profilesApi.getPublicProfile(username)
-          console.log('Public Profile Fetch Result:', publicData) // Debug log
-          setProfile(publicData)
-
-          // Check if we accidentally fetched our own public profile (e.g. visited via ID or different casing)
-          if (user && (publicData.profile.id === user.id || publicData.profile._id === user.id)) {
-             console.log('Detected own profile via public fetch, correcting mode...')
-             // We can either redirect to proper /in/username or just load private data here.
-             // For now, let's lazy load the private data to give the "Owner" experience
-             try {
-                const fullProfile = await usersApi.getProfile()
-                setPrivateProfileData(fullProfile) 
-                // We keep the public profile state as is or map it, but adding private data enables the "Owner" UI checks
-             } catch (e) {
-                console.error('Failed to upgrade to owner view', e)
-             }
-             return // Stop processing as visitor
-          }
-
-          // Check connection status if authenticated visitor
-          if (isAuthenticated && user && publicData.profile) {
-             const targetId = publicData.profile.id || publicData.profile._id
-             
-             if (targetId && targetId !== user.id) {
-                const { connected } = await connectionsApi.checkStatus(targetId)
-                if (connected) {
-                  setConnectionStatus('CONNECTED')
-                } else {
-                  // Check for pending requests
-                  // We manually fetch to check explicitly
-                  const { requests } = await connectionsApi.getRequests('outgoing')
-                  const hasPending = requests.find(r => r.receiver.id === targetId && r.status === 'PENDING')
-                  if (hasPending) {
-                      setConnectionStatus('PENDING')
-                  }
-                }
-             }
-          }
-        }
-      } catch (err: any) {
-        console.error('Failed to load profile:', err)
-        setError(err.response?.data?.error || 'Profile not found')
-      } finally {
-        setIsLoading(false)
-      }
+  // Derived Profile State
+  const displayProfile = useMemo(() => {
+    if (isOwner && ownerProfile && ownerUser) {
+      return mapPrivateToPublicProfile({ user: ownerUser, profile: ownerProfile })
     }
+    return publicProfileData
+  }, [isOwner, ownerProfile, ownerUser, publicProfileData])
 
-    if (username) {
-      loadProfileData()
+  const isLoading = isOwner ? isOwnerLoading : isPublicLoading
+  const isError = isOwner ? isOwnerError : isPublicError
+
+  // Connection Status Logic
+  const targetId = displayProfile?.profile.id || displayProfile?.profile._id
+
+  // We unconditionally call hooks, but their query keys/enabled depend on data
+  const { data: outgoingRequests } = useRequests('outgoing')
+  const { data: connectionStatusData } = useConnectionStatus(targetId)
+
+  const connectionStatus = useMemo(() => {
+    if (isOwner || !isAuthenticated || !targetId) return 'NONE'
+    
+    if (connectionStatusData?.connected) return 'CONNECTED'
+    
+    // Check pending
+    if (outgoingRequests?.requests) {
+      const hasPending = outgoingRequests.requests.find(
+        r => r.receiver.id === targetId && r.status === 'PENDING'
+      )
+      if (hasPending) return 'PENDING'
     }
-  }, [username, isOwner, isAuthenticated, user])
+    
+    return 'NONE'
+  }, [isOwner, isAuthenticated, targetId, connectionStatusData, outgoingRequests])
 
-  // Sync pending status from requests list (for visitors)
-  // Sync pending status is now handled during loadProfileData or via mutation success logic (if we stayed on page)
-  // Logic from loadProfileData covers initial state.
-  // Optimistic updates in handleConnect cover user action.
-  // So we can remove this side-effect.
 
   // Actions
   const handleConnect = async () => {
-    if (!profile) return
+    if (!targetId) return
     try {
-      // Robustly find target ID
-      const targetId = profile.profile.id || profile.profile._id || (profile.profile as any).userId
-      if (!targetId) {
-        console.error('User ID not found in profile:', profile)
-        throw new Error('User ID not found')
-      }
-      
-      await sendRequest(targetId)
-      setConnectionStatus('PENDING')
+       await sendRequest(targetId)
+       // React Query invalidation handles UI update
     } catch (error) {
-      console.error('Failed to send request:', error)
-      alert('Failed to send connection request')
+       console.error('Connection request failed', error)
     }
   }
 
   const handleMessage = () => {
-    if (!profile) return
-    const targetId = profile.profile.id || profile.profile._id
-    if (!targetId) {
-      console.error('No ID found for message target')
-      return
-    }
-    router.push(`/messages?userId=${targetId}`)
+    if (targetId) router.push(`/messages?userId=${targetId}`)
   }
 
-  // Loading State
   if (isLoading || isUsernameReserved(username)) {
     return (
       <ProfileLayout>
@@ -187,13 +117,12 @@ export default function UnifiedProfilePage() {
     )
   }
 
-  // Error State
-  if (error || !profile) {
+  if (isError || !displayProfile) {
     return (
       <ProfileLayout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <p className="text-destructive mb-4">{error || 'Profile not found'}</p>
+            <p className="text-destructive mb-4">Profile not found or validation error.</p>
             <button
               onClick={() => router.push('/feed')}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
@@ -208,19 +137,17 @@ export default function UnifiedProfilePage() {
 
   return (
     <ProfileLayout>
-      {/* Main Profile Content (Shared) */}
       <ProfileContent
-        profile={profile}
+        profile={displayProfile}
         isAuthenticated={isAuthenticated}
-        isOwnProfile={isOwner || (!!user && !!profile && (user.id === profile.profile.id || user.id === profile.profile._id))}
+        isOwnProfile={isOwner}
         onConnect={handleConnect}
         onMessage={handleMessage}
         connectionStatus={connectionStatus}
       />
       
-      {/* Owner-Only Private Sections */}
-      {(isOwner || (!!user && !!profile && (user.id === profile.profile.id || user.id === profile.profile._id))) && privateProfileData && (
-        <PrivateProfileSections profile={privateProfileData} />
+      {isOwner && ownerProfile && ownerUser && (
+        <PrivateProfileSections profile={{ user: ownerUser, profile: ownerProfile }} />
       )}
     </ProfileLayout>
   )

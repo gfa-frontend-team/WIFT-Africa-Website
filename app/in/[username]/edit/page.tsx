@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { usersApi, type UpdateProfileInput } from '@/lib/api/users'
+import { useProfile } from '@/lib/hooks/useProfile'
+import { type UpdateProfileInput } from '@/lib/api/users'
 import { 
   User, 
   Upload, 
-  X, 
   Loader2,
   Save,
   ArrowLeft,
@@ -15,7 +15,6 @@ import {
   Trash2
 } from 'lucide-react'
 import Link from 'next/link'
-import type { UserProfileResponse } from '@/lib/api/users'
 import { AvailabilityStatus } from '@/types'
 
 export default function EditProfilePage() {
@@ -24,11 +23,21 @@ export default function EditProfilePage() {
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
   
-  const [profile, setProfile] = useState<UserProfileResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const { 
+    profile, 
+    user: profileUser, // The user object from the profile response
+    isLoading, 
+    error: loadError, 
+    updateProfile, 
+    isUpdating,
+    uploadPhoto,
+    isUploadingPhoto,
+    deletePhoto, // we might want to add delete photo button too
+    uploadCV,
+    isUploadingCV,
+    deleteCV,
+    isDeletingCV
+  } = useProfile()
 
   // Form state
   const [formData, setFormData] = useState<UpdateProfileInput>({
@@ -47,9 +56,9 @@ export default function EditProfilePage() {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [cvFile, setCvFile] = useState<File | null>(null)
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
-  const [isUploadingCV, setIsUploadingCV] = useState(false)
-  const [isDeletingCV, setIsDeletingCV] = useState(false)
+  
+  // Local error state for validations
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   // Determine ownership
   const isOwner = !!(user && (
@@ -57,79 +66,58 @@ export default function EditProfilePage() {
     (user.id === username)
   ))
 
+  // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
-      return
+    if (!isAuthenticated && !isLoading) { // Wait for auth to load? useAuth also has isLoading
+       // useAuth isLoading is not destructured here but it's fine
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isLoading]) // Simpler check handled by middleware usually or useAuth layout
 
-  // Separate effect for ownership check
+  // Redirect if not owner
   useEffect(() => {
     if (isAuthenticated && user && !isOwner) {
-       // Not owner, redirect to their profile view or home
        router.replace(`/in/${username}`)
     }
   }, [isAuthenticated, user, isOwner, username, router])
 
+  // Populate form when profile loads
   useEffect(() => {
-    if (isAuthenticated && isOwner) {
-       loadProfile()
-    }
-  }, [isAuthenticated, isOwner])
-
-  const loadProfile = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const data = await usersApi.getProfile()
-      setProfile(data)
-
-      // Populate form with existing data
+    if (profile && profileUser) {
       setFormData({
-        headline: data.profile.headline || '',
-        bio: data.profile.bio || '',
-        location: data.profile.location || '',
-        website: data.profile.website || '',
-        imdbUrl: data.profile.imdbUrl || '',
-        linkedinUrl: data.profile.linkedinUrl || '',
-        instagramHandle: data.profile.instagramHandle || '',
-        twitterHandle: data.profile.twitterHandle || '',
-        availabilityStatus: data.profile.availabilityStatus || 'AVAILABLE'
+        headline: profile.headline || '',
+        bio: profile.bio || '',
+        location: profile.location || '',
+        website: profile.website || '',
+        imdbUrl: profile.imdbUrl || '',
+        linkedinUrl: profile.linkedinUrl || '',
+        instagramHandle: profile.instagramHandle || '',
+        twitterHandle: profile.twitterHandle || '',
+        availabilityStatus: profile.availabilityStatus || 'AVAILABLE'
       })
 
-      if (data.user.profilePhoto) {
-        setPhotoPreview(data.user.profilePhoto)
+      if (profileUser.profilePhoto) {
+        setPhotoPreview(profileUser.profilePhoto)
       }
-    } catch (err: any) {
-      console.error('Failed to load profile:', err)
-      setError(err.response?.data?.error || 'Failed to load profile')
-    } finally {
-      setIsLoading(false)
     }
-  }
+  }, [profile, profileUser])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-    setError(null)
-    setSuccessMessage(null)
+    setValidationError(null)
   }
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
-        setError('Please select an image file')
+        setValidationError('Please select an image file')
         return
       }
-
-      // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image must be less than 5MB')
+        setValidationError('Image must be less than 5MB')
         return
       }
 
@@ -139,119 +127,73 @@ export default function EditProfilePage() {
         setPhotoPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
-      setError(null)
+      setValidationError(null)
     }
   }
 
   const handleCVChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Validate file type
       const allowedTypes = [
         'application/pdf',
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       ]
       if (!allowedTypes.includes(file.type)) {
-        setError('Please select a PDF, DOC, or DOCX file')
+        setValidationError('Please select a PDF, DOC, or DOCX file')
         return
       }
-
-      // Validate file size (10MB)
       if (file.size > 10 * 1024 * 1024) {
-        setError('CV must be less than 10MB')
+        setValidationError('CV must be less than 10MB')
         return
       }
 
       setCvFile(file)
-      setError(null)
-    }
-  }
-
-  const handleUploadPhoto = async () => {
-    if (!photoFile) return
-
-    try {
-      setIsUploadingPhoto(true)
-      setError(null)
-      await usersApi.uploadProfilePhoto(photoFile)
-      setSuccessMessage('Profile photo updated successfully')
-      setPhotoFile(null)
-      await loadProfile()
-    } catch (err: any) {
-      console.error('Failed to upload photo:', err)
-      setError(err.response?.data?.error || 'Failed to upload photo')
-    } finally {
-      setIsUploadingPhoto(false)
-    }
-  }
-
-  const handleUploadCV = async () => {
-    if (!cvFile) return
-
-    try {
-      setIsUploadingCV(true)
-      setError(null)
-      await usersApi.uploadCV(cvFile)
-      setSuccessMessage('CV uploaded successfully')
-      setCvFile(null)
-      await loadProfile()
-    } catch (err: any) {
-      console.error('Failed to upload CV:', err)
-      setError(err.response?.data?.error || 'Failed to upload CV')
-    } finally {
-      setIsUploadingCV(false)
+      setValidationError(null)
     }
   }
 
   const handleDeleteCV = async () => {
     if (!confirm('Are you sure you want to delete your CV?')) return
-
-    try {
-      setIsDeletingCV(true)
-      setError(null)
-      await usersApi.deleteCV()
-      setSuccessMessage('CV deleted successfully')
-      await loadProfile()
-    } catch (err: any) {
-      console.error('Failed to delete CV:', err)
-      setError(err.response?.data?.error || 'Failed to delete CV')
-    } finally {
-      setIsDeletingCV(false)
-    }
+    await deleteCV()
+  }
+  
+  // We can add Delete Photo here if we want
+  const handleDeletePhoto = async () => {
+    if (!confirm('Remove profile photo?')) return
+    await deletePhoto()
+    setPhotoPreview(null)
+    setPhotoFile(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setValidationError(null)
 
     try {
-      setIsSaving(true)
-      setError(null)
-      setSuccessMessage(null)
-
-      // Upload photo if selected
+      // 1. Upload photo if selected
       if (photoFile) {
-        await handleUploadPhoto()
+        await uploadPhoto(photoFile)
+        setPhotoFile(null) // Reset file selection on success
       }
 
-      // Upload CV if selected
+      // 2. Upload CV if selected
       if (cvFile) {
-        await handleUploadCV()
+        await uploadCV(cvFile)
+        setCvFile(null)
       }
 
-      // Update profile data
-      await usersApi.updateProfile(formData)
-      setSuccessMessage('Profile updated successfully')
+      // 3. Update profile data
+      await updateProfile(formData)
       
-      // Reload profile to get updated data
-      await loadProfile()
+      // Hook handles success toasts
     } catch (err: any) {
-      console.error('Failed to update profile:', err)
-      setError(err.response?.data?.error || 'Failed to update profile')
-    } finally {
-      setIsSaving(false)
+        // Hook handles error toasts, but we log here just in case
+        console.error('Save failed', err)
     }
   }
+  
+  const isSaving = isUpdating || isUploadingPhoto || isUploadingCV
 
   if (isLoading) {
     return (
@@ -264,13 +206,13 @@ export default function EditProfilePage() {
     )
   }
 
-  if (error && !profile) {
+  if (loadError && !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-destructive mb-4">{error}</p>
+          <p className="text-destructive mb-4">Failed to load profile</p>
           <button
-            onClick={loadProfile}
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             Try Again
@@ -296,16 +238,10 @@ export default function EditProfilePage() {
           </div>
         </div>
 
-        {/* Messages */}
-        {error && (
+        {/* Validation Errors */}
+        {validationError && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-800">{successMessage}</p>
+            <p className="text-sm text-red-800">{validationError}</p>
           </div>
         )}
 
@@ -315,37 +251,52 @@ export default function EditProfilePage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">Profile Photo</h2>
             <div className="flex items-center gap-6">
               {photoPreview ? (
-                <img
-                  src={photoPreview}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
-                />
+                <div className="relative group">
+                    <img
+                      src={photoPreview}
+                      alt="Profile"
+                      className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
+                    />
+                    {/* Optional: Add delete button overlay or separate button */}
+                </div>
               ) : (
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center border-4 border-primary/20">
                   <User className="h-12 w-12 text-primary/50" />
                 </div>
               )}
-              <div className="flex-1">
-                <input
-                  type="file"
-                  id="photo"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="photo"
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-accent cursor-pointer transition-colors"
-                >
-                  <Upload className="h-4 w-4" />
-                  Choose Photo
-                </label>
-                <p className="text-sm text-muted-foreground mt-2">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      id="photo"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="photo"
+                      className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-accent cursor-pointer transition-colors"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {photoPreview ? 'Change Photo' : 'Upload Photo'}
+                    </label>
+                    {photoPreview && (
+                        <button 
+                            type="button"
+                            onClick={handleDeletePhoto}
+                            className="px-3 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                            title="Remove photo"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    )}
+                </div>
+                <p className="text-sm text-muted-foreground">
                   JPG, PNG or WebP. Max size 5MB.
                 </p>
                 {photoFile && (
-                  <p className="text-sm text-primary mt-1">
-                    New photo selected: {photoFile.name}
+                  <p className="text-sm text-primary">
+                    Selected: {photoFile.name}
                   </p>
                 )}
               </div>
@@ -516,16 +467,16 @@ export default function EditProfilePage() {
           <div className="bg-card border border-border rounded-lg p-6">
             <h2 className="text-xl font-semibold text-foreground mb-4">CV/Resume</h2>
             
-            {profile?.user.cvFileName ? (
+            {profileUser?.cvFileName ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
                   <div className="flex items-center gap-3">
                     <FileText className="h-8 w-8 text-primary" />
                     <div>
-                      <p className="font-medium text-foreground">{profile.user.cvFileName}</p>
-                      {profile.user.cvUploadedAt && (
+                      <p className="font-medium text-foreground">{profileUser.cvFileName}</p>
+                      {profileUser.cvUploadedAt && (
                         <p className="text-sm text-muted-foreground">
-                          Uploaded {new Date(profile.user.cvUploadedAt).toLocaleDateString()}
+                          Uploaded {new Date(profileUser.cvUploadedAt).toLocaleDateString()}
                         </p>
                       )}
                     </div>
@@ -565,7 +516,7 @@ export default function EditProfilePage() {
                 className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-accent cursor-pointer transition-colors"
               >
                 <Upload className="h-4 w-4" />
-                {profile?.user.cvFileName ? 'Upload New CV' : 'Upload CV'}
+                {profileUser?.cvFileName ? 'Upload New CV' : 'Upload CV'}
               </label>
               <p className="text-sm text-muted-foreground mt-2">
                 PDF, DOC or DOCX. Max size 10MB.

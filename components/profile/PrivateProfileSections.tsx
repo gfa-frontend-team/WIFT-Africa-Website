@@ -1,7 +1,6 @@
-'use client'
-
 import { FileText, Download } from 'lucide-react'
-import { usersApi, type UserProfileResponse } from '@/lib/api/users'
+import { type UserProfileResponse } from '@/lib/api/users'
+import { useProfile } from '@/lib/hooks/useProfile'
 
 interface PrivateProfileSectionsProps {
   profile: UserProfileResponse
@@ -9,23 +8,7 @@ interface PrivateProfileSectionsProps {
 
 export default function PrivateProfileSections({ profile }: PrivateProfileSectionsProps) {
   const { user } = profile
-
-  const handleDownloadCV = async () => {
-    try {
-      const blob = await usersApi.downloadCV()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = user.cvFileName || 'cv.pdf'
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch (err) {
-      console.error('Failed to download CV:', err)
-      alert('Failed to download CV. Please try again.')
-    }
-  }
+  const { downloadCV } = useProfile()
 
   if (!user.cvFileName) {
     return null
@@ -48,7 +31,7 @@ export default function PrivateProfileSections({ profile }: PrivateProfileSectio
             </div>
           </div>
           <button
-            onClick={handleDownloadCV}
+            onClick={downloadCV}
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
           >
             <Download className="h-4 w-4" />
