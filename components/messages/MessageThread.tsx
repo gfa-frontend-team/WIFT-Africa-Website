@@ -3,21 +3,106 @@
 import { Message, Conversation } from '@/lib/api/messages'
 import Image from 'next/image'
 import { format } from 'date-fns'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useLayoutEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 
 interface MessageThreadProps {
   conversation: Conversation
   messages: Message[]
   onBack?: () => void
+  hasMore?: boolean
+  fetchNextPage?: () => void
+  isFetchingNextPage?: boolean
 }
 
-export default function MessageThread({ conversation, messages, onBack }: MessageThreadProps) {
+export default function MessageThread({ 
+  conversation, 
+  messages, 
+  onBack,
+  hasMore,
+  fetchNextPage,
+  isFetchingNextPage
+}: MessageThreadProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
+  const topRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  
+  // Refs for scroll management
+  const prevMessagesLength = useRef(messages.length)
+  const isInitialLoad = useRef(true)
+  const prevScrollHeight = useRef(0)
 
-  // Auto-scroll to bottom on new messages
+  // Infinite Scroll Observer
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingNextPage) {
+           // Save current scroll height before fetching
+           if (containerRef.current) {
+             prevScrollHeight.current = containerRef.current.scrollHeight
+             fetchNextPage?.()
+           }
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (topRef.current) {
+      observer.observe(topRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [hasMore, isFetchingNextPage, fetchNextPage])
+
+  // Scroll Management
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const currentLen = messages.length
+    const startLen = prevMessagesLength.current
+
+    // Case 1: Initial Load -> Scroll to bottom
+    if (isInitialLoad.current && currentLen > 0) {
+      container.scrollTop = container.scrollHeight
+      isInitialLoad.current = false
+      prevMessagesLength.current = currentLen
+      return
+    }
+
+    // Case 2: Updates
+    if (currentLen > startLen) {
+        // If we fetched previous page (start of list changed)
+        // Heuristic: If we were at the top (near 0) and validation passed, restore position
+        // Better: Compare first message ID or check if isFetchingNextPage WAS true
+        // But since we captured prevScrollHeight in the observer, we can use it.
+        
+        if (prevScrollHeight.current > 0) {
+            // We were loading history
+            const newScrollHeight = container.scrollHeight
+            const diff = newScrollHeight - prevScrollHeight.current
+            container.scrollTop = diff
+            
+            // Reset
+            prevScrollHeight.current = 0
+        } else {
+            // New message at bottom
+            // Only auto-scroll if user is near bottom
+            const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100
+             if (isNearBottom || messages[messages.length - 1].isMine) {
+                 bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+             }
+        }
+    }
+
+    prevMessagesLength.current = currentLen
   }, [messages])
+
+  // Clear initial load state when conversation changes
+  useEffect(() => {
+    isInitialLoad.current = true
+    prevMessagesLength.current = 0
+  }, [conversation.id])
 
   const otherUser = conversation.otherParticipant
 
@@ -73,7 +158,15 @@ export default function MessageThread({ conversation, messages, onBack }: Messag
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div 
+        ref={containerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth"
+      >
+        {/* Loading Sentinel */}
+        <div ref={topRef} className="h-4 w-full flex items-center justify-center">
+            {isFetchingNextPage && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+        </div>
+
         {messages.map((message, index) => {
           const isMine = message.isMine
           const showSenderInfo = !isMine && (index === 0 || messages[index - 1].sender.id !== message.sender.id)
@@ -134,7 +227,7 @@ export default function MessageThread({ conversation, messages, onBack }: Messag
             </div>
           )
         })}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} className="h-1" />
       </div>
     </div>
   )
