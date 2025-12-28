@@ -227,7 +227,7 @@ class ApiClient {
     
     // Redirect to login
     // Use window.location only if we are not already on a public page
-    const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/', '/onboarding']
+    const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/', '/onboarding', '/verify-email']
     if (!publicPaths.includes(window.location.pathname)) {
         window.location.href = '/login'
     }

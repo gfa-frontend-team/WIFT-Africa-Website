@@ -21,6 +21,7 @@ export function useUser() {
     staleTime: Infinity, // User data rarely changes automatically
     gcTime: 1000 * 60 * 60 * 24, // Keep in garbage collection for 24h
     retry: 1, // Don't retry too many times if auth fails
+    enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
   })
 
   // Sync with Zustand store for global access

@@ -1,26 +1,15 @@
-'use client'
-
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { ArrowLeft, CheckCircle, Briefcase, Users, Clock } from 'lucide-react'
-import { onboardingApi } from '@/lib/api/onboarding'
-import { useUserStore } from '@/lib/stores/userStore'
-import { useAuth } from '@/lib/hooks/useAuth'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface TermsAcceptanceStepProps {
   onPrevious: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 export default function TermsAcceptanceStep({
   onPrevious,
-  isSaving,
-  setIsSaving,
 }: TermsAcceptanceStepProps) {
-  const router = useRouter()
-  const { updateUser } = useUserStore()
-  const { refreshUserData } = useAuth()
+  const { acceptTerms, isAcceptingTerms: isSaving } = useOnboarding()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
@@ -30,34 +19,14 @@ export default function TermsAcceptanceStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
-      const response = await onboardingApi.acceptTerms()
-
+      await acceptTerms()
       console.log('✅ Terms accepted - Onboarding complete!')
       
-      // Update user state to reflect onboarding completion
-      updateUser({ 
-        onboardingComplete: true,
-        termsAccepted: true 
-      })
-
-      // Refresh full user data to get updated membershipStatus and accountType
-      try {
-        await refreshUserData()
-        console.log('✅ User data refreshed after onboarding completion')
-      } catch (refreshError) {
-        console.warn('⚠️ Failed to refresh user data after onboarding:', refreshError)
-      }
-      
-      // Redirect to home page after successful completion
-      router.push('/feed')
+      // Redirect handled by hook
     } catch (error: any) {
       console.error('❌ Failed to accept terms:', error)
       alert(error.response?.data?.error || 'Failed to complete onboarding')
-    } finally {
-      setIsSaving(false)
     }
   }
 
