@@ -1,164 +1,29 @@
+import { useUser } from './useAuthQuery'
+import { useAuthMutations } from './useAuthMutations'
 import { useUserStore, selectIsAuthenticated, selectIsEmailVerified, selectOnboardingComplete } from '../stores/userStore'
-import { authApi } from '../api/auth'
-import { usersApi } from '../api/users'
-import { useRouter } from 'next/navigation'
-import { useEffect, useRef } from 'react'
 import { AccountType } from '@/types'
+import { useMutation } from '@tanstack/react-query'
+import { authApi } from '../api/auth'
 
 export function useAuth() {
-  const router = useRouter()
-  const { currentUser, setUser, clearUser, setLoading, setError, _hasHydrated, isLoading: isStoreLoading } = useUserStore()
+  const { data: user, isLoading: isUserLoading, refetch: refreshUserData } = useUser()
+  const { loginMutation, registerMutation, logoutMutation } = useAuthMutations()
+  
+  // Use store selectors for derived state
+  // Even though we have data from RQ, the store is synced via useUser so these selectors work
   const isAuthenticated = useUserStore(selectIsAuthenticated)
   const isEmailVerified = useUserStore(selectIsEmailVerified)
   const onboardingComplete = useUserStore(selectOnboardingComplete)
-  
-  // Unified loading state: true if store is rehydrating OR if an async action is valid
-  const isLoading = !_hasHydrated || isStoreLoading
+  const currentUser = useUserStore((state) => state.currentUser)
 
-  /* 
-    Prevention of Infinite Loops:
-    Use a ref to track if we've already attempted to fetch the full user data for this mount.
-    This prevents the useEffect from firing repeatedly if the user object keeps updating 
-    (changing reference) but still lacks the required fields.
-  */
-  const refreshAttempted = useRef(false)
-
-  // Check for token state mismatch on mount and when user changes
-  useEffect(() => {
-    if (currentUser && typeof window !== 'undefined') {
-      const accessToken = localStorage.getItem('accessToken')
-      const refreshToken = localStorage.getItem('refreshToken')
-      
-      // If user exists but no tokens, clear user state (force logout)
-      if (!accessToken && !refreshToken) {
-        console.warn('🔄 Token state mismatch detected: User exists but no tokens found. Logging out...')
-        clearUser()
-        return
-      }
-
-      // If user exists but missing critical fields (membershipStatus, accountType), load full user data
-      // BUT only if we haven't already tried to refresh in this session
-      if ((!currentUser.membershipStatus || !currentUser.accountType) && !refreshAttempted.current) {
-        console.log('🔄 Detected incomplete user data, attempting to refresh...')
-        refreshAttempted.current = true // Mark as attempted immediately
-        loadCurrentUser()
-      }
+  // Verify Email Mutation (kept local as it's specific)
+  const verifyEmailMutation = useMutation({
+    mutationFn: (token: string) => authApi.verifyEmail({ token }),
+    onSuccess: (data) => {
+      // Refresh user data after verification
+      refreshUserData()
     }
-  }, [currentUser, clearUser])
-
-  // Load full user data from /users/me endpoint
-  const loadCurrentUser = async () => {
-    try {
-      const response = await usersApi.getCurrentUser()
-      setUser(response.user)
-    } catch (error) {
-      console.error('❌ Failed to load current user:', error)
-      // If we can't load user data, the tokens might be invalid
-      clearUser()
-    }
-  }
-
-  const login = async (email: string, password: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await authApi.login({ email, password })
-      
-      // Set basic user data from auth response first
-      setUser(response.user)
-      
-      // Load full user data with membershipStatus and accountType
-      try {
-        const fullUserResponse = await usersApi.getCurrentUser()
-        setUser(fullUserResponse.user)
-      } catch (userError) {
-        console.warn('⚠️ Failed to load full user data after login, using auth response data:', userError)
-        // Continue with basic user data from auth response
-      }
-      
-      // Determine redirect path based on user state
-      let redirectPath = '/feed' // Default for fully onboarded users
-      
-      if (!response.user.emailVerified) {
-        redirectPath = '/verify-email'
-      } else if (!response.user.onboardingComplete) {
-        redirectPath = '/onboarding'
-      }
-      
-      // Always redirect to appropriate page after login
-      router.push(redirectPath)
-      
-      return response
-    } catch (error: any) {
-      console.error('❌ Login error:', error)
-      const message = error.response?.data?.message || 'Login failed'
-      setError(message)
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const register = async (data: { email: string; password: string; firstName: string; lastName: string }) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await authApi.register(data)
-      router.push('/verify-email')
-      return response
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Registration failed'
-      setError(message)
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const logout = async () => {
-    try {
-      const refreshToken = localStorage.getItem('refreshToken')
-      if (refreshToken) {
-        await authApi.logout(refreshToken)
-      }
-    } catch (error) {
-      console.error('Logout error:', error)
-      // Even if API call fails, clear local state
-    } finally {
-      // Clear user state
-      clearUser()
-      
-      // Clear any remaining tokens (belt and suspenders approach)
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      
-      // Force redirect to login
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login'
-      }
-    }
-  }
-
-  const verifyEmail = async (token: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await authApi.verifyEmail({ token })
-      
-      // Update user with verified status
-      if (currentUser) {
-        setUser({ ...currentUser, emailVerified: true })
-      }
-      
-      return response
-    } catch (error: unknown) {
-      const message = (error as any)?.response?.data?.message || 'Email verification failed'
-      setError(message)
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }
+  })
 
   // Role checks
   const isMember = currentUser?.accountType === AccountType.CHAPTER_MEMBER || currentUser?.accountType === AccountType.HQ_MEMBER
@@ -167,19 +32,28 @@ export function useAuth() {
   const isAdmin = isChapterAdmin || isSuperAdmin
 
   return {
-    user: currentUser,
+    // State
+    user: currentUser, // Prefer store user as it's globally synced
     isAuthenticated,
     isEmailVerified,
     onboardingComplete,
+    
+    // Roles
     isMember,
     isChapterAdmin,
     isSuperAdmin,
     isAdmin,
-    login,
-    register,
-    logout,
-    verifyEmail,
-    isLoading,
-    refreshUserData: loadCurrentUser,
+    
+    // Actions - wrapping mutations to match original interface promise return
+    login: (email: string, password: string) => loginMutation.mutateAsync({ email, password }),
+    register: (data: { email: string; password: string; firstName: string; lastName: string }) => registerMutation.mutateAsync(data),
+    logout: () => logoutMutation.mutateAsync(),
+    verifyEmail: (token: string) => verifyEmailMutation.mutateAsync(token),
+    
+    // Loading states
+    isLoading: isUserLoading || loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
+    
+    // Utils
+    refreshUserData,
   }
 }

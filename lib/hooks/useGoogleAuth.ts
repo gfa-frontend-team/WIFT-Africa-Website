@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { authApi } from '../api/auth'
+import { useAuthMutations } from './useAuthMutations'
 import { useUserStore } from '../stores/userStore'
 
 declare global {
@@ -21,12 +21,13 @@ declare global {
 
 export function useGoogleAuth() {
   const router = useRouter()
-  const { setUser, setLoading, setError } = useUserStore()
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const { setError } = useUserStore()
+  const { googleLoginMutation } = useAuthMutations()
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false)
 
   const initializeGoogleAuth = () => {
     if (typeof window === 'undefined' || !window.google) {
-      console.error('Google Identity Services not loaded')
+      // console.error('Google Identity Services not loaded')
       return
     }
 
@@ -36,10 +37,11 @@ export function useGoogleAuth() {
         callback: handleGoogleResponse,
         auto_select: false,
         cancel_on_tap_outside: true,
-        use_fedcm_for_prompt: false, // Disable FedCM to avoid the error
-        ux_mode: 'popup', // Force popup mode
+        use_fedcm_for_prompt: false, 
+        ux_mode: 'popup', 
         context: 'signin',
       })
+      setIsScriptLoaded(true)
     } catch (error) {
       console.error('Failed to initialize Google Auth:', error)
     }
@@ -48,39 +50,16 @@ export function useGoogleAuth() {
   const handleGoogleResponse = async (response: any) => {
     if (!response.credential) {
       setError('Google authentication failed - no credential received')
-      setIsGoogleLoading(false)
       return
     }
 
-    setIsGoogleLoading(true)
-    setError(null)
-
     try {
-      const result = await authApi.googleAuth(response.credential)
-      
-      // Set user in store
-      setUser(result.user)
-      
-      // Determine redirect path based on user state
-      let redirectPath = '/feed' // Default for fully onboarded users
-      
-      if (!result.user.emailVerified) {
-        redirectPath = '/verify-email'
-      } else if (!result.user.onboardingComplete) {
-        redirectPath = '/onboarding'
-      }
-      
-      // Redirect to appropriate page
-      router.push(redirectPath)
-      
-      return result
+      await googleLoginMutation.mutateAsync(response.credential)
+      // Redirect is handled by mutation
     } catch (error: any) {
       console.error('Google auth error:', error)
       const message = error.response?.data?.message || 'Google authentication failed'
       setError(message)
-      throw error
-    } finally {
-      setIsGoogleLoading(false)
     }
   }
 
@@ -90,8 +69,6 @@ export function useGoogleAuth() {
       return
     }
 
-    setIsGoogleLoading(true)
-    
     try {
       // Cancel any existing prompts
       window.google.accounts.id.cancel()
@@ -100,14 +77,11 @@ export function useGoogleAuth() {
       window.google.accounts.id.prompt((notification) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
           console.log('Google prompt was not displayed or skipped')
-          setIsGoogleLoading(false)
-          // Fallback: you could show a custom error message here
         }
       })
     } catch (error) {
       console.error('Error showing Google prompt:', error)
       setError('Failed to show Google sign-in')
-      setIsGoogleLoading(false)
     }
   }
 
@@ -137,6 +111,7 @@ export function useGoogleAuth() {
     initializeGoogleAuth,
     signInWithGoogle,
     renderGoogleButton,
-    isGoogleLoading,
+    isGoogleLoading: googleLoginMutation.isPending,
+    isScriptLoaded
   }
 }

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from 'axios'
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { API_BASE_URL } from '../env'
 import type { ApiError } from '@/types'
 
@@ -6,12 +6,24 @@ import type { ApiError } from '@/types'
 const RETRY_DELAYS = [1000, 2000, 4000] // Exponential backoff: 1s, 2s, 4s
 const MAX_RETRIES = 3
 
+interface CustomRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+  headers: any // Relaxing headers type for ease of use with newer Axios types
+}
+
 class ApiClient {
   private client: AxiosInstance
   private requestQueue: Array<() => Promise<unknown>> = []
   private isProcessingQueue = false
   private lastRequestTime = 0
   private minRequestInterval = 100 // Minimum 100ms between requests
+
+  // Token refresh queue
+  private isRefreshing = false
+  private failedQueue: Array<{
+    resolve: (value?: unknown) => void
+    reject: (reason?: any) => void
+  }> = []
 
   constructor() {
     this.client = axios.create({
@@ -40,7 +52,7 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       async (error: AxiosError<ApiError>) => {
-        const originalRequest = error.config
+        const originalRequest = error.config as CustomRequestConfig
 
         // Handle rate limiting (429)
         if (error.response?.status === 429 && originalRequest && !originalRequest.headers['X-Retry-Count']) {
@@ -70,39 +82,73 @@ class ApiClient {
         const isNoTokenError = error.response?.data?.error === 'No token provided' || 
                               error.response?.data?.message === 'No token provided'
 
-        // If 401 or "No token provided" and we haven't tried to refresh yet
-        if ((error.response?.status === 401 || isNoTokenError) && originalRequest && !originalRequest.headers['X-Retry']) {
-          try {
-            // Try to refresh token
-            const refreshToken = this.getRefreshToken()
-            if (refreshToken) {
-              const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-                refreshToken,
+        // If 401 or "No token provided" and we haven't retried yet
+        if ((error.response?.status === 401 || isNoTokenError) && originalRequest && !originalRequest._retry) {
+          
+          if (this.isRefreshing) {
+            // If already refreshing, add to queue
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject })
+            })
+              .then((token) => {
+                originalRequest.headers['Authorization'] = `Bearer ${token}`
+                return this.client(originalRequest)
               })
+              .catch((err) => {
+                return Promise.reject(err)
+              })
+          }
 
-              // Save new tokens
-              this.setTokens(data.tokens.accessToken, data.tokens.refreshToken)
+          originalRequest._retry = true
+          this.isRefreshing = true
 
-              // Retry original request with new token
-              originalRequest.headers['Authorization'] = `Bearer ${data.tokens.accessToken}`
-              originalRequest.headers['X-Retry'] = 'true'
-              return this.client(originalRequest)
-            } else {
-              // No refresh token available, clear any remaining tokens and force logout
-              this.clearTokens()
-              this.forceLogout()
+          try {
+            const refreshToken = this.getRefreshToken()
+            
+            if (!refreshToken) {
+              throw new Error('No refresh token available')
             }
+
+            // Call refresh endpoint using a fresh axios instance to avoid interceptors
+            const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+              refreshToken,
+            })
+
+            const { accessToken, refreshToken: newRefreshToken } = data.tokens
+            this.setTokens(accessToken, newRefreshToken)
+
+            // Update header for the original request
+            originalRequest.headers['Authorization'] = `Bearer ${accessToken}`
+            
+            // Process queue
+            this.processFailedQueue(null, accessToken)
+            
+            return this.client(originalRequest)
           } catch (refreshError) {
-            // Refresh failed, clear tokens and redirect to login
+            this.processFailedQueue(refreshError, null)
             this.clearTokens()
             this.forceLogout()
             return Promise.reject(refreshError)
+          } finally {
+            this.isRefreshing = false
           }
         }
 
         return Promise.reject(error)
       }
     )
+  }
+
+  private processFailedQueue(error: any, token: string | null = null) {
+    this.failedQueue.forEach((prom) => {
+      if (error) {
+        prom.reject(error)
+      } else {
+        prom.resolve(token)
+      }
+    })
+    
+    this.failedQueue = []
   }
 
   // Request throttling to prevent rate limiting
@@ -180,7 +226,11 @@ class ApiClient {
     })
     
     // Redirect to login
-    window.location.href = '/login'
+    // Use window.location only if we are not already on a public page
+    const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/', '/onboarding']
+    if (!publicPaths.includes(window.location.pathname)) {
+        window.location.href = '/login'
+    }
   }
 
   // HTTP methods with throttling
