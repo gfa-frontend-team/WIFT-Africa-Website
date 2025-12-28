@@ -17,7 +17,14 @@ export default function ProfilePhotoUpload({
   onPhotoUpdated,
   onPhotoDeleted,
 }: ProfilePhotoUploadProps) {
-  const { uploadProfilePhoto, deleteProfilePhoto, isLoading } = useProfile()
+  const { 
+    uploadPhoto: uploadProfilePhoto, 
+    deletePhoto: deleteProfilePhoto, 
+    isUploadingPhoto,
+    isDeletingPhoto
+  } = useProfile()
+  
+  const isLoading = isUploadingPhoto || isDeletingPhoto
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)

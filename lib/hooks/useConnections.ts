@@ -62,10 +62,18 @@ export function useConnections() {
     },
   })
 
+  const useConnectionStatus = (userId?: string) => useQuery({
+    queryKey: userId ? connectionKeys.status(userId) : [],
+    queryFn: () => connectionsApi.checkStatus(userId!),
+    enabled: !!userId,
+    staleTime: 1000 * 60, // 1 minute
+  })
+
   return {
     // Hooks for components to use
     useRequests,
     useStats,
+    useConnectionStatus,
     
     // Actions (Mutations)
     sendRequest: (receiverId: string, message?: string) => sendRequestMutation.mutateAsync({ receiverId, message }),
