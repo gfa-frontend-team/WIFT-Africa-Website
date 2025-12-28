@@ -204,7 +204,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar - 3 columns on desktop */}
-          <div className="lg:col-span-3">
+          <div className="hidden lg:block lg:col-span-3">
             <LeftSidebar />
           </div>
 
@@ -242,7 +242,7 @@ export default function HomePage() {
           </main>
 
           {/* Right Sidebar - 3 columns on desktop */}
-          <div className="lg:col-span-3">
+          <div className="hidden lg:block lg:col-span-3">
             <RightSidebar />
           </div>
         </div>
