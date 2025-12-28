@@ -121,7 +121,13 @@ export default function MessagesPage() {
     return conversations.find(c => c.id === activeConversationId) || null
   }, [activeConversationId, conversations, tempUser])
 
-  const { data: threadData, isLoading: isMessagesLoading } = useMessageThread(activeConversationId || '', !!activeConversationId)
+  const { 
+    data: threadData, 
+    isLoading: isMessagesLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useMessageThread(activeConversationId || '', !!activeConversationId)
   
   const activeMessages = useMemo(() => {
     return threadData?.pages.flatMap(page => page.messages).reverse() || []
@@ -189,6 +195,9 @@ export default function MessagesPage() {
                     conversation={activeConversation as any}
                     messages={activeMessages}
                     onBack={handleBackToList}
+                    hasMore={hasNextPage}
+                    fetchNextPage={fetchNextPage}
+                    isFetchingNextPage={isFetchingNextPage}
                   />
                   <MessageComposer 
                     conversationId={activeConversation.id} 

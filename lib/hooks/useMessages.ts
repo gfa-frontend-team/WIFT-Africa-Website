@@ -25,21 +25,20 @@ export function useMessages() {
   // Messages in a Thread (Infinite Scroll)
   const useMessageThread = (conversationId: string, enabled = true) => useInfiniteQuery({
     queryKey: messageKeys.thread(conversationId),
-    queryFn: ({ pageParam = 1 }) => messagesApi.getMessages(conversationId, pageParam as number, 50),
+    queryFn: ({ pageParam = 1 }) => messagesApi.getMessages(conversationId, pageParam as number, 20),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      // Assuming pages logic similar to notifications/search
-      // If messages.length === limit (50), likely more
-      if (lastPage.messages.length === 50) return (lastPage as any)._pageParam + 1 // We need to track page param
-      // Better: Use total count if available
-      return undefined // Need verify pagination logic in API response
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedMessagesCount = allPages.reduce((acc, page) => acc + page.messages.length, 0)
+      
+      if (loadedMessagesCount < lastPage.total) {
+        return allPages.length + 1
+      }
+      return undefined
     },
     enabled: !!conversationId && !conversationId.startsWith('new_') && enabled,
+    staleTime: 0, // Always fetch latest when opening thread, reliance on cache for history
   })
 
-  // Safe wrapper for message thread with proper page tracking if needed
-  // Using simplified approach: assumes standard pagination if not fully specified
-  
   // Unread Count
   const useUnreadMessageCount = () => useQuery({
     queryKey: messageKeys.unreadCount(),
