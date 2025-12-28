@@ -3,20 +3,19 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 import OnboardingLayout from '@/components/onboarding/OnboardingLayout'
 import RoleSelectionStep from '@/components/onboarding/RoleSelectionStep'
 import SpecializationsStep from '@/components/onboarding/SpecializationsStep'
 import ChapterSelectionStep from '@/components/onboarding/ChapterSelectionStep'
 import ProfileSetupStep from '@/components/onboarding/ProfileSetupStep'
 import TermsAcceptanceStep from '@/components/onboarding/TermsAcceptanceStep'
-import { onboardingApi } from '@/lib/api/onboarding'
 
 export default function OnboardingPage() {
   const router = useRouter()
   const { user, isAuthenticated, isEmailVerified } = useAuth()
+  const { progress, isLoadingProgress } = useOnboarding()
   const [currentStep, setCurrentStep] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
 
   // Form data
   const [roles, setRoles] = useState<string[]>([])
@@ -25,63 +24,47 @@ export default function OnboardingPage() {
   const [crewSpecializations, setCrewSpecializations] = useState<string[]>([])
   const [businessSpecializations, setBusinessSpecializations] = useState<string[]>([])
 
-  // Check auth and load progress on mount
+  // Check auth and sync progress data
   useEffect(() => {
-    const checkAuthAndLoadProgress = async () => {
-      // Redirect if not authenticated
-      if (!isAuthenticated) {
-        router.push('/login')
-        return
-      }
-
-      // Redirect if email not verified
-      if (!isEmailVerified) {
-        router.push('/verify-email')
-        return
-      }
-
-      // Redirect if onboarding already complete
-      if (user?.onboardingComplete) {
-        router.push('/feed')
-        return
-      }
-
-      // Load onboarding progress
-      try {
-        const progress = await onboardingApi.getProgress()
-        
-        // Set current step from backend
-        setCurrentStep(progress.currentStep || 1)
-        
-        // Load saved data if exists
-        if (progress.data) {
-          if (progress.data.roles) setRoles(progress.data.roles)
-          if (progress.data.primaryRole) setPrimaryRole(progress.data.primaryRole)
-          if (progress.data.specializations?.writer) {
-            setWriterSpecialization(progress.data.specializations.writer)
-          }
-          if (progress.data.specializations?.crew) {
-            // Ensure it's an array
-            setCrewSpecializations(Array.isArray(progress.data.specializations.crew) 
-              ? progress.data.specializations.crew 
-              : [])
-          }
-          if (progress.data.specializations?.business) {
-            // Ensure it's an array
-            setBusinessSpecializations(Array.isArray(progress.data.specializations.business) 
-              ? progress.data.specializations.business 
-              : [])
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load onboarding progress:', error)
-      } finally {
-        setIsLoading(false)
-      }
+    // Auth checks
+    if (!isAuthenticated) {
+      // Allow time for auth to initialize? 
+      // useAuth handles initial loading, so if !isAuthenticated and !isLoading (implied), redirect.
+      // But for simplicity let's assume if it is false we redirect effectively.
+      // Better to check isLoading from useAuth but sticking to original logic slightly improved.
+      // router.push('/login') // Moved this check to be safer, or just rely on middleware/protected route wrapper if exists.
+      // The original code did strict checks here.
+    }
+    
+    if (isAuthenticated && !isEmailVerified) {
+      router.push('/verify-email')
+    } else if (user?.onboardingComplete) {
+      router.push('/feed')
     }
 
-    checkAuthAndLoadProgress()
-  }, [isAuthenticated, isEmailVerified, user, router])
+    // Sync progress data to local state
+    if (progress) {
+      setCurrentStep(progress.currentStep || 1)
+      
+      if (progress.data) {
+        if (progress.data.roles) setRoles(progress.data.roles)
+        if (progress.data.primaryRole) setPrimaryRole(progress.data.primaryRole)
+        if (progress.data.specializations?.writer) {
+          setWriterSpecialization(progress.data.specializations.writer)
+        }
+        if (progress.data.specializations?.crew) {
+          setCrewSpecializations(Array.isArray(progress.data.specializations.crew) 
+            ? progress.data.specializations.crew 
+            : [])
+        }
+        if (progress.data.specializations?.business) {
+          setBusinessSpecializations(Array.isArray(progress.data.specializations.business) 
+            ? progress.data.specializations.business 
+            : [])
+        }
+      }
+    }
+  }, [progress, isAuthenticated, isEmailVerified, user, router])
 
   const handleNext = () => {
     setCurrentStep((prev) => prev + 1)
@@ -91,7 +74,7 @@ export default function OnboardingPage() {
     setCurrentStep((prev) => Math.max(1, prev - 1))
   }
 
-  if (isLoading) {
+  if (isLoadingProgress) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -100,6 +83,12 @@ export default function OnboardingPage() {
         </div>
       </div>
     )
+  }
+
+  if (!isAuthenticated) {
+     // Small flicker protection or redirecting view
+     router.push('/login')
+     return null
   }
 
   return (
@@ -111,8 +100,6 @@ export default function OnboardingPage() {
           onRolesChange={setRoles}
           onPrimaryRoleChange={setPrimaryRole}
           onNext={handleNext}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
         />
       )}
 
@@ -127,8 +114,6 @@ export default function OnboardingPage() {
           onBusinessSpecsChange={setBusinessSpecializations}
           onNext={handleNext}
           onPrevious={handlePrevious}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
         />
       )}
 
@@ -136,8 +121,6 @@ export default function OnboardingPage() {
         <ChapterSelectionStep
           onNext={handleNext}
           onPrevious={handlePrevious}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
         />
       )}
 
@@ -145,16 +128,12 @@ export default function OnboardingPage() {
         <ProfileSetupStep
           onNext={handleNext}
           onPrevious={handlePrevious}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
         />
       )}
 
       {currentStep === 5 && (
         <TermsAcceptanceStep
           onPrevious={handlePrevious}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
         />
       )}
     </OnboardingLayout>

@@ -1,8 +1,6 @@
-'use client'
-
 import { useState } from 'react'
 import { Film, Camera, Edit, Users, Music, Briefcase, CheckCircle, Crown, ArrowRight } from 'lucide-react'
-import { onboardingApi } from '@/lib/api/onboarding'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface RoleSelectionStepProps {
   selectedRoles: string[]
@@ -10,8 +8,6 @@ interface RoleSelectionStepProps {
   onRolesChange: (roles: string[]) => void
   onPrimaryRoleChange: (role: string) => void
   onNext: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 const ROLE_OPTIONS = [
@@ -71,10 +67,9 @@ export default function RoleSelectionStep({
   onRolesChange,
   onPrimaryRoleChange,
   onNext,
-  isSaving,
-  setIsSaving,
 }: RoleSelectionStepProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const { submitRoles, isSubmittingRoles: isSaving } = useOnboarding()
 
   const handleRoleToggle = (roleValue: string) => {
     const newRoles = selectedRoles.includes(roleValue)
@@ -110,10 +105,8 @@ export default function RoleSelectionStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
-      await onboardingApi.submitRoles({
+      await submitRoles({
         roles: selectedRoles,
         primaryRole: selectedRoles.length === 1 ? selectedRoles[0] : primaryRole,
       })
@@ -122,9 +115,8 @@ export default function RoleSelectionStep({
       onNext()
     } catch (error: any) {
       console.error('❌ Failed to save roles:', error)
-      alert(error.response?.data?.error || 'Failed to save roles')
-    } finally {
-      setIsSaving(false)
+      const message = error.response?.data?.error || 'Failed to save roles'
+      setErrors({ roles: message })
     }
   }
 

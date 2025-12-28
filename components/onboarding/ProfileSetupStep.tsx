@@ -1,22 +1,17 @@
-'use client'
-
 import { useState } from 'react'
 import { ArrowLeft, ArrowRight, Link as LinkIcon, Film, Globe, MapPin, Upload } from 'lucide-react'
-import { onboardingApi } from '@/lib/api/onboarding'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface ProfileSetupStepProps {
   onNext: () => void
   onPrevious: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 export default function ProfileSetupStep({
   onNext,
   onPrevious,
-  isSaving,
-  setIsSaving,
 }: ProfileSetupStepProps) {
+  const { submitProfile, isSubmittingProfile: isSaving } = useOnboarding()
   const [headline, setHeadline] = useState('')
   const [bio, setBio] = useState('')
   const [location, setLocation] = useState('')
@@ -81,8 +76,6 @@ export default function ProfileSetupStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
       // Use FormData if CV file is present, otherwise use JSON
       if (cvFile) {
@@ -102,11 +95,7 @@ export default function ProfileSetupStep({
         // Add CV file
         formData.append('cv', cvFile)
 
-        // Import apiClient for direct FormData upload
-        const { apiClient } = await import('@/lib/api/client')
-        await apiClient.post('/onboarding/profile', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        })
+        await submitProfile(formData)
       } else {
         // No CV file, use regular JSON
         const data: any = {
@@ -122,15 +111,13 @@ export default function ProfileSetupStep({
         if (instagramHandle.trim()) data.instagramHandle = instagramHandle.trim()
         if (twitterHandle.trim()) data.twitterHandle = twitterHandle.trim()
 
-        await onboardingApi.submitProfile(data)
+        await submitProfile(data)
       }
 
       onNext()
     } catch (error: any) {
       console.error('❌ Failed to save profile setup:', error)
       alert(error.response?.data?.error || 'Failed to save profile setup')
-    } finally {
-      setIsSaving(false)
     }
   }
 

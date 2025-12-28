@@ -1,24 +1,32 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { ArrowLeft, ArrowRight, MapPin, Users, Crown, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
-import { onboardingApi, Chapter } from '@/lib/api/onboarding'
+import { Chapter } from '@/lib/api/onboarding'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface ChapterSelectionStepProps {
   onNext: () => void
   onPrevious: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 export default function ChapterSelectionStep({
   onNext,
   onPrevious,
-  isSaving,
-  setIsSaving,
 }: ChapterSelectionStepProps) {
+  const { chapters: dataChapters, isLoadingChapters, submitChapter, isSubmittingChapter: isSaving } = useOnboarding()
   const [chapters, setChapters] = useState<Chapter[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  
+  // Sort chapters when data loads
+  useEffect(() => {
+    if (dataChapters) {
+      const sorted = [...dataChapters].sort((a, b) => {
+        if (a.code === 'HQ') return 1
+        if (b.code === 'HQ') return -1
+        return a.country.localeCompare(b.country)
+      })
+      setChapters(sorted)
+    }
+  }, [dataChapters])
+
   const [selectedChapter, setSelectedChapter] = useState<string>('')
   const [memberType, setMemberType] = useState<'NEW' | 'EXISTING' | null>(null)
   const [membershipId, setMembershipId] = useState('')
@@ -26,28 +34,6 @@ export default function ChapterSelectionStep({
   const [additionalInfo, setAdditionalInfo] = useState('')
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
-
-  useEffect(() => {
-    loadChapters()
-  }, [])
-
-  const loadChapters = async () => {
-    try {
-      const response = await onboardingApi.getChapters()
-      // Sort chapters alphabetically by country, with HQ at the end
-      const sorted = response.chapters.sort((a, b) => {
-        if (a.code === 'HQ') return 1
-        if (b.code === 'HQ') return -1
-        return a.country.localeCompare(b.country)
-      })
-      setChapters(sorted)
-    } catch (error) {
-      console.error('Failed to load chapters:', error)
-      alert('Failed to load chapters. Please refresh the page.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const getCountryFlag = (countryCode: string) => {
     if (countryCode === 'HQ' || countryCode === 'AFRICA') {
@@ -98,8 +84,6 @@ export default function ChapterSelectionStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
       const data: any = {
         chapterId: selectedChapter,
@@ -118,19 +102,19 @@ export default function ChapterSelectionStep({
         data.additionalInfo = additionalInfo.trim()
       }
 
-      await onboardingApi.submitChapter(data)
+      await submitChapter(data)
 
       console.log('✅ Chapter selection saved successfully')
       onNext()
     } catch (error: any) {
       console.error('❌ Failed to save chapter selection:', error)
       alert(error.response?.data?.error || 'Failed to save chapter selection')
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  if (isLoading) {
+  if (isLoadingChapters && chapters.length === 0) {
+    // Show loading if we don't have chapters yet and logic is loading
+    // But if we have chapters (e.g. from cache), we can show them
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">

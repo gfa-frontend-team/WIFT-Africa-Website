@@ -1,8 +1,6 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { ArrowLeft, ArrowRight, Tv, Clapperboard, Sparkles, Video, Scissors, Music2, Volume2, Palette, Shirt, Paintbrush, Lightbulb, Scale, Radio, DollarSign, Megaphone, Handshake, Newspaper } from 'lucide-react'
-import { onboardingApi } from '@/lib/api/onboarding'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface SpecializationsStepProps {
   roles: string[]
@@ -14,8 +12,6 @@ interface SpecializationsStepProps {
   onBusinessSpecsChange: (specs: string[]) => void
   onNext: () => void
   onPrevious: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 const WRITER_SPECIALIZATIONS = [
@@ -54,10 +50,14 @@ export default function SpecializationsStep({
   onBusinessSpecsChange,
   onNext,
   onPrevious,
-  isSaving,
-  setIsSaving,
 }: SpecializationsStepProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const { submitSpecializations, isSubmittingSpecializations: isSaving, prefetchChapters } = useOnboarding()
+
+  // Prefetch chapters for the next step
+  useEffect(() => {
+    prefetchChapters()
+  }, [prefetchChapters])
 
   // Check if specializations are needed
   const needsWriterSpec = roles.includes('WRITER')
@@ -67,6 +67,12 @@ export default function SpecializationsStep({
   // If no specializations needed, skip to next step automatically
   useEffect(() => {
     if (!needsWriterSpec && !needsCrewSpec && !needsBusinessSpec) {
+      // Just call onNext directly if no specs needed, but maybe we should ensure consistency?
+      // The original code called handleSubmit -> API. 
+      // If we skip API call here, we might miss tracking. 
+      // BE likely expects this step if it returns true for needsSpecialization?
+      // Actually if !needsSpec, we technically shouldn't be here or we just pass through.
+      // Let's call submit with empty data to be safe if that's what the original did.
       handleSubmit()
     }
   }, [needsWriterSpec, needsCrewSpec, needsBusinessSpec])
@@ -99,8 +105,6 @@ export default function SpecializationsStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
       const data: any = {}
       
@@ -109,22 +113,20 @@ export default function SpecializationsStep({
       }
       
       if (needsCrewSpec && crewSpecializations.length > 0) {
-        data.crewSpecializations = crewSpecializations  // Send array
+        data.crewSpecializations = crewSpecializations
       }
       
       if (needsBusinessSpec && businessSpecializations.length > 0) {
-        data.businessSpecializations = businessSpecializations  // Send array
+        data.businessSpecializations = businessSpecializations
       }
 
-      await onboardingApi.submitSpecializations(data)
+      await submitSpecializations(data)
 
       console.log('✅ Specializations saved successfully')
       onNext()
     } catch (error: any) {
       console.error('❌ Failed to save specializations:', error)
       alert(error.response?.data?.error || 'Failed to save specializations')
-    } finally {
-      setIsSaving(false)
     }
   }
 
