@@ -15,6 +15,14 @@ export default function AuthenticatedLayout({
 }) {
   const router = useRouter()
   const { user, isAuthenticated, isEmailVerified, onboardingComplete, refreshUserData, isLoading } = useAuth()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+
+  
   // const [isChecking, setIsChecking] = useState(true) // Removed local state in favor of hook state
 
   useEffect(() => {
@@ -40,6 +48,8 @@ export default function AuthenticatedLayout({
 
     checkAuth()
   }, [isAuthenticated, isEmailVerified, onboardingComplete, router])
+
+  if (!mounted) return null
 
   // Show loading while checking auth
   if (isLoading) {

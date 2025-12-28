@@ -201,7 +201,7 @@ export default function PostCard({ post }: PostCardProps) {
               post.isLiked ? 'fill-current animate-pulse' : ''
             }`}
           />
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium hidden sm:inline">
             {post.isLiked ? 'Liked' : 'Like'}
           </span>
         </button>
@@ -215,7 +215,7 @@ export default function PostCard({ post }: PostCardProps) {
           }`}
         >
           <MessageCircle className="h-5 w-5" />
-          <span className="text-sm font-medium">Comment</span>
+          <span className="text-sm font-medium hidden sm:inline">Comment</span>
         </button>
 
         <button
@@ -223,7 +223,7 @@ export default function PostCard({ post }: PostCardProps) {
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted-foreground hover:bg-accent transition-all duration-200 hover:scale-105 active:scale-95"
         >
           <Share2 className="h-5 w-5" />
-          <span className="text-sm font-medium">Share</span>
+          <span className="text-sm font-medium hidden sm:inline">Share</span>
         </button>
 
         <button

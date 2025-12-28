@@ -48,6 +48,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const { access } = useFeatureAccess();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { useUnreadCount } = useNotifications();
   const { data: unreadData } = useUnreadCount();
@@ -187,6 +188,14 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               </div>
             </div>
 
+            {/* Mobile Search Toggle */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+
             {/* Notifications */}
             <div className="relative">
               <Link
@@ -288,6 +297,29 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           </div>
         </div>
       </div>
+      {/* Mobile Search Overlay */}
+      {isSearchOpen && (
+        <div className="md:hidden border-t border-border bg-card px-4 py-3 animate-fade-in">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault()
+                    router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
+                    setIsSearchOpen(false)
+                }
+              }}
+              autoFocus
+              className="pl-10 pr-4 py-2 w-full bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+            />
+          </div>
+        </div>
+      )}
     </header>
   );
 }
