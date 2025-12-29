@@ -30,6 +30,85 @@ Get high-level statistics about chapters and membership globally.
 
 ---
 
+## Endpoint: Get Countries with Chapters
+
+### Request
+**`GET /api/v1/admin/chapters/countries`**
+
+Get a list of distinct countries where chapters are established.
+
+**Authentication**: Required (Super Admin)
+
+### Response
+
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "countries": [
+    "South Africa",
+    "Kenya",
+    "Nigeria",
+    "Ghana"
+  ]
+}
+```
+
+---
+
+## Endpoint: Get Member Analytics
+
+### Request
+**`GET /api/v1/admin/analytics/members`**
+
+Retrieve member growth and distribution analytics.
+
+**Authentication**: Required (Super Admin)
+
+#### Query Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chapterId | string | Filter by chapter (optional) |
+| startDate | string | Start date (YYYY-MM-DD) |
+| endDate | string | End date (YYYY-MM-DD) |
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "growth": [
+    { "_id": "2024-01-01", "count": 5 }
+  ],
+  "distribution": {
+    "chapters": [],
+    "roles": []
+  }
+}
+```
+
+---
+
+## Endpoint: Get Chapter Analytics
+
+### Request
+**`GET /api/v1/admin/chapters/:chapterId/analytics`**
+
+Get specific analytics for a single chapter.
+
+**Authentication**: Required (Super Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "members": { "total": 120, "growth": 5 },
+  "events": { "total": 12, "upcoming": 2 },
+  "engagement": { "activeUsers": 85 }
+}
+```
+
+---
+
 ## Endpoint: List Chapters
 
 ### Request
@@ -248,3 +327,212 @@ Get statistics on membership requests that have been pending for longer than the
   "notNotified": 2
 }
 ```
+
+---
+
+## Endpoint: Trigger Verification Delay Check
+
+### Request
+**`POST /api/v1/admin/verification/check-delays`**
+
+Manually trigger the background process to check for delayed membership requests.
+
+**Authentication**: Required (Super Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Delay check completed",
+  "processed": 5,
+  "errors": 0
+}
+```
+
+---
+
+## Endpoint: Deactivate Chapter
+
+### Request
+**`DELETE /api/v1/admin/chapters/:id`**
+
+Soft delete/deactivate a chapter.
+
+**Authentication**: Required (Super Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Chapter deactivated successfully"
+}
+```
+
+---
+
+## Endpoint: Reactivate Chapter
+
+### Request
+**`POST /api/v1/admin/chapters/:id/reactivate`**
+
+Reactivate a previously deactivated chapter.
+
+**Authentication**: Required (Super Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Chapter reactivated successfully"
+}
+```
+
+---
+
+## Endpoint: Remove Chapter Admin
+
+### Request
+**`DELETE /api/v1/admin/chapters/:id/admins/:userId`**
+
+Remove admin privileges from a chapter member.
+
+**Authentication**: Required (Super Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Chapter admin removed successfully"
+}
+```
+
+---
+
+## Endpoint: Hide Post (Moderation)
+
+### Request
+**`PATCH /api/v1/admin/posts/:postId/hide`**
+
+Hide a post from the public feed due to policy violations.
+
+**Authentication**: Required (Admin)
+
+#### Request Body
+```json
+{
+  "reason": "This post violates community guidelines regarding respectful communication."
+}
+```
+*Reason must be between 10 and 500 characters.*
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Post hidden successfully"
+}
+```
+
+---
+
+## Endpoint: Unhide Post
+
+### Request
+**`PATCH /api/v1/admin/posts/:postId/unhide`**
+
+Restore a previously hidden post.
+
+**Authentication**: Required (Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Post unhidden successfully"
+}
+```
+
+---
+
+## Endpoint: Get Moderation Log
+
+### Request
+**`GET /api/v1/admin/posts/moderation-log`**
+
+View history of moderation actions (hide/unhide).
+
+**Authentication**: Required (Admin)
+
+#### Query Parameters
+- `page`, `limit`
+- `action`: Filter by `hidden`, `unhidden`
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "logs": [
+    {
+      "postId": "...",
+      "action": "hidden",
+      "moderator": { "firstName": "Admin" },
+      "reason": "Spam",
+      "timestamp": "..."
+    }
+  ]
+}
+```
+
+---
+
+## Endpoint: Realtime Monitoring
+
+### Request
+**`GET /api/v1/admin/monitoring/realtime`**
+
+Get real-time system stats (WebSocket connections, message throughput).
+
+**Authentication**: Required (Super Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "websocket": {
+    "activeConnections": 247,
+    "activeUsers": 198
+  },
+  "messaging": {
+    "throughputPerMinute": 52
+  },
+  "system": {
+    "uptime": 86400
+  }
+}
+```
+
+---
+
+## Endpoint: System Health
+
+### Request
+**`GET /api/v1/admin/monitoring/system`**
+
+Get database status and performance metrics.
+
+**Authentication**: Required (Super Admin)
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "database": {
+    "status": "connected",
+    "collections": { "users": 1500, "posts": 5000 }
+  },
+  "performance": {
+    "avgResponseTime": "45ms"
+  }
+}
+```
+

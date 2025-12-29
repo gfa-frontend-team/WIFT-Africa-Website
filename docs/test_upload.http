@@ -1,0 +1,91 @@
+@baseUrl = http://localhost:3001/api/v1
+@email = olaniyisal@gmail.com
+@password = Password12$
+@authToken = {{login.response.body.token}}
+
+### 1. Login to get Access Token
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+### 2. Upload Profile Photo
+POST {{baseUrl}}/users/me/profile-photo
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="photo"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/local/image.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 3. Upload Generic Image (For Posts)
+# @name uploadImage
+POST {{baseUrl}}/uploads?type=post
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryPostImage
+
+------WebKitFormBoundaryPostImage
+Content-Disposition: form-data; name="file"; filename="post-image.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/local/image.jpg
+------WebKitFormBoundaryPostImage--
+
+### 4. Get SAS Token for Video Upload
+# @name signVideo
+POST {{baseUrl}}/uploads/video/sign
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "fileName": "my-awesome-video.mp4"
+}
+
+### 5. Create Post with Multiple Media
+POST {{baseUrl}}/posts
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "content": "Check out my new photos and video! 📸🎥",
+    "visibility": "PUBLIC",
+    "media": [
+        {
+            "type": "image",
+            "url": "{{uploadImage.response.body.url}}"
+        },
+        {
+            "type": "video",
+            "url": "{{signVideo.response.body.blobUrl}}"
+        }
+    ]
+}
+
+### 6. Create Post with TOO MANY items (Test Limit)
+POST {{baseUrl}}/posts
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "content": "This should fail validation",
+    "media": [
+        { "type": "image", "url": "http://example.com/1.jpg" },
+        { "type": "image", "url": "http://example.com/2.jpg" },
+        { "type": "image", "url": "http://example.com/3.jpg" },
+        { "type": "image", "url": "http://example.com/4.jpg" },
+        { "type": "image", "url": "http://example.com/5.jpg" },
+        { "type": "image", "url": "http://example.com/6.jpg" },
+        { "type": "image", "url": "http://example.com/7.jpg" },
+        { "type": "image", "url": "http://example.com/8.jpg" },
+        { "type": "image", "url": "http://example.com/9.jpg" },
+        { "type": "image", "url": "http://example.com/10.jpg" },
+        { "type": "image", "url": "http://example.com/11.jpg" }
+    ]
+}

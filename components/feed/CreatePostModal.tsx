@@ -6,6 +6,8 @@ import Avatar from '@/components/ui/Avatar'
 import { usePostStore } from '@/lib/stores/postStore'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { usePostMutations } from '@/lib/hooks/usePostMutations'
+import { uploadApi } from '@/lib/api/upload'
+import ConfirmationModal from '@/components/ui/ConfirmationModal'
 
 interface CreatePostModalProps {
   isOpen: boolean
@@ -109,16 +111,37 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
     setMediaPreviews(mediaPreviews.filter((_, i) => i !== index))
   }
 
+  const [isUploading, setIsUploading] = useState(false)
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+
   const handleSubmit = async () => {
-    if (!content.trim() || isOverLimit || isCreating) return
+    if (!content.trim() || isOverLimit || isCreating || isUploading) return
 
     try {
-      // TODO: Upload media files and get URLs
-      // For now, we'll create posts without media
+      setIsUploading(true)
+      const media = []
+
+      // Upload files
+      for (const file of mediaFiles) {
+        if (file.type.startsWith('image/')) {
+          const response = await uploadApi.uploadFile(file, 'post')
+          media.push({
+            type: 'image' as const,
+            url: response.url
+          })
+        } else if (file.type.startsWith('video/')) {
+          const response = await uploadApi.uploadVideo(file)
+          media.push({
+            type: 'video' as const,
+            url: response.url
+          })
+        }
+      }
+
       await createPost({
         content,
         visibility,
-        // media: [] // Will be implemented when file upload is ready
+        media
       })
       
       // Clear form
@@ -130,20 +153,24 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
     } catch (error) {
       console.error('Failed to create post:', error)
       alert('Failed to create post. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
   }
 
   const handleClose = () => {
     if (content.trim() || mediaFiles.length > 0) {
-      if (confirm('You have unsaved changes. Do you want to discard them?')) {
-        setContent('')
-        setMediaFiles([])
-        setMediaPreviews([])
-        onClose()
-      }
+      setShowDiscardDialog(true)
     } else {
       onClose()
     }
+  }
+
+  const handleDiscard = () => {
+    setContent('')
+    setMediaFiles([])
+    setMediaPreviews([])
+    onClose()
   }
 
   const visibilityOptions = [
@@ -311,14 +338,24 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
             </span>
             <button
               onClick={handleSubmit}
-              disabled={!content.trim() || isOverLimit || isCreating}
+              disabled={!content.trim() || isOverLimit || isCreating || isUploading}
               className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isCreating ? 'Posting...' : 'Post'}
+              {isCreating || isUploading ? 'Posting...' : 'Post'}
             </button>
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={showDiscardDialog}
+        onClose={() => setShowDiscardDialog(false)}
+        onConfirm={handleDiscard}
+        title="Discard Post?"
+        message="You have unsaved changes. Are you sure you want to discard them?"
+        confirmText="Discard"
+        variant="danger"
+      />
     </div>
   )
 }

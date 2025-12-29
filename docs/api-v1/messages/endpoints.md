@@ -259,3 +259,55 @@ Get read receipts and statistics for a broadcast.
   ]
 }
 ```
+
+---
+
+## Endpoint: Archive Conversation
+
+### Request
+**`POST /api/v1/messages/conversations/:conversationId/archive`**
+
+Archive a conversation so it no longer appears in the main list.
+
+**Authentication**: Required
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| conversationId | string | ID of the conversation |
+
+### Response
+
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Conversation archived"
+}
+```
+
+---
+
+## Endpoint: Delete Message
+
+### Request
+**`DELETE /api/v1/messages/:messageId`**
+
+Delete a specific message.
+
+**Authentication**: Required
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| messageId | string | ID of the message |
+
+### Response
+
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Message deleted"
+}
+```

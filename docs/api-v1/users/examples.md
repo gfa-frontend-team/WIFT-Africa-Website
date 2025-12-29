@@ -1,60 +1,87 @@
 # Users Module - Usage Examples
 
 ## Overview
-Examples for user profile management, including file uploads and privacy settings.
+Practical examples for integrating Users module endpoints into your frontend application.
 
 ---
 
-## Get My Profile
+## Get Current User
+
+### Basic Usage (Fetch API)
+```typescript
+const response = await fetch('/api/v1/users/me', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log('User:', data.user);
+```
 
 ### React Hook Example
 ```typescript
 import { useState, useEffect } from 'react';
 
-function useMyProfile() {
-  const [profile, setProfile] = useState(null);
+function useCurrentUser() {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/api/v1/users/me/profile', {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    async function fetchUser() {
+      try {
+        const response = await fetch('/api/v1/users/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch user');
+        
+        const data = await response.json();
+        setUser(data.user);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    })
-    .then(res => res.json())
-    .then(data => {
-      setProfile(data);
-      setLoading(false);
-    });
-  }, []);
+    }
 
-  return { profile, loading };
+    fetchUser();
+  }, [token]);
+
+  return { user, loading, error };
 }
 ```
 
 ---
 
-## Update Profile
+## Update user Profile
 
 ### Basic Usage (Axios)
 ```typescript
 import axios from 'axios';
 
-const updateProfile = async (updates) => {
+const updateProfile = async (profileData) => {
   try {
-    const response = await axios.patch('/api/v1/users/me/profile', updates, {
+    const response = await axios.patch('/api/v1/users/me/profile', profileData, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    console.log('Updated:', response.data.profile);
-  } catch (err) {
-    console.error('Update failed', err);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 400) {
+      console.error('Validation Error:', error.response.data.message);
+    }
+    throw error;
   }
 };
 
 // Usage
 updateProfile({
-  headline: 'Award Winning Producer',
-  availabilityStatus: 'BUSY'
+  bio: 'Filmmaker based in Lagos',
+  headline: 'Director | Producer',
+  availabilityStatus: 'AVAILABLE'
 });
 ```
 
@@ -62,7 +89,7 @@ updateProfile({
 
 ## Upload Profile Photo
 
-### Javascript with FormData
+### Basic Usage (Fetch API)
 ```typescript
 const uploadPhoto = async (file) => {
   const formData = new FormData();
@@ -72,14 +99,16 @@ const uploadPhoto = async (file) => {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`
+      // Note: Content-Type is automatically set with boundary for FormData
     },
     body: formData
   });
 
-  const data = await response.json();
-  if (data.photoUrl) {
-    console.log('New ID:', data.photoUrl);
+  if (!response.ok) {
+    throw new Error('Upload failed');
   }
+
+  return await response.json();
 };
 ```
 
@@ -87,9 +116,9 @@ const uploadPhoto = async (file) => {
 
 ## Update Username
 
-### Error Handling Example
+### React Handler with Error Checking
 ```typescript
-const changeUsername = async (newUsername) => {
+const handleUsernameChange = async (newUsername) => {
   try {
     const response = await fetch('/api/v1/users/me/username', {
       method: 'PUT',
@@ -100,61 +129,128 @@ const changeUsername = async (newUsername) => {
       body: JSON.stringify({ username: newUsername })
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      if (response.status === 409) {
-        throw new Error('Username taken');
-      } else if (response.status === 429) {
-        throw new Error(`Too many changes. Remaining: ${data.changesRemaining}`);
-      } else {
-        throw new Error(data.error.message);
-      }
+    if (response.status === 409) {
+      alert('Username is already taken');
+      return;
     }
 
-    console.log('Success!', data.username);
+    if (response.status === 429) {
+      alert('Too many username changes. Please try again next month.');
+      return;
+    }
 
+    if (!response.ok) throw new Error('Failed to update');
+
+    const result = await response.json();
+    console.log('New username:', result.username);
+    
   } catch (error) {
-    alert(error.message);
+    console.error(error);
   }
 };
 ```
 
 ---
 
-## View Public Profile
+## Check Username Availability
 
-### Example
+### Debounced Check Example
 ```typescript
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { debounce } from 'lodash';
 
-function ProfilePage() {
-  const { identifier } = useParams(); // username or ID
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+function UsernameInput() {
+  const [username, setUsername] = useState('');
+  const [isAvailable, setIsAvailable] = useState(null);
 
-  useEffect(() => {
-    fetch(`/api/v1/profiles/${identifier}`)
-      .then(res => {
-        if (res.status === 403) throw new Error('Private Profile');
-        if (res.status === 404) throw new Error('Not Found');
-        return res.json();
-      })
-      .then(data => setData(data.profile))
-      .catch(err => setError(err.message));
-  }, [identifier]);
+  const checkAvailability = async (value) => {
+    if (value.length < 3) return;
+    
+    const response = await fetch(`/api/v1/users/me/username/check?username=${value}`);
+    const data = await response.json();
+    setIsAvailable(data.available);
+  };
 
-  if (error) return <div>Error: {error}</div>;
-  if (!data) return <div>Loading...</div>;
+  // Create debounced function once
+  const debouncedCheck = debounce(checkAvailability, 500);
+
+  const handleChange = (e) => {
+    const val = e.target.value;
+    setUsername(val);
+    if (val) debouncedCheck(val);
+    else setIsAvailable(null);
+  };
 
   return (
     <div>
-      <h1>{data.firstName} {data.lastName}</h1>
-      <p>{data.headline}</p>
-      {/* Conditionally render fields that might be hidden via privacy */}
-      {data.email && <p>Contact: {data.email}</p>}
+      <input value={username} onChange={handleChange} />
+      {isAvailable === true && <span style={{color: 'green'}}>Available</span>}
+      {isAvailable === false && <span style={{color: 'red'}}>Taken</span>}
     </div>
   );
 }
 ```
+
+---
+
+## Get Privacy Settings
+
+### Usage
+```typescript
+const getPrivacy = async () => {
+  const response = await fetch('/api/v1/users/me/privacy', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  
+  const { privacySettings } = await response.json();
+  
+  if (privacySettings.profileVisibility === 'PRIVATE') {
+    console.log('Profile is currently private');
+  }
+};
+```
+
+---
+
+## Upload CV
+
+### Usage
+```typescript
+const uploadCV = async (fileInput) => {
+  const file = fileInput.files[0];
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File too large (max 10MB)');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('cv', file);
+
+  try {
+    const response = await fetch('/api/v1/users/me/cv', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
+    
+    const result = await response.json();
+    console.log('CV uploaded:', result.cvFileName);
+  } catch (error) {
+    console.error('Upload error:', error);
+  }
+};
+```
+
+### Common Errors
+
+#### 400 Bad Request
+**Cause**: Validation failed (e.g., username regex mismatch, bio too long).
+**Solution**: Check input against validation rules in `endpoints.md`.
+
+#### 401 Unauthorized
+**Cause**: Missing or invalid Bearer token.
+**Solution**: Ensure user is logged in and token is attached to headers.
+
+#### 404 Not Found
+**Cause**: Resource (like a profile or CV) does not exist for this user.
+**Solution**: Ensure the user has created a profile/CV before accessing.

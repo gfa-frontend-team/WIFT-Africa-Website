@@ -210,3 +210,141 @@ Get a list of all approved members in the chapter.
   ]
 }
 ```
+
+---
+
+---
+
+## Endpoint: List Chapters (Public)
+
+### Request
+**`GET /api/v1/chapters`**
+
+List all chapters with optional filtering.
+
+**Authentication**: Public (or Authenticated)
+
+#### Query Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| country | string | Filter by country |
+| city | string | Filter by city |
+
+### Response
+**Status Code**: `200 OK`
+```json
+{
+  "chapters": [
+    {
+      "id": "676bd...",
+      "name": "WIFT Africa HQ",
+      "country": "Kenya",
+      "city": "Nairobi"
+    }
+  ]
+}
+```
+
+---
+
+## Endpoint: Get Chapter Details
+### Request
+**`GET /api/v1/chapters/:chapterId`**
+
+Retrieve details for a specific chapter.
+**Note**: Only accessible by Chapter Admins of the target chapter or Super Admins.
+
+**Authentication**: Required (Chapter Admin or Super Admin Role)
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
+| Content-Type | application/json | Yes |
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chapterId | string | ID of the chapter |
+
+### Response
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "id": "676bd2...",
+  "name": "WIFT Africa HQ",
+  "code": "WA-HQ",
+  "country": "Kenya",
+  "city": "Nairobi",
+  "description": "Headquarters chapter...",
+  "missionStatement": "Empowering women...",
+  "email": "hq@wiftafrica.org",
+  "phone": "+254...",
+  "website": "https://wiftafrica.org",
+  "isActive": true
+}
+```
+
+#### Error Responses
+##### 403 Forbidden
+```json
+{
+  "success": false,
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "You are not authorized to view this chapter's details"
+  }
+}
+```
+
+---
+
+## Endpoint: Update Chapter Details
+### Request
+**`PATCH /api/v1/chapters/:chapterId`**
+
+Update editable details for a specific chapter.
+**Note**: Only accessible by Chapter Admins of the target chapter or Super Admins.
+
+**Authentication**: Required (Chapter Admin or Super Admin Role)
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
+| Content-Type | application/json | Yes |
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chapterId | string | ID of the chapter |
+
+#### Request Body
+```json
+{
+  "description": "New description...",
+  "missionStatement": "New mission...",
+  "email": "new-email@wift.org",
+  "phone": "+1234567890",
+  "website": "https://new-site.org",
+  "facebookUrl": "...",
+  "twitterHandle": "...",
+  "instagramHandle": "...",
+  "linkedinUrl": "..."
+}
+```
+**Allowed Fields**: `description`, `missionStatement`, `email`, `phone`, `address`, `website`, `facebookUrl`, `twitterHandle`, `instagramHandle`, `linkedinUrl`.
+**Restricted Fields**: `name`, `code`, `country`, `city`, `foundedDate`, `isActive` (cannot be changed via this endpoint).
+
+### Response
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "id": "676bd2...",
+  "name": "WIFT Africa HQ",
+  "description": "New description...",
+  ...
+}
+```

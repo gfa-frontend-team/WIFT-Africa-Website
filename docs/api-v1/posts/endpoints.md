@@ -155,7 +155,46 @@ Get top-level comments for a post.
 }
 ```
 
+
 ---
+
+## Endpoint: Get Comment Replies
+
+### Request
+**`GET /api/v1/posts/comments/:commentId/replies`**
+
+Get nested replies for a specific comment.
+
+**Authentication**: Required
+
+#### Query Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| page | number | Page number |
+| limit | number | Limit per page |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "comments": [
+    {
+      "id": "676f6...",
+      "content": "I agree!",
+      "author": { ... },
+      "parentComment": "676f4...",
+      "createdAt": "..."
+    }
+  ],
+  "total": 1
+}
+```
+
+---
+
 
 ## Endpoint: Add Comment
 

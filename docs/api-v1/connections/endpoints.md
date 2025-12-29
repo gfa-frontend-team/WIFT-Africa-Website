@@ -271,3 +271,31 @@ Check if the current user is connected to a specific target user.
   "connected": true
 }
 ```
+
+---
+
+## Endpoint: Get Blocked Users
+
+### Request
+**`GET /api/v1/connections/blocked`**
+
+Retrieve a list of users blocked by the current user.
+
+**Authentication**: Required
+
+### Response
+
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "blockedUsers": [
+    {
+      "id": "UserBad...",
+      "firstName": "Spammer",
+      "lastName": "User",
+      "profilePhoto": "..."
+    }
+  ]
+}
+```
