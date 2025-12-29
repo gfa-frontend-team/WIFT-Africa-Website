@@ -1,0 +1,86 @@
+# Messaging Module Optimization Plan
+
+## Goal Description
+Refactor and optimize the messaging module to meet industry standards for scalability, reliability, and security. The current implementation has significant scalability bottlenecks in broadcast handling and lacks the necessary infrastructure for horizontal scaling.
+
+## Current Issues & Risks
+> [!WARNING]
+> **Scalability Risk**: Broadcast conversations store ALL recipients in a single `participants` array (MongoDB BSON limit risk) and iterating through thousands of users for socket events will block the event loop.
+
+> [!IMPORTANT]
+> **Missing Infrastructure**: `Redis` adapter for Socket.io is installed but NOT configured, preventing the application from running on multiple instances (horizontal scaling).
+
+> [!CAUTION]
+> **Data Integrity**: Massive `readBy` arrays in Message documents will cause performance degradation on writes and updates.
+
+## Proposed Changes
+
+### 1. Database Schema Optimization
+**Goal**: Decouple broadcast recipients from the Conversation document to allow for unlimited scale.
+
+#### [MODIFY] [src/models/Conversation.ts](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/models/Conversation.ts)
+- Remove strict `participants` requirement for Broadcasts.
+- Add `target` field:
+  ```typescript
+  target: {
+    type: 'ALL' | 'CHAPTER' | 'CUSTOM',
+    chapterId?: ObjectId,
+    ids?: ObjectId[] // Only for CUSTOM, max limit enforced
+  }
+  ```
+- Index `target.type` and `target.chapterId`.
+
+#### [MODIFY] [src/models/Message.ts](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/models/Message.ts)
+- Remove `readBy` array from the [Message](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/models/Message.ts#4-24) document to prevent unbounded growth.
+- **New Strategy**: Track read status in a separate collection `MessageReadStatus` for tracking individual user reads without locking the main message document.
+
+#### [NEW] `src/models/MessageReadStatus.ts`
+- Schema: `{ messageId, userId, readAt, conversationId }`
+- Compound Index: `{ messageId: 1, userId: 1 }`
+
+### 2. Socket.io Scalability & Reliability
+**Goal**: Enable horizontal scaling and more efficient broadcasting.
+
+#### [MODIFY] [src/socket/socketServer.ts](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/socket/socketServer.ts)
+- **Implement Redis Adapter**: Initialize the Redis adapter to allow multiple server instances to communicate.
+- **Smart Rooms**:
+  - Auto-join users to `global` room.
+  - Auto-join users to `chapter:{chapterId}` room.
+- **Efficient Broadcasting**:
+  - Instead of looping `recipients.forEach(emit)`, use `io.to('global').emit()` or `io.to('chapter:123').emit()`.
+- **Enhanced Auth**:
+  - Verify user status (not just token validity) against DB to prevent banned users from connecting.
+
+### 3. Service Layer Refactoring
+**Goal**: Adapt business logic to new schema and socket strategies.
+
+#### [MODIFY] [src/services/message.service.ts](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/services/message.service.ts)
+- [sendBroadcastMessage](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/services/message.service.ts#71-166):
+  - Stop adding all users to `participants`.
+  - Set `target` fields.
+  - Use optimized Socket room emission.
+- [getConversations](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/modules/messages/messages.controller.ts#81-102):
+  - Update query to find broadcasts based on `target` criteria matching the user (Global + My Chapter + Custom target) + Direct `participants`.
+- [markAsRead](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/modules/messages/messages.controller.ts#124-142):
+  - Upsert into `MessageReadStatus` instead of pushing to `Message.readBy`.
+
+### 4. Controller & Routes
+#### [MODIFY] [src/modules/messages/messages.controller.ts](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/modules/messages/messages.controller.ts)
+- Add validation limit for `CUSTOM` recipient list size (e.g., max 100 users for custom, otherwise use Chapter/All).
+
+## Verification Plan
+
+### Automated Tests
+Since there are no existing tests, validification will be primarily manual and through checking logic flow.
+- [ ] **Socket Connection**: Verify server starts with Redis adapter enabled (check logs).
+- [ ] **Broadcast Efficiency**: Create a broadcast and verify DB [Conversation](file:///Users/khalidsalman-yusuf/Documents/Unleashified/Active/WIFT-Africa-Backend/src/models/Conversation.ts#10-23) document does NOT contain thousands of IDs.
+- [ ] **Read Status**: Mark a message as read and verify a `MessageReadStatus` document is created.
+
+### Manual Verification
+1.  **Direct Message**: Send DM between two users. Verify real-time receipt and persistence.
+2.  **Broadcast (Chapter)**:
+    -   Log in as Chapter Admin.
+    -   Send Broadcast to Chapter.
+    -   Log in as Chapter Member -> Should receive.
+    -   Log in as Different Chapter Member -> Should NOT receive.
+3.  **Performance/Load**: (Simulated) Check that sending a "All Members" broadcast returns immediately and doesn't hang the server.

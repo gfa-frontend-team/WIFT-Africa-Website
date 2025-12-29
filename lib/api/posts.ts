@@ -33,6 +33,7 @@ export interface Post {
   commentsCount: number
   sharesCount: number
   savesCount: number
+  likes?: string[]
   isLiked: boolean
   isSaved: boolean
   isPinned: boolean
@@ -127,7 +128,8 @@ const mapComment = (comment: any): Comment => {
     author: comment.author ? {
       ...comment.author,
       id: comment.author.id || comment.author._id
-    } : comment.author
+    } : comment.author,
+    parentCommentId: comment.parentComment || comment.parentCommentId
   }
 }
 
@@ -247,6 +249,17 @@ export const postsApi = {
    */
   getComments: async (postId: string, page = 1, limit = 20): Promise<CommentsResponse> => {
     const response = await apiClient.get<CommentsResponse>(`/posts/${postId}/comments?page=${page}&limit=${limit}`)
+    if (response && response.comments) {
+      response.comments = response.comments.map(mapComment)
+    }
+    return response
+  },
+
+  /**
+   * Get replies for a comment
+   */
+  getReplies: async (commentId: string, page = 1, limit = 10): Promise<CommentsResponse> => {
+    const response = await apiClient.get<CommentsResponse>(`/posts/comments/${commentId}/replies?page=${page}&limit=${limit}`)
     if (response && response.comments) {
       response.comments = response.comments.map(mapComment)
     }

@@ -1,9 +1,11 @@
+# Users API Documentation
+
 ## Endpoint: Get Current User
 
 ### Request
 **`GET /api/v1/users/me`**
 
-Retrieve basic information about the currently authenticated user.
+Get basic information about the currently authenticated user.
 
 **Authentication**: Required
 
@@ -11,7 +13,6 @@ Retrieve basic information about the currently authenticated user.
 | Header | Value | Required |
 |--------|-------|----------|
 | Authorization | Bearer \<token\> | Yes |
-| Content-Type | application/json | Yes |
 
 ### Response
 
@@ -21,37 +22,47 @@ Retrieve basic information about the currently authenticated user.
 ```json
 {
   "user": {
-    "id": "676ac5...",
-    "email": "jane.doe@example.com",
-    "firstName": "Jane",
+    "userId": "usr_123456789",
+    "email": "user@example.com",
+    "firstName": "John",
     "lastName": "Doe",
-    "profilePhoto": "https://...",
-    "emailVerified": true,
-    "accountType": "CHAPTER_MEMBER",
-    "membershipStatus": "APPROVED",
-    "onboardingComplete": true,
-    "onboardingStep": 5,
-    "chapter": {
-      "id": "676bd2...",
-      "name": "WIFT Africa HQ",
-      "code": "HQ",
-      "country": "South Africa"
-    },
-    "memberType": "NEW",
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "lastLoginAt": "2024-01-05T12:00:00.000Z"
+    "username": "johndoe",
+    "role": "MEMBER",
+    "profilePhotoUrl": "https://example.com/photo.jpg",
+    "isEmailVerified": true,
+    "createdAt": "2024-01-01T00:00:00.000Z"
   }
+}
+```
+
+**Response Fields**:
+- `user.userId` (string): Unique user identifier
+- `user.email` (string): User's email address
+- `user.firstName` (string): First name
+- `user.lastName` (string): Last name
+- `user.username` (string): Unique username
+- `user.role` (string): User role (e.g., MEMBER, ADMIN)
+- `user.profilePhotoUrl` (string): URL to profile photo
+- `user.isEmailVerified` (boolean): Whether email is verified
+- `user.createdAt` (string): Account creation timestamp
+
+#### Error Responses
+
+##### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized"
 }
 ```
 
 ---
 
-## Endpoint: Get My Profile
+## Endpoint: Get Complete Profile
 
 ### Request
 **`GET /api/v1/users/me/profile`**
 
-Get the user's complete profile, including roles, specializations, social links, and completion status.
+Get the user's complete profile including roles, specializations, and additional details.
 
 **Authentication**: Required
 
@@ -59,7 +70,6 @@ Get the user's complete profile, including roles, specializations, social links,
 | Header | Value | Required |
 |--------|-------|----------|
 | Authorization | Bearer \<token\> | Yes |
-| Content-Type | application/json | Yes |
 
 ### Response
 
@@ -69,35 +79,42 @@ Get the user's complete profile, including roles, specializations, social links,
 ```json
 {
   "user": {
-    "id": "676ac5...",
-    "email": "jane.doe@example.com",
-     "chapter": {
-      "id": "676bd2...",
-      "name": "WIFT Africa HQ"
-    }
+    "userId": "usr_123456789",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "user@example.com",
+    "username": "johndoe"
   },
   "profile": {
-    "roles": ["DIRECTOR", "WRITER"],
-    "primaryRole": "DIRECTOR",
-    "isMultihyphenate": true,
-    "writerSpecialization": "FILM",
-    "crewSpecializations": [],
-    "businessSpecializations": [],
-    "headline": "Award-winning Director",
-    "bio": "Passionate filmmaker...",
-    "location": "Lagos, Nigeria",
-    "availabilityStatus": "AVAILABLE",
-    "website": "https://janedoe.com",
+    "id": "prf_123456789",
+    "bio": "Film enthusiast and producer",
+    "headline": "Independent Producer",
+    "location": "Nairobi, Kenya",
+    "website": "https://johndoe.com",
     "imdbUrl": "https://imdb.com/name/nm1234567",
-    "linkedinUrl": null,
-    "instagramHandle": "janedoe_films",
-    "twitterHandle": null,
-    "completeness": {
-      "completionPercentage": 85,
-      "missingFields": ["linkedinUrl"],
-      "isComplete": false
-    }
+    "linkedinUrl": "https://linkedin.com/in/johndoe",
+    "instagramHandle": "johndoe_film",
+    "twitterHandle": "johndoe_tweets",
+    "availabilityStatus": "AVAILABLE",
+    "profileVisibility": "PUBLIC",
+    "cvUrl": "https://example.com/cv.pdf"
   }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+##### 404 Not Found
+```json
+{
+  "description": "Profile not found"
 }
 ```
 
@@ -108,7 +125,7 @@ Get the user's complete profile, including roles, specializations, social links,
 ### Request
 **`PATCH /api/v1/users/me/profile`**
 
-Update user profile details such as bio, headline, and social links.
+Update the user's public profile information.
 
 **Authentication**: Required
 
@@ -121,32 +138,33 @@ Update user profile details such as bio, headline, and social links.
 #### Request Body
 ```json
 {
-  "bio": "Updated bio text...",
-  "headline": "New Headline",
-  "location": "Cape Town, SA",
-  "website": "https://newwebsite.com",
-  "imdbUrl": "",
-  "linkedinUrl": "https://linkedin.com/in/jane",
-  "instagramHandle": "jane_updated",
-  "twitterHandle": "jane_tweets",
-  "availabilityStatus": "BUSY"
+  "bio": "New bio content...",
+  "headline": "Senior Director",
+  "location": "Lagos, Nigeria",
+  "website": "https://newsite.com",
+  "availabilityStatus": "BUSY",
+  "twitterHandle": "new_handle"
 }
 ```
 
 **Field Descriptions**:
-- `bio` (string, optional): Max 1000 chars
-- `headline` (string, optional): Max 255 chars
-- `location` (string, optional): Max 100 chars
-- `website` (string, optional): Valid URL or empty string
-- `imdbUrl` (string, optional): Valid URL or empty string
-- `linkedinUrl` (string, optional): Valid URL or empty string
-- `instagramHandle` (string, optional): Max 50 chars
-- `twitterHandle` (string, optional): Max 50 chars
-- `availabilityStatus` (string, optional): `AVAILABLE`, `BUSY`, or `NOT_LOOKING`
+- `bio` (string, optional): User biography (max 1000 chars)
+- `headline` (string, optional): Professional headline (max 255 chars)
+- `location` (string, optional): City/Country (max 100 chars)
+- `website` (string, optional): Personal website URL
+- `imdbUrl` (string, optional): IMDb profile URL
+- `linkedinUrl` (string, optional): LinkedIn profile URL
+- `instagramHandle` (string, optional): Instagram username (max 50 chars)
+- `twitterHandle` (string, optional): Twitter username (max 50 chars)
+- `availabilityStatus` (string, optional): Work availability status
 
 #### Validation Rules
-- URLs must be valid format
-- Field lengths are enforced
+- `bio`: Max 1000 characters
+- `headline`: Max 255 characters
+- `location`: Max 100 characters
+- `website`, `imdbUrl`, `linkedinUrl`: Must be valid URLs or empty string
+- `instagramHandle`, `twitterHandle`: Max 50 characters
+- `availabilityStatus`: Must be one of `AVAILABLE`, `BUSY`, `NOT_LOOKING`
 
 ### Response
 
@@ -155,18 +173,30 @@ Update user profile details such as bio, headline, and social links.
 **Status Code**: `200 OK`
 ```json
 {
-  "message": "Profile updated successfully",
-  "profile": {
-    "headline": "New Headline",
-    "bio": "Updated bio text...",
-    "location": "Cape Town, SA",
-    "availabilityStatus": "BUSY",
-    "website": "https://newwebsite.com",
-    "imdbUrl": null,
-    "linkedinUrl": "https://linkedin.com/in/jane",
-    "instagramHandle": "jane_updated",
-    "twitterHandle": "jane_tweets"
-  }
+  "id": "prf_123456789",
+  "bio": "New bio content...",
+  "headline": "Senior Director",
+  "location": "Lagos, Nigeria",
+  "website": "https://newsite.com",
+  "availabilityStatus": "BUSY",
+  "updatedAt": "2024-03-15T10:30:00.000Z"
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+```json
+{
+  "error": "ZodError",
+  "message": "Validation error"
+}
+```
+
+##### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized"
 }
 ```
 
@@ -177,7 +207,7 @@ Update user profile details such as bio, headline, and social links.
 ### Request
 **`POST /api/v1/users/me/profile-photo`**
 
-Upload a new profile photo. Replaces any existing photo.
+Upload a new profile photo.
 
 **Authentication**: Required
 
@@ -187,10 +217,9 @@ Upload a new profile photo. Replaces any existing photo.
 | Authorization | Bearer \<token\> | Yes |
 | Content-Type | multipart/form-data | Yes |
 
-#### Request Body (Multipart/Form-Data)
-| Field | Type | Description |
-|-------|------|-------------|
-| photo | file | Image file (JPG, PNG, WebP, max 5MB) |
+#### Request Body
+Form Data:
+- `photo`: File (Required) - JPG, PNG, or WebP image (max 5MB)
 
 ### Response
 
@@ -199,8 +228,24 @@ Upload a new profile photo. Replaces any existing photo.
 **Status Code**: `200 OK`
 ```json
 {
-  "message": "Profile photo uploaded successfully",
-  "photoUrl": "https://storage.example.com/uploads/photo.jpg"
+  "message": "Photo uploaded successfully",
+  "photoUrl": "https://storage.example.com/uploads/users/photo_123.jpg"
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+```json
+{
+  "error": "No file uploaded"
+}
+```
+
+##### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized"
 }
 ```
 
@@ -211,7 +256,7 @@ Upload a new profile photo. Replaces any existing photo.
 ### Request
 **`DELETE /api/v1/users/me/profile-photo`**
 
-Remove the current profile photo.
+Remove the current profile photo and revert to default.
 
 **Authentication**: Required
 
@@ -227,7 +272,16 @@ Remove the current profile photo.
 **Status Code**: `200 OK`
 ```json
 {
-  "message": "Profile photo deleted successfully"
+  "message": "Photo deleted successfully"
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized"
 }
 ```
 
@@ -238,7 +292,7 @@ Remove the current profile photo.
 ### Request
 **`PUT /api/v1/users/me/username`**
 
-Change the user's username. Limited to 3 changes per month.
+Change the user's unique username.
 
 **Authentication**: Required
 
@@ -251,17 +305,15 @@ Change the user's username. Limited to 3 changes per month.
 #### Request Body
 ```json
 {
-  "username": "jane-filmmaker"
+  "username": "new-username"
 }
 ```
 
-**Field Descriptions**:
-- `username` (string, required): New username (3-30 chars, lowercase alphanumeric + hyphens)
-
 #### Validation Rules
-- Must match regex: `^[a-z0-9-]+$`
-- Must differ from current username
-- Must be unique across system
+- `username`:
+  - Length: 3-30 characters
+  - Pattern: Lowercase letters, numbers, and hyphens only (`^[a-z0-9-]+$`)
+  - Must be unique
 
 ### Response
 
@@ -271,32 +323,30 @@ Change the user's username. Limited to 3 changes per month.
 ```json
 {
   "message": "Username updated successfully",
-  "username": "jane-filmmaker",
-  "changesRemaining": 2
+  "username": "new-username"
 }
 ```
 
 #### Error Responses
 
+##### 400 Bad Request
+```json
+{
+  "error": "Validation error"
+}
+```
+
 ##### 409 Conflict
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "CONFLICT",
-    "message": "Username is already taken"
-  }
+  "error": "Username already taken"
 }
 ```
 
 ##### 429 Too Many Requests
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "TOO_MANY_REQUESTS",
-    "message": "Too many username changes"
-  }
+  "error": "Too many username changes (max 3 per month)"
 }
 ```
 
@@ -307,14 +357,14 @@ Change the user's username. Limited to 3 changes per month.
 ### Request
 **`GET /api/v1/users/me/username/check`**
 
-Check if a username satisfies validation rules and is available.
+Check if a username is available for use.
 
-**Authentication**: Required
+**Authentication**: Not specified (implied public or user context)
 
 #### Query Parameters
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| username | string | Yes | Username to test |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| username | string | Yes | - | Username to check |
 
 ### Response
 
@@ -324,10 +374,57 @@ Check if a username satisfies validation rules and is available.
 ```json
 {
   "available": true,
-  "username": "jane-filmmaker"
+  "username": "requested-username"
 }
 ```
-*Note: If `available` is false, an `error` field may explain why (e.g., "Username is already taken").*
+OR
+```json
+{
+  "available": false,
+  "username": "requested-username",
+  "error": "Username is already taken"
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+```json
+{
+  "error": "Username is required"
+}
+```
+
+---
+
+## Endpoint: Get Username Suggestions
+
+### Request
+**`GET /api/v1/users/me/username/suggestions`**
+
+Get a list of available username suggestions based on the user's name.
+
+**Authentication**: Required
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "suggestions": [
+    "johndoe123",
+    "john-doe-official",
+    "thejohndoe"
+  ]
+}
+```
 
 ---
 
@@ -336,9 +433,14 @@ Check if a username satisfies validation rules and is available.
 ### Request
 **`GET /api/v1/users/me/privacy`**
 
-Get the current privacy configuration for the user.
+Get the user's current privacy configuration.
 
 **Authentication**: Required
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
 
 ### Response
 
@@ -365,26 +467,35 @@ Get the current privacy configuration for the user.
 ### Request
 **`PATCH /api/v1/users/me/privacy`**
 
-Modify privacy preferences.
+Update the user's privacy settings.
 
 **Authentication**: Required
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
+| Content-Type | application/json | Yes |
 
 #### Request Body
 ```json
 {
-  "profileVisibility": "CHAPTER_ONLY",
-  "showEmail": true,
+  "profileVisibility": "CONNECTIONS_ONLY",
+  "showEmail": false,
   "showPhone": false
 }
 ```
 
 **Field Descriptions**:
-- `profileVisibility` (string): `PUBLIC`, `CHAPTER_ONLY`, `CONNECTIONS_ONLY`, or `PRIVATE`
-- `showEmail` (boolean): Whether to show email to allowed viewers
-- `showPhone` (boolean): Whether to show phone number
-- `showSocialLinks` (boolean): Whether to show social media links
-- `showChapter` (boolean): Whether to show chapter affiliation
-- `showRoles` (boolean): Whether to show professional roles
+- `profileVisibility` (string, optional): Who can view the profile
+- `showEmail` (boolean, optional): Whether to display email publicly
+- `showPhone` (boolean, optional): Whether to display phone publicly
+- `showSocialLinks` (boolean, optional): Whether to display social links
+- `showChapter` (boolean, optional): Whether to display chapter affiliation
+- `showRoles` (boolean, optional): Whether to display roles
+
+#### Validation Rules
+- `profileVisibility`: Must be one of `PUBLIC`, `CHAPTER_ONLY`, `CONNECTIONS_ONLY`, `PRIVATE`
 
 ### Response
 
@@ -395,8 +506,8 @@ Modify privacy preferences.
 {
   "message": "Privacy settings updated successfully",
   "privacySettings": {
-    "profileVisibility": "CHAPTER_ONLY",
-    "showEmail": true,
+    "profileVisibility": "CONNECTIONS_ONLY",
+    "showEmail": false,
     "showPhone": false,
     "showSocialLinks": true,
     "showChapter": true,
@@ -412,9 +523,14 @@ Modify privacy preferences.
 ### Request
 **`GET /api/v1/users/me/share-link`**
 
-Get a direct link to the user's public profile.
+Get a direct link to share the user's profile.
 
 **Authentication**: Required
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
 
 ### Response
 
@@ -423,9 +539,9 @@ Get a direct link to the user's public profile.
 **Status Code**: `200 OK`
 ```json
 {
-  "url": "https://member.wiftafrica.org/profile/jane-doe",
-  "username": "jane-doe",
-  "profileSlug": "jane-doe-123"
+  "url": "https://app.example.com/in/johndoe",
+  "username": "johndoe",
+  "profileSlug": "johndoe"
 }
 ```
 
@@ -436,7 +552,7 @@ Get a direct link to the user's public profile.
 ### Request
 **`POST /api/v1/users/me/cv`**
 
-Upload a CV/Resume document. Replaces existing CV.
+Upload a CV or Resume document.
 
 **Authentication**: Required
 
@@ -446,10 +562,9 @@ Upload a CV/Resume document. Replaces existing CV.
 | Authorization | Bearer \<token\> | Yes |
 | Content-Type | multipart/form-data | Yes |
 
-#### Request Body (Multipart/Form-Data)
-| Field | Type | Description |
-|-------|------|-------------|
-| cv | file | Document (PDF, DOC, DOCX, max 10MB) |
+#### Request Body
+Form Data:
+- `cv`: File (Required) - PDF, DOC, or DOCX (max 10MB)
 
 ### Response
 
@@ -459,39 +574,17 @@ Upload a CV/Resume document. Replaces existing CV.
 ```json
 {
   "message": "CV uploaded successfully",
-  "cvFileName": "MyResume.pdf",
-  "cvUploadedAt": "2024-01-05T12:30:00.000Z"
+  "cvFileName": "john-doe-resume.pdf",
+  "cvUploadedAt": "2024-03-15T10:30:00.000Z"
 }
 ```
 
----
-
-## Endpoint: Download CV
-
-### Request
-**`GET /api/v1/users/me/cv/download`**
-
-Download the user's uploaded CV.
-
-**Authentication**: Required
-
-### Response
-
-#### Success Response
-
-**Status Code**: `200 OK`
-- Helper triggers file download (binary content) with appropriate `Content-Type` headers (e.g., `application/pdf`).
-
 #### Error Responses
 
-##### 404 Not Found
+##### 400 Bad Request
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "No CV found"
-  }
+  "error": "No file uploaded"
 }
 ```
 
@@ -502,9 +595,14 @@ Download the user's uploaded CV.
 ### Request
 **`DELETE /api/v1/users/me/cv`**
 
-Remove the user's uploaded CV.
+Delete the currently stored CV.
 
 **Authentication**: Required
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
 
 ### Response
 
@@ -517,67 +615,50 @@ Remove the user's uploaded CV.
 }
 ```
 
+#### Error Responses
+
+##### 404 Not Found
+```json
+{
+  "error": "No CV found"
+}
+```
+
 ---
 
-## Endpoint: Get Public Profile (Profiles Module)
+## Endpoint: Download CV
 
 ### Request
-**`GET /api/v1/profiles/:identifier`**
+**`GET /api/v1/users/me/cv/download`**
 
-Get the public profile of another user by their username or User ID. The amount of data returned depends on the owner's privacy settings and the viewer's relationship (same chapter, authenticated, public).
+Download the user's stored CV file.
 
-**Authentication**: Optional (supports public view)
+**Authentication**: Required
 
-#### Path Parameters
-| Parameter | Type | description |
-|-----------|------|-------------|
-| identifier | string | Username (e.g., `jane-doe`) or User ID |
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
 
 ### Response
 
 #### Success Response
 
 **Status Code**: `200 OK`
-```json
-{
-  "profile": {
-    "firstName": "Jane",
-    "lastName": "Doe",
-    "username": "jane-doe",
-    "headline": "Award-winning Director",
-    "bio": "Passionate filmmaker...",
-    "primaryRole": "DIRECTOR",
-    "location": "Lagos, Nigeria",
-    "roles": ["DIRECTOR", "WRITER"],
-    "chapter": {
-      "id": "...",
-      "name": "WIFT Africa HQ"
-    }
-    // Other fields depend on privacy settings
-  }
-}
-```
+**Content-Type**: `application/pdf`, `application/msword`, or `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+
+(Binary File Content)
 
 #### Error Responses
-
-##### 403 Forbidden
-```json
-{
-  "success": false,
-  "error": {
-    "code": "FORBIDDEN",
-    "message": "This profile is private"
-  }
-}
-```
 
 ##### 404 Not Found
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Profile not found"
-  }
+  "error": "CV not found"
 }
 ```
+
+### Notes
+- Profile updates are partial updates; only provided fields will be changed.
+- Username changes may have rate limits applied (e.g., 3 times per month).
+- File uploads have size limits: Profile Photo (5MB), CV (10MB).

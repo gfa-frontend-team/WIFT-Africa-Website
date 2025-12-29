@@ -66,6 +66,7 @@ export default function PostCard({ post }: PostCardProps) {
   }
 
   const isOwnPost = user?.id === post.author.id
+  const isLiked = post.isLiked || (user && post.likes?.includes(user.id))
 
   return (
     <article className="bg-card border border-border rounded-lg">
@@ -191,18 +192,18 @@ export default function PostCard({ post }: PostCardProps) {
           onClick={handleLike}
           disabled={isLiking}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-            post.isLiked
+            isLiked
               ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'
               : 'text-muted-foreground hover:bg-accent'
           } ${isLiking ? 'scale-95' : 'hover:scale-105 active:scale-95'}`}
         >
           <Heart
             className={`h-5 w-5 transition-all duration-200 ${
-              post.isLiked ? 'fill-current animate-pulse' : ''
+              isLiked ? 'fill-current animate-pulse' : ''
             }`}
           />
           <span className="text-sm font-medium hidden sm:inline">
-            {post.isLiked ? 'Liked' : 'Like'}
+            {isLiked ? 'Liked' : 'Like'}
           </span>
         </button>
 

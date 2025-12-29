@@ -1,0 +1,50 @@
+
+### Login
+# @name login
+POST http://localhost:3001/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "khalid@unleashified.com",
+  "password": "Password123!"
+}
+
+### Create Post
+# @name createPost
+POST http://localhost:5001/api/v1/posts
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.tokens.accessToken}}
+
+{
+  "content": "Testing nested comments feature!",
+  "visibility": "PUBLIC"
+}
+
+@postId = {{createPost.response.body.post._id}}
+
+### Create Root Comment
+# @name createComment
+POST http://localhost:5001/api/v1/posts/{{postId}}/comments
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.tokens.accessToken}}
+
+{
+  "content": "This is a root comment."
+}
+
+@commentId = {{createComment.response.body.comment._id}}
+
+### Create Reply to Comment
+# @name createReply
+POST http://localhost:5001/api/v1/posts/{{postId}}/comments
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.tokens.accessToken}}
+
+{
+  "content": "This is a reply to the root comment.",
+  "parentCommentId": "{{commentId}}"
+}
+
+### Get Replies (New Endpoint)
+GET http://localhost:5001/api/v1/posts/comments/{{commentId}}/replies
+Authorization: Bearer {{login.response.body.tokens.accessToken}}
