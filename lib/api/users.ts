@@ -66,7 +66,18 @@ export const usersApi = {
    * Get current user information
    */
   getCurrentUser: async (): Promise<{ user: User }> => {
-    return await apiClient.get<{ user: User }>('/users/me')
+    const response = await apiClient.get<any>('/users/me')
+    // Fix: Map backend userId to frontend id expected by types
+    if (response.user) {
+      if (response.user.userId && !response.user.id) {
+        response.user.id = response.user.userId
+      }
+      // Ensure other ID mismatches are handled
+      if (response.user._id && !response.user.id) {
+        response.user.id = response.user._id
+      }
+    }
+    return response as { user: User }
   },
 
   /**

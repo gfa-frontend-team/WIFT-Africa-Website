@@ -33,13 +33,33 @@ export default function NotificationItem({ notification }: NotificationItemProps
     }
   }
 
+  // Sanitize action URL to handle legacy or incorrect routes
+  const getSanitizedUrl = (url?: string) => {
+    if (!url) return undefined
+    
+    // Map non-existent dashboard to feed
+    if (url === '/dashboard' || url.startsWith('/dashboard/')) {
+       return url.replace('/dashboard', '/feed')
+    }
+
+    // Map legacy profile routes
+    // Backend might match /profile/:id, frontend uses /in/:id
+    if (url.startsWith('/profile/')) {
+      return url.replace('/profile/', '/in/')
+    }
+
+    return url
+  }
+
+  const actionUrl = getSanitizedUrl(notification.actionUrl)
+
   const handleClick = (e?: React.MouseEvent) => {
     // If it's a link click, let it propagate naturally unless we specifically want to intercept
     if (!notification.isRead) {
       markAsRead(notification.id)
     }
 
-    if (!notification.actionUrl) {
+    if (!actionUrl) {
        setIsModalOpen(true)
     }
   }
@@ -129,7 +149,7 @@ export default function NotificationItem({ notification }: NotificationItemProps
         {notification.actionUrl && (
             <div className="pt-4 flex justify-end">
                 <Link 
-                    href={notification.actionUrl}
+                    href={actionUrl || notification.actionUrl}
                     className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
                     View Related
@@ -139,12 +159,12 @@ export default function NotificationItem({ notification }: NotificationItemProps
     </div>
   )
 
-  if (notification.actionUrl) {
+  if (actionUrl) {
     return (
         <div onClick={(e) => {
              if (!notification.isRead) markAsRead(notification.id)
         }}>
-         <Link href={notification.actionUrl}>
+         <Link href={actionUrl}>
             <div className={`flex items-start gap-4 p-4 border-b border-border hover:bg-muted/50 transition-colors cursor-pointer ${!notification.isRead ? 'bg-primary/5' : ''}`}>
                {ContentInner}
             </div>

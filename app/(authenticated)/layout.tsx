@@ -22,8 +22,6 @@ export default function AuthenticatedLayout({
   }, [])
 
 
-  
-  // const [isChecking, setIsChecking] = useState(true) // Removed local state in favor of hook state
 
   useEffect(() => {
     // Only check auth when hydration is done

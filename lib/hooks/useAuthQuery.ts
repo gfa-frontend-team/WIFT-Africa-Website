@@ -12,29 +12,43 @@ export const authKeys = {
 export function useUser() {
   const { setUser, clearUser } = useUserStore()
 
+  // Check for token existence
+  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('accessToken')
+
   const query = useQuery({
     queryKey: authKeys.user,
     queryFn: async () => {
       const response = await usersApi.getCurrentUser()
       return response.user
     },
-    staleTime: Infinity, // User data rarely changes automatically
-    gcTime: 1000 * 60 * 60 * 24, // Keep in garbage collection for 24h
-    retry: 1, // Don't retry too many times if auth fails
-    enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24,
+    retry: 1,
+    enabled: hasToken,
   })
 
   // Sync with Zustand store for global access
   useEffect(() => {
     if (query.data) {
       setUser(query.data)
-    } else if (query.isError) {
-      // Only clear user if the error is due to auth failure, 
-      // but simpler to just let the API client handle forceLogout for 401s.
-      // However, if we mount and fail to fetch user, we might want to ensure store is empty.
-      // But let's avoid aggressive clearing here to prevent flashing if it's just a network error.
+    } else if (!hasToken) {
+      clearUser()
     }
-  }, [query.data, query.isError, setUser])
+  }, [query.data, setUser, clearUser, hasToken])
+
+  // Fix for "stuck in loading" issue:
+  // If there is no token, useQuery with enabled:false returns status:'pending', fetchStatus:'idle'
+  // which is typically interpreted as isLoading:true in old React Query versions or dependent logic.
+  // We explicitly return isLoading:false if we know there is no token.
+  if (!hasToken) {
+    return {
+      ...query,
+      data: null,
+      isLoading: false,
+      isPending: false, 
+      status: 'success', // Treat "no token" as a settled state (unauthenticated)
+    } as unknown as typeof query
+  }
 
   return query
 }
