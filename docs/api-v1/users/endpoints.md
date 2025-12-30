@@ -97,7 +97,12 @@ Get the user's complete profile including roles, specializations, and additional
     "twitterHandle": "johndoe_tweets",
     "availabilityStatus": "AVAILABLE",
     "profileVisibility": "PUBLIC",
-    "cvUrl": "https://example.com/cv.pdf"
+    "cvUrl": "https://example.com/cv.pdf",
+    "completeness": {
+      "completionPercentage": 85,
+      "missingFields": ["bio", "location"],
+      "isComplete": false
+    }
   }
 }
 ```

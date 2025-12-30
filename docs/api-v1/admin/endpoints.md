@@ -452,36 +452,7 @@ Restore a previously hidden post.
 }
 ```
 
----
 
-## Endpoint: Get Moderation Log
-
-### Request
-**`GET /api/v1/admin/posts/moderation-log`**
-
-View history of moderation actions (hide/unhide).
-
-**Authentication**: Required (Admin)
-
-#### Query Parameters
-- `page`, `limit`
-- `action`: Filter by `hidden`, `unhidden`
-
-### Response
-**Status Code**: `200 OK`
-```json
-{
-  "logs": [
-    {
-      "postId": "...",
-      "action": "hidden",
-      "moderator": { "firstName": "Admin" },
-      "reason": "Spam",
-      "timestamp": "..."
-    }
-  ]
-}
-```
 
 ---
 
@@ -507,31 +478,6 @@ Get real-time system stats (WebSocket connections, message throughput).
   },
   "system": {
     "uptime": 86400
-  }
-}
-```
-
----
-
-## Endpoint: System Health
-
-### Request
-**`GET /api/v1/admin/monitoring/system`**
-
-Get database status and performance metrics.
-
-**Authentication**: Required (Super Admin)
-
-### Response
-**Status Code**: `200 OK`
-```json
-{
-  "database": {
-    "status": "connected",
-    "collections": { "users": 1500, "posts": 5000 }
-  },
-  "performance": {
-    "avgResponseTime": "45ms"
   }
 }
 ```

@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { isUsernameReserved } from '@/lib/constants/reserved-usernames'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useConnections } from '@/lib/hooks/useConnections'
+import ConnectModal from '@/components/connections/ConnectModal'
 import { usePublicProfile } from '@/lib/hooks/usePublicProfile'
 import { useProfile } from '@/lib/hooks/useProfile'
 import ProfileLayout from '@/components/layout/ProfileLayout'
@@ -90,20 +92,33 @@ export default function UnifiedProfilePage() {
   }, [isOwner, isAuthenticated, targetId, connectionStatusData, outgoingRequests])
 
 
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
+
+
   // Actions
-  const handleConnect = async () => {
+  const handleConnect = async (message?: string) => {
     if (!isAuthenticated) {
       router.push('/login')
-      return
+      return;
     }
 
-    if (!targetId) return
-    try {
-       await sendRequest(targetId)
-       // React Query invalidation handles UI update
-    } catch (error) {
-       console.error('Connection request failed', error)
+    if (!targetId) return;
+    
+    // If we have a message, it's a confirmed send from the modal
+    if (message !== undefined) {
+        try {
+            await sendRequest(targetId, message)
+            setIsConnectModalOpen(false)
+            toast.success('Connection request sent')
+        } catch (error) {
+            console.error('Connection request failed', error)
+            toast.error('Failed to send connection request')
+        }
+        return
     }
+
+    // Otherwise open modal
+    setIsConnectModalOpen(true)
   }
 
   const handleMessage = () => {
@@ -152,6 +167,18 @@ export default function UnifiedProfilePage() {
         onMessage={handleMessage}
         connectionStatus={connectionStatus}
       />
+      
+      {targetId && (
+        <ConnectModal
+          isOpen={isConnectModalOpen}
+          onClose={() => setIsConnectModalOpen(false)}
+          onConfirm={handleConnect}
+          recipientName={displayProfile?.profile.firstName || 'User'}
+          isSending={isSending}
+        />
+      )}
+      
+
       
       {isOwner && ownerProfile && ownerUser && (
         <PrivateProfileSections profile={{ user: ownerUser, profile: ownerProfile }} />

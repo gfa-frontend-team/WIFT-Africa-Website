@@ -45,6 +45,13 @@ export interface PublicProfileResponse {
     
     // Privacy
     privacySettings?: any
+
+    // Completeness
+    completeness?: {
+      completionPercentage: number
+      missingFields: string[]
+      isComplete: boolean
+    }
   }
 }
 

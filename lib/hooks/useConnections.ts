@@ -76,6 +76,12 @@ export function useConnections() {
     useRequests,
     useStats,
     useConnectionStatus,
+    useMyConnections: (page = 1) => useQuery({
+      queryKey: [...connectionKeys.all, 'list', page],
+      queryFn: () => connectionsApi.getConnections(page),
+      staleTime: 1000 * 60 * 5, // 5 mins
+      enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
+    }),
     
     // Actions (Mutations)
     sendRequest: (receiverId: string, message?: string) => sendRequestMutation.mutateAsync({ receiverId, message }),

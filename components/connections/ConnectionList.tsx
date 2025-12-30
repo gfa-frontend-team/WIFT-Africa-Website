@@ -25,21 +25,24 @@ import { useState } from 'react'
 // I'll assume `GET /api/v1/connections` exists and returns User[] or Connection[]
 // For now, I will build a Generic User Card component for this list.
 
+import { Connection } from '@/lib/api/connections'
+
 interface ConnectionListProps {
-  connections: any[] // TODO: Define strict type when endpoint confirmed
+  connections: Connection[]
   onRemove: (id: string) => void
-  onBlock: (id: string) => void
+  onBlock?: (id: string) => void
 }
 
 export default function ConnectionList({ connections, onRemove, onBlock }: ConnectionListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {connections.map((connection) => {
-        // Assuming connection object structure, or it might be just a User profile
-        const user = connection.user || connection 
+        const user = connection.user 
         
+        if (!user) return null
+
         return (
-          <div key={user.id} className="bg-card border border-border rounded-lg p-6 flex flex-col items-center text-center">
+          <div key={user.id || connection.id} className="bg-card border border-border rounded-lg p-6 flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-muted relative mb-4">
               {user.profilePhoto ? (
                 <Image
@@ -50,19 +53,19 @@ export default function ConnectionList({ connections, onRemove, onBlock }: Conne
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-2xl font-bold">
-                  {user.firstName[0]}
+                  {user.firstName?.[0]}
                 </div>
               )}
             </div>
             
             <Link 
-              href={`/in/${user.profileSlug || user.username}`}
+              href={`/in/${user.username || user.id}`}
               className="font-bold text-lg text-foreground hover:underline mb-1"
             >
               {user.firstName} {user.lastName}
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
-              {user.headline || user.accountType.replace('_', ' ').toLowerCase()}
+              {user.accountType?.replace('_', ' ').toLowerCase() || 'Member'}
             </p>
             
             <div className="flex items-center gap-2 w-full">

@@ -12,12 +12,13 @@ import ExperienceSection from './ExperienceSection'
 import PortfolioSection from './PortfolioSection'
 import ContactSection from './ContactSection'
 import SpecializationsSection from './SpecializationsSection'
+import ProfileCompleteness from './ProfileCompleteness'
 
 interface ProfileContentProps {
   profile: PublicProfileResponse
   isAuthenticated: boolean
   isOwnProfile?: boolean
-  onConnect?: () => void
+  onConnect?: (message?: string) => void
   isConnecting?: boolean
   onMessage?: () => void
   onShare?: () => void
@@ -129,8 +130,10 @@ export default function ProfileContent({
           
           <SpecializationsSection profile={profileObj as any} />
 
-           {/* Profile Strength / Completion could go here */}
-           {/* For now we stick to what we have */}
+           {/* Profile Strength / Completion */}
+           {data.completeness && isOwnProfile && (
+             <ProfileCompleteness completeness={data.completeness} />
+           )}
         </div>
       </div>
     </div>

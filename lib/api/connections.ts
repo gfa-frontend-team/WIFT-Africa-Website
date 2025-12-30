@@ -15,6 +15,8 @@ export interface Connection {
   id: string
   user1: User
   user2: User
+  user?: User // For list endpoint
+  connectedAt?: string
   createdAt: string
 }
 
@@ -51,6 +53,27 @@ export const connectionsApi = {
       response.requests = response.requests.map((req: any) => ({
         ...req,
         id: req.id || req._id
+      }))
+    }
+    
+    return response
+  },
+
+  /**
+   * Get confirmed connections
+   */
+  getConnections: async (page = 1, limit = 20): Promise<{ connections: Connection[]; total: number; pages: number }> => {
+    const response = await apiClient.get<{ connections: Connection[]; total: number; pages: number }>(`/connections?page=${page}&limit=${limit}`)
+    
+    // Map _id to id if needed
+    if (response.connections && Array.isArray(response.connections)) {
+      response.connections = response.connections.map((conn: any) => ({
+        ...conn,
+        id: conn.id || conn._id,
+        user: {
+          ...conn.user,
+          id: conn.user.id || conn.user._id
+        }
       }))
     }
     

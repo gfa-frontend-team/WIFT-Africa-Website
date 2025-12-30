@@ -28,7 +28,7 @@ interface ProfileHeaderProps {
   isOwner: boolean
   connectionStatus: 'NONE' | 'CONNECTED' | 'PENDING'
   connectionsCount: number
-  onConnect?: () => void
+  onConnect?: (message?: string) => void
   isConnecting?: boolean
   onMessage?: () => void
   onEdit?: () => void
@@ -156,7 +156,7 @@ export default function ProfileHeader({
                         </button>
                       ) : (
                         <button 
-                          onClick={onConnect}
+                          onClick={() => onConnect?.()}
                           disabled={isConnecting}
                           className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                         >
