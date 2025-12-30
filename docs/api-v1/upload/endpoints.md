@@ -23,13 +23,9 @@ The file is uploaded using `multipart/form-data`.
 **Status Code**: `201 Created`
 ```json
 {
-  "message": "File uploaded successfully",
-  "file": {
-    "url": "https://storage.azure.com/container/filename.jpg",
-    "filename": "filename.jpg",
-    "mimetype": "image/jpeg",
-    "size": 102400
-  }
+  "url": "https://storage.azure.com/container/filename.jpg",
+  "type": "image",
+  "originalName": "filename.jpg"
 }
 ```
 
@@ -66,8 +62,8 @@ Generate a Shared Access Signature (SAS) token to allow the client to upload a v
 ```json
 {
   "uploadUrl": "https://accountname.blob.core.windows.net/videos/unique-name.mp4?sv=...",
-  "blobName": "unique-name.mp4",
-  "expiresOn": "2024-03-01T10:15:00Z"
+  "blobUrl": "https://accountname.blob.core.windows.net/videos/unique-name.mp4",
+  "blobName": "unique-name.mp4"
 }
 ```
 *The client should then use `PUT` request to the `uploadUrl` with the video file binary body.*

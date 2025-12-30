@@ -27,9 +27,10 @@ Retrieve the user's recent notifications, paginated.
       "type": "NEW_MESSAGE",
       "title": "New Message",
       "message": "Alice sent you a message",
-      "sender": {
         "id": "...",
         "firstName": "Alice",
+        "lastName": "Smith",
+        "username": "alicesmith",
         "profilePhoto": "..."
       },
       "isRead": false,

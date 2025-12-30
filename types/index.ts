@@ -185,7 +185,12 @@ export interface Chapter {
   name: string
   code: string
   country: string
+  city?: string
   description?: string
+  missionStatement?: string
+  email?: string
+  phone?: string
+  website?: string
   memberCount: number
   isActive: boolean
   adminIds: string[]

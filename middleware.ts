@@ -25,6 +25,8 @@ export function middleware(request: NextRequest) {
     '/landing',
     '/api',
     '/search',
+    '/chapters',
+    '/chapter',
     '/_next',
     '/favicon.ico',
   ]

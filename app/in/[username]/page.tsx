@@ -44,7 +44,9 @@ export default function UnifiedProfilePage() {
     isLoading: isPublicLoading,
     isError: isPublicError,
     error: publicError
-  } = usePublicProfile(username)
+  } = usePublicProfile(username, { 
+    enabled: !isUsernameReserved(username) 
+  })
 
   // Handle Reserved Routes
   useEffect(() => {

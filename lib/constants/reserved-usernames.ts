@@ -10,6 +10,7 @@ export const RESERVED_USERNAMES = [
   'events',
   'resources',
   'chapters',
+  'chapter',
   'messages',
   'notifications',
   'connections',
@@ -17,7 +18,11 @@ export const RESERVED_USERNAMES = [
   'me',
   'in',
   'search',
+  'in',
+  'search',
   'edit',
+  'directory',
+  'list',
   
   // Auth routes
   'login',

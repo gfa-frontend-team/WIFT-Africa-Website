@@ -38,9 +38,14 @@ Search for users with various filters. Returns a paginated list of results with 
       "username": "sconnor",
       "headline": "Director & Writer",
       "primaryRole": "DIRECTOR",
+      "roles": ["DIRECTOR", "WRITER"],
+      "location": "Nairobi, Kenya",
+      "profileSlug": "sarah-connor",
+      "profilePhoto": "...",
       "chapter": {
         "id": "...",
-        "name": "WIFT Kenya"
+        "name": "WIFT Kenya",
+        "code": "KE"
       },
       "isConnected": false,
       "connectionStatus": "none",
@@ -83,6 +88,10 @@ Get user recommendations based on shared chapter, similar roles, or location.
     {
       "id": "679f...",
       "firstName": "Jane",
+      "lastName": "Doe",
+      "username": "janedoe",
+      "profileSlug": "jane-doe",
+      "headline": "Actress",
       "primaryRole": "ACTRESS",
       "recommendationReason": "Same chapter",
       "score": 10
