@@ -76,13 +76,34 @@ Retrieve member growth and distribution analytics.
 **Status Code**: `200 OK`
 ```json
 {
-  "growth": [
-    { "_id": "2024-01-01", "count": 5 }
-  ],
-  "distribution": {
-    "chapters": [],
-    "roles": []
-  }
+  "summary": {
+    "totalMembers": 150,
+    "approvedMembers": 120,
+    "pendingMembers": 25,
+    "rejectedMembers": 5,
+    "activeMembers": 85,
+    "profileCompletionRate": 65
+  },
+  "growth": {
+    "period": "daily",
+    "data": [
+      {
+        "date": "2024-01-01",
+        "total": 5,
+        "approved": 3,
+        "pending": 2
+      }
+    ]
+  },
+  "byChapter": [
+    {
+      "chapterId": "...",
+      "chapterName": "WIFT Africa HQ",
+      "totalMembers": 50,
+      "approvedMembers": 45,
+      "pendingMembers": 5
+    }
+  ]
 }
 ```
 
@@ -101,9 +122,28 @@ Get specific analytics for a single chapter.
 **Status Code**: `200 OK`
 ```json
 {
-  "members": { "total": 120, "growth": 5 },
-  "events": { "total": 12, "upcoming": 2 },
-  "engagement": { "activeUsers": 85 }
+  "chapter": {
+    "id": "...",
+    "name": "WIFT Africa HQ",
+    "country": "Kenya",
+    "city": "Nairobi"
+  },
+  "members": {
+    "approved": { "total": 120, "newLast30Days": 5 },
+    "pendingApproval": 15
+  },
+  "activity": {
+    "activeLast30Days": 85,
+    "inactive": 35
+  },
+  "profiles": {
+    "completed": 80,
+    "incomplete": 40
+  },
+  "roles": {
+    "WRITER": 45,
+    "DIRECTOR": 30
+  }
 }
 ```
 

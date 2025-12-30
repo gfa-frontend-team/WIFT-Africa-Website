@@ -234,14 +234,18 @@ List all chapters with optional filtering.
 **Status Code**: `200 OK`
 ```json
 {
-  "chapters": [
-    {
-      "id": "676bd...",
-      "name": "WIFT Africa HQ",
-      "country": "Kenya",
-      "city": "Nairobi"
-    }
-  ]
+  "status": "success",
+  "results": 1,
+  "data": {
+    "chapters": [
+      {
+        "id": "676bd...",
+        "name": "WIFT Africa HQ",
+        "country": "Kenya",
+        "city": "Nairobi"
+      }
+    ]
+  }
 }
 ```
 
@@ -272,17 +276,19 @@ Retrieve details for a specific chapter.
 **Status Code**: `200 OK`
 ```json
 {
-  "id": "676bd2...",
-  "name": "WIFT Africa HQ",
-  "code": "WA-HQ",
-  "country": "Kenya",
-  "city": "Nairobi",
-  "description": "Headquarters chapter...",
-  "missionStatement": "Empowering women...",
-  "email": "hq@wiftafrica.org",
-  "phone": "+254...",
-  "website": "https://wiftafrica.org",
-  "isActive": true
+  "chapter": {
+    "id": "676bd2...",
+    "name": "WIFT Africa HQ",
+    "code": "WA-HQ",
+    "country": "Kenya",
+    "city": "Nairobi",
+    "description": "Headquarters chapter...",
+    "missionStatement": "Empowering women...",
+    "email": "hq@wiftafrica.org",
+    "phone": "+254...",
+    "website": "https://wiftafrica.org",
+    "isActive": true
+  }
 }
 ```
 

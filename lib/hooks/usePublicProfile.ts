@@ -6,14 +6,14 @@ export const publicProfileKeys = {
   byIdentifier: (identifier: string) => [...publicProfileKeys.all, identifier] as const,
 }
 
-export function usePublicProfile(identifier: string) {
+export function usePublicProfile(identifier: string, options: { enabled?: boolean } = {}) {
   const query = useQuery({
     queryKey: publicProfileKeys.byIdentifier(identifier),
     queryFn: async () => {
       if (!identifier) return null
       return await profilesApi.getPublicProfile(identifier)
     },
-    enabled: !!identifier,
+    enabled: !!identifier && (options.enabled !== false),
     staleTime: 1000 * 60 * 5, // 5 minutes cache
   })
 

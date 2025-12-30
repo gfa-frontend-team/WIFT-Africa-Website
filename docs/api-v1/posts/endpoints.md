@@ -46,12 +46,10 @@ Retrieve the main feed of posts, including regular posts from other users, chapt
       "isPinned": false
     }
   ],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "total": 50,
-    "pages": 5
-  }
+    }
+  ],
+  "total": 50,
+  "pages": 5
 }
 ```
 
@@ -159,7 +157,6 @@ Update an existing post.
 **Status Code**: `200 OK`
 ```json
 {
-  "message": "Post updated successfully",
   "post": { ... }
 }
 ```
@@ -420,7 +417,8 @@ Get a list of users who shared a specific post.
       "user": { ... },
       "createdAt": "..."
     }
-  ]
+  ],
+  "total": 15
 }
 ```
 
@@ -479,7 +477,8 @@ Retrieve posts saved by the current user.
 **Status Code**: `200 OK`
 ```json
 {
-  "posts": [ ... ]
+  "posts": [ ... ],
+  "total": 15
 }
 ```
 

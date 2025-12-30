@@ -41,7 +41,17 @@ Retrieve the user's list of conversations, sorted by the most recent message. Su
       "type": "BROADCAST",
       "title": "Monthly Newsletter",
       "description": "Updates for March",
-      "unreadCount": 1
+      "creator": {
+        "firstName": "Super",
+        "lastName": "Admin",
+        "profilePhoto": "..."
+      },
+      "participantCount": 150,
+      "lastMessage": {
+        "content": "Check this out",
+        "sender": "...",
+        "createdAt": "..."
+      }
     }
   ],
   "total": 5
@@ -177,7 +187,17 @@ Send a message to multiple users (e.g., all members or specific chapter).
 {
   "message": "Broadcast sent successfully",
   "data": {
-    "recipientCount": 150
+    "recipientCount": 150,
+    "message": {
+      "id": "...",
+      "content": "Please check your email...",
+      "createdAt": "..."
+    },
+    "conversation": {
+      "id": "...",
+      "title": "Urgent Update",
+      "type": "BROADCAST"
+    }
   }
 }
 ```
@@ -247,14 +267,24 @@ Get read receipts and statistics for a broadcast.
 ```json
 {
   "conversation": {
+    "id": "...",
     "title": "Urgent Update",
-    "participantCount": 150
+    "description": "Policy update notification",
+    "creator": {
+      "firstName": "Super",
+      "lastName": "Admin"
+    },
+    "participantCount": 150,
+    "createdAt": "2024-02-15T..."
   },
   "stats": [
     {
       "messageId": "...",
+      "content": "Please check...",
+      "recipientCount": 150,
       "readCount": 45,
-      "readPercentage": "30.00"
+      "readPercentage": "30.00",
+      "sentAt": "2024-02-15T..."
     }
   ]
 }

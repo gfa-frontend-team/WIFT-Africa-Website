@@ -114,7 +114,8 @@ Get a list of pending connection requests.
       "createdAt": "..."
     }
   ],
-  "total": 5
+  "total": 5,
+  "pages": 1
 }
 ```
 
@@ -152,6 +153,11 @@ Handle a connection request. `action` can be `accept`, `decline`, or `cancel`.
     "id": "ConnNew...",
     "user1": "...",
     "user2": "..."
+  },
+  "request": {
+    "id": "Req123...",
+    "status": "ACCEPTED",
+    "respondedAt": "..."
   },
   "message": "Connection request accepted"
 }
@@ -289,12 +295,16 @@ Retrieve a list of users blocked by the current user.
 **Status Code**: `200 OK`
 ```json
 {
-  "blockedUsers": [
+  "blocked": [
     {
-      "id": "UserBad...",
-      "firstName": "Spammer",
-      "lastName": "User",
-      "profilePhoto": "..."
+      "user": {
+        "id": "UserBad...",
+        "firstName": "Spammer",
+        "lastName": "User",
+        "profilePhoto": "..."
+      },
+      "blockedAt": "2024-03-01T...",
+      "reason": "Spamming"
     }
   ]
 }
