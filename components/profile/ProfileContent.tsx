@@ -18,6 +18,7 @@ interface ProfileContentProps {
   isAuthenticated: boolean
   isOwnProfile?: boolean
   onConnect?: () => void
+  isConnecting?: boolean
   onMessage?: () => void
   onShare?: () => void
   connectionStatus?: 'NONE' | 'PENDING' | 'CONNECTED'
@@ -28,6 +29,7 @@ export default function ProfileContent({
   isAuthenticated, 
   isOwnProfile = false,
   onConnect,
+  isConnecting = false,
   onMessage,
   onShare,
   connectionStatus = 'NONE'
@@ -35,9 +37,7 @@ export default function ProfileContent({
   const router = useRouter()
   const { profile: data } = profile
   
-  // Reconstruct User and Profile objects from flattened data
-  // because our UI components expect distinct objects.
-  // This maintains separation associated with backend types even if the public endpoint flattens them.
+  // ... (userObj/profileObj mapping) ...
   const userObj = {
     id: data.id || data._id,
     firstName: data.firstName,
@@ -72,8 +72,8 @@ export default function ProfileContent({
     router.push('/me/edit')
   }
 
-  // Get email safely
-  const displayEmail = data.email || (isOwnProfile ? 'your@email.com' : 'Hidden')
+  // Get email safely - enforce privacy for guests
+  const displayEmail = isAuthenticated ? (data.email || 'Hidden') : 'Hidden'
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
@@ -88,10 +88,11 @@ export default function ProfileContent({
         user={userObj as any}
         profile={profileObj as any}
         isOwner={isOwnProfile}
-        connectionStatus={connectionStatus}
-        connectionsCount={156} // Real data should be passed via props ideally, but for now specific mock/hook data
-        onConnect={onConnect}
-        onMessage={onMessage}
+        connectionStatus={isAuthenticated ? connectionStatus : 'NONE'}
+        connectionsCount={156}
+        onConnect={onConnect} // Always pass onConnect so the parent can handle the redirect behavior
+        isConnecting={isConnecting}
+        onMessage={isAuthenticated ? onMessage : undefined}
         onEdit={handleEdit}
       />
 

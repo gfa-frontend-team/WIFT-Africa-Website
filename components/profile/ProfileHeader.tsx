@@ -29,6 +29,7 @@ interface ProfileHeaderProps {
   connectionStatus: 'NONE' | 'CONNECTED' | 'PENDING'
   connectionsCount: number
   onConnect?: () => void
+  isConnecting?: boolean
   onMessage?: () => void
   onEdit?: () => void
 }
@@ -40,6 +41,7 @@ export default function ProfileHeader({
   connectionStatus,
   connectionsCount,
   onConnect,
+  isConnecting = false,
   onMessage,
   onEdit
 }: ProfileHeaderProps) {
@@ -155,9 +157,17 @@ export default function ProfileHeader({
                       ) : (
                         <button 
                           onClick={onConnect}
-                          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
+                          disabled={isConnecting}
+                          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                          Connect
+                          {isConnecting ? (
+                            <>
+                              <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                              <span>Connecting...</span>
+                            </>
+                          ) : (
+                            <span>Connect</span>
+                          )}
                         </button>
                       )}
                     </>
