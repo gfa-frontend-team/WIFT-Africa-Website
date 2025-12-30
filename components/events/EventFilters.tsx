@@ -15,6 +15,7 @@ interface EventFiltersProps {
     chapterId?: string
     startDate?: string
     endDate?: string
+    page?: number
   }) => void
   initialFilters?: {
     search?: string
@@ -22,6 +23,7 @@ interface EventFiltersProps {
     chapterId?: string
     startDate?: string
     endDate?: string
+    page?: number
   }
 }
 
@@ -38,7 +40,8 @@ export function EventFilters({ onFiltersChange, initialFilters = {} }: EventFilt
       search: value || undefined,
       type: selectedType,
       startDate: startDate || undefined,
-      endDate: endDate || undefined
+      endDate: endDate || undefined,
+      page: 1 // Reset to first page when filters change
     })
   }
 
@@ -48,7 +51,8 @@ export function EventFilters({ onFiltersChange, initialFilters = {} }: EventFilt
       search: search || undefined,
       type,
       startDate: startDate || undefined,
-      endDate: endDate || undefined
+      endDate: endDate || undefined,
+      page: 1 // Reset to first page when filters change
     })
   }
 
@@ -59,7 +63,8 @@ export function EventFilters({ onFiltersChange, initialFilters = {} }: EventFilt
       search: search || undefined,
       type: selectedType,
       startDate: start || undefined,
-      endDate: end || undefined
+      endDate: end || undefined,
+      page: 1 // Reset to first page when filters change
     })
   }
 
@@ -68,7 +73,7 @@ export function EventFilters({ onFiltersChange, initialFilters = {} }: EventFilt
     setSelectedType(undefined)
     setStartDate('')
     setEndDate('')
-    onFiltersChange({})
+    onFiltersChange({ page: 1 }) // Reset to first page
   }
 
   const hasActiveFilters = search || selectedType || startDate || endDate

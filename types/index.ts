@@ -228,16 +228,22 @@ export interface EventLocation {
   address?: string
   city?: string
   country?: string
-  virtualLink?: string
+  virtualUrl?: string  // Changed from virtualLink to match API
   instructions?: string
 }
 
 export interface Event {
-  id: string
+  _id: string  // MongoDB uses _id
+  id?: string  // Keep for compatibility, will be mapped from _id
   title: string
   description: string
   type: EventType
-  chapter: {
+  chapterId?: {  // API returns chapterId as object
+    _id: string
+    name: string
+    code: string
+  }
+  chapter?: {  // Keep for compatibility, will be mapped from chapterId
     id: string
     name: string
   }
@@ -245,25 +251,29 @@ export interface Event {
   endDate: string
   timezone?: string
   location: EventLocation
-  organizer: {
-    id: string
+  organizer?: {
+    _id: string  // MongoDB uses _id
+    id?: string  // Keep for compatibility
     firstName: string
     lastName: string
   }
   coverImage?: string
   capacity?: number
-  currentAttendees: number
+  currentAttendees?: number
   tags?: string[]
   myRSVP?: RSVPStatus | null
+  status?: string
+  isPublished?: boolean
+  isCancelled?: boolean
   createdAt: string
   updatedAt: string
+  __v?: number  // MongoDB version field
 }
 
 export interface EventRSVP {
   eventId: string
   userId: string
   status: RSVPStatus
-  rsvpDate: string
 }
 
 export interface EventsListResponse {

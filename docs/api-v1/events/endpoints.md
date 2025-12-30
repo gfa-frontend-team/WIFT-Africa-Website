@@ -7,12 +7,7 @@
 
 Retrieve a list of events with optional filtering.
 
-**Authentication**: Public (for listing) / Required (depending on implementation - checking routes, it seems public or at least accessible)
-*Note: Route definition uses `eventsController.listEvents` directly without `authenticate` middleware on the router level for this specific route?
-Wait, checking `events.routes.ts`:
-`router.get('/', eventsController.listEvents.bind(eventsController));`
-There is no `router.use(authenticate)` at the top level. The other routes have `authenticate`.
-So listing events appears to be public.
+**Authentication**: Public (no authentication required)
 
 #### Query Parameters
 | Parameter | Type | Description |
@@ -67,7 +62,7 @@ So listing events appears to be public.
 
 Get detailed information about a specific event.
 
-**Authentication**: Public
+**Authentication**: Public (optional - if authenticated, includes user's RSVP status)
 
 #### Path Parameters
 | Parameter | Type | Description |
@@ -96,10 +91,18 @@ Get detailed information about a specific event.
     "firstName": "Jane",
     "lastName": "Doe"
   },
-  "myRSVP": "GOING" 
+  "myRSVP": "GOING"
 }
 ```
 *Note: `myRSVP` field will be `null` if user is not authenticated or hasn't RSVP'd.*
+
+#### Error Response
+**Status Code**: `404 Not Found`
+```json
+{
+  "error": "Event not found"
+}
+```
 
 ---
 
@@ -110,7 +113,7 @@ Get detailed information about a specific event.
 
 RSVP to an upcoming event.
 
-**Authentication**: Required
+**Authentication**: Required (Bearer token)
 
 #### Path Parameters
 | Parameter | Type | Description |
@@ -136,8 +139,36 @@ RSVP to an upcoming event.
   "message": "RSVP recorded successfully",
   "rsvp": {
     "eventId": "evt_123...",
+    "userId": "usr_456...",
     "status": "GOING"
   }
+}
+```
+
+#### Error Responses
+**Status Code**: `400 Bad Request`
+```json
+{
+  "error": "Event is full"
+}
+```
+```json
+{
+  "error": "Event is cancelled"
+}
+```
+
+**Status Code**: `401 Unauthorized`
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Status Code**: `404 Not Found`
+```json
+{
+  "error": "Event not found"
 }
 ```
 
@@ -150,7 +181,12 @@ RSVP to an upcoming event.
 
 Cancel an existing RSVP.
 
-**Authentication**: Required
+**Authentication**: Required (Bearer token)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| eventId | string | ID of the event |
 
 ### Response
 
@@ -163,16 +199,31 @@ Cancel an existing RSVP.
 }
 ```
 
+#### Error Responses
+**Status Code**: `401 Unauthorized`
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Status Code**: `404 Not Found`
+```json
+{
+  "error": "RSVP not found"
+}
+```
+
 ---
 
 ## Endpoint: Create Event (Admin)
 
 ### Request
-**`POST /api/v1/admin/events`**
+**`POST /api/v1/events/admin/events`**
 
 Create a new chapter event.
 
-**Authentication**: Required (Chapter Admin)
+**Authentication**: Required (Chapter Admin or Super Admin)
 
 #### Request Body
 ```json
@@ -195,6 +246,24 @@ Create a new chapter event.
 }
 ```
 
+#### Field Descriptions
+- `title` (string, required): Event title (max 200 characters)
+- `description` (string, required): Event description (max 5000 characters)
+- `type` (string, required): Event type enum
+- `chapterId` (string, required): Chapter ID
+- `startDate` (string, required): ISO datetime string
+- `endDate` (string, required): ISO datetime string
+- `timezone` (string, required): Timezone identifier
+- `location` (object, required): Location details
+  - `type` (string, required): `PHYSICAL`, `VIRTUAL`, or `HYBRID`
+  - `address` (string, optional): Physical address
+  - `city` (string, optional): City name
+  - `country` (string, optional): Country name
+  - `virtualUrl` (string, optional): Virtual meeting URL
+- `capacity` (number, optional): Maximum attendees
+- `coverImage` (string, optional): Cover image URL
+- `tags` (array, optional): Array of tag strings
+
 ### Response
 
 #### Success Response
@@ -202,69 +271,71 @@ Create a new chapter event.
 ```json
 {
   "message": "Event created successfully",
-  "event": { ... }
+  "event": {
+    "id": "evt_789...",
+    "title": "Screenwriting Workshop",
+    "description": "Learn the basics...",
+    "type": "WORKSHOP",
+    "chapterId": "ch_123...",
+    "organizer": "usr_456...",
+    "startDate": "2024-03-01T10:00:00Z",
+    "endDate": "2024-03-01T14:00:00Z",
+    "timezone": "Africa/Lagos",
+    "location": {
+      "type": "PHYSICAL",
+      "address": "Film Center",
+      "city": "Lagos",
+      "country": "Nigeria"
+    },
+    "capacity": 30,
+    "currentAttendees": 0,
+    "tags": ["writing", "workshop"],
+    "status": "PUBLISHED",
+    "isPublished": true,
+    "isCancelled": false,
+    "createdAt": "2024-02-20T10:00:00Z",
+    "updatedAt": "2024-02-20T10:00:00Z"
+  }
+}
+```
+
+#### Error Responses
+**Status Code**: `400 Bad Request`
+```json
+{
+  "error": "End date must be after start date"
+}
+```
+
+**Status Code**: `401 Unauthorized`
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Status Code**: `403 Forbidden`
+```json
+{
+  "error": "Admin privileges required"
 }
 ```
 
 ---
 
-## Endpoint: Update Event (Admin)
+## Endpoint: Get Event Attendees (Admin)
 
 ### Request
-**`PATCH /api/v1/admin/events/:eventId`**
-
-Update details of an existing event.
-
-**Authentication**: Required (Chapter Admin)
-
-#### Request Body
-```json
-{
-  "title": "Updated Title",
-  "capacity": 40
-}
-```
-
-### Response
-**Status Code**: `200 OK`
-
----
-
-## Endpoint: Cancel/Archive Event (Admin)
-
-### Request
-**`DELETE /api/v1/admin/events/:eventId`**
-
-Cancel an event and notify attendees.
-
-**Authentication**: Required (Chapter Admin)
-
-#### Request Body
-```json
-{
-  "reason": "Venue unavailable"
-}
-```
-
-### Response
-**Status Code**: `200 OK`
-```json
-{
-  "message": "Event cancelled successfully",
-  "notifiedAttendees": 15
-}
-```
-
----
-
-## Endpoint: Get Attendees (Admin)
-
-### Request
-**`GET /api/v1/admin/events/:eventId/attendees`**
+**`GET /api/v1/events/admin/events/:eventId/attendees`**
 
 List all users who have RSVP'd to the event.
 
-**Authentication**: Required (Chapter Admin)
+**Authentication**: Required (Chapter Admin or Super Admin)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| eventId | string | ID of the event |
 
 #### Query Parameters
 | Parameter | Type | Description |
@@ -272,14 +343,22 @@ List all users who have RSVP'd to the event.
 | export | boolean | If true, may trigger CSV download (default: false) |
 
 ### Response
+
+#### Success Response
 **Status Code**: `200 OK`
 ```json
 {
   "attendees": [
     {
-      "user": { "id": "...", "firstName": "..." },
+      "user": {
+        "id": "usr_123...",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane@example.com",
+        "profilePhoto": "/uploads/profiles/jane.jpg"
+      },
       "status": "GOING",
-      "rsvpDate": "2024-02-10T..."
+      "rsvpDate": "2024-02-10T15:30:00Z"
     }
   ],
   "stats": {
@@ -289,3 +368,52 @@ List all users who have RSVP'd to the event.
   }
 }
 ```
+
+#### Error Responses
+**Status Code**: `401 Unauthorized`
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Status Code**: `403 Forbidden`
+```json
+{
+  "error": "Admin privileges required"
+}
+```
+
+**Status Code**: `404 Not Found`
+```json
+{
+  "error": "Event not found"
+}
+```
+
+---
+
+## Endpoints NOT YET IMPLEMENTED
+
+The following endpoints are defined in the routes but return placeholder responses:
+
+### Update Event (Admin)
+**`PATCH /api/v1/events/admin/events/:eventId`**
+- Returns: `{"message": "Event updated successfully"}`
+- Status: Placeholder implementation (TODO in controller)
+
+### Cancel Event (Admin)
+**`DELETE /api/v1/events/admin/events/:eventId`**
+- Returns: `{"message": "Event cancelled successfully", "notifiedAttendees": 0}`
+- Status: Placeholder implementation (TODO in controller)
+
+---
+
+## Notes
+
+1. **Correct Admin URLs**: Admin endpoints are accessible at `/api/v1/events/admin/events/*`, not `/api/v1/admin/events/*`
+2. **Authentication**: Uses Bearer token in Authorization header
+3. **Validation**: All endpoints use Zod schema validation
+4. **Error Handling**: Consistent error response format with appropriate HTTP status codes
+5. **Pagination**: List events supports pagination with `page` and `limit` parameters
+6. **Filtering**: Multiple filter options available for event listing

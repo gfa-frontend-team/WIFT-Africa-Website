@@ -19,8 +19,36 @@ export function EventCard({ event, showRSVP = true, compact = false }: EventCard
   const startDate = new Date(event.startDate)
   const endDate = new Date(event.endDate)
   
+  // Helper function to get RSVP status info
+  const getRSVPStatusInfo = () => {
+    if (!event.myRSVP) return null
+    
+    switch (event.myRSVP) {
+      case 'GOING':
+        return { label: 'Going', color: 'bg-green-100 text-green-800 border-green-200', icon: '✓' }
+      case 'INTERESTED':
+        return { label: 'Interested', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: '🕐' }
+      case 'NOT_GOING':
+        return { label: 'Not Going', color: 'bg-red-100 text-red-800 border-red-200', icon: '✗' }
+      default:
+        return null
+    }
+  }
+
+  const rsvpInfo = getRSVPStatusInfo()
+  
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow relative">
+      {/* RSVP Status Badge */}
+      {rsvpInfo && (
+        <div className="absolute top-3 right-3 z-10">
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${rsvpInfo.color}`}>
+            <span className="mr-1">{rsvpInfo.icon}</span>
+            {rsvpInfo.label}
+          </span>
+        </div>
+      )}
+      
       {event.coverImage && (
         <div className="aspect-video w-full overflow-hidden">
           <img
@@ -37,7 +65,7 @@ export function EventCard({ event, showRSVP = true, compact = false }: EventCard
             <div className="flex items-center gap-2 mb-2">
               <EventTypeBadge type={event.type} />
               <span className="text-sm text-muted-foreground">
-                {event.chapter.name}
+                {event.chapter?.name || 'Unknown Chapter'}
               </span>
             </div>
             
@@ -88,7 +116,7 @@ export function EventCard({ event, showRSVP = true, compact = false }: EventCard
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
               <span>
-                {event.currentAttendees} / {event.capacity} attending
+                {event.currentAttendees || 0} / {event.capacity} attending
               </span>
             </div>
           )}
@@ -96,7 +124,7 @@ export function EventCard({ event, showRSVP = true, compact = false }: EventCard
 
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            by {event.organizer.firstName} {event.organizer.lastName}
+            by {event.organizer?.firstName || 'Unknown'} {event.organizer?.lastName || 'Organizer'}
           </div>
           
           {showRSVP && (

@@ -92,7 +92,7 @@ export default function EventDetailsPage() {
                 <div className="flex items-center gap-3 mb-3">
                   <EventTypeBadge type={event.type} />
                   <span className="text-muted-foreground">
-                    {event.chapter.name}
+                    {event.chapter?.name || 'Unknown Chapter'}
                   </span>
                 </div>
                 
@@ -101,7 +101,7 @@ export default function EventDetailsPage() {
                 </h1>
                 
                 <p className="text-muted-foreground">
-                  Organized by {event.organizer.firstName} {event.organizer.lastName}
+                  Organized by {event.organizer?.firstName || 'Unknown'} {event.organizer?.lastName || 'Organizer'}
                 </p>
               </div>
               
@@ -156,10 +156,10 @@ export default function EventDetailsPage() {
                             {event.location.city}, {event.location.country}
                           </div>
                         )}
-                        {event.location.virtualLink && (
+                        {event.location.virtualUrl && (
                           <div className="mt-2">
                             <Button variant="outline" size="sm" asChild>
-                              <a href={event.location.virtualLink} target="_blank" rel="noopener noreferrer">
+                              <a href={event.location.virtualUrl} target="_blank" rel="noopener noreferrer">
                                 <ExternalLink className="h-3 w-3 mr-2" />
                                 Join Virtual Event
                               </a>

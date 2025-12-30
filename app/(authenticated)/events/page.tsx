@@ -18,6 +18,7 @@ export default function EventsPage() {
     chapterId?: string
     startDate?: string
     endDate?: string
+    page?: number
   }>({})
 
   const { events, loading, error, pagination } = useEvents({
