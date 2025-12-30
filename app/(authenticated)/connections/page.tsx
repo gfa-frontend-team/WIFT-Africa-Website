@@ -3,19 +3,22 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useConnections } from '@/lib/hooks/useConnections'
 import RequestCard from '@/components/connections/RequestCard'
-import { Users, UserPlus, ExternalLink } from 'lucide-react'
+import ConnectionList from '@/components/connections/ConnectionList'
+import { Users, UserPlus, ExternalLink, Network } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ConnectionsPage() {
-  const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing'>('incoming')
+  const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing' | 'connections'>('connections')
   
-  const { useRequests, useStats } = useConnections()
-  const { data: requestsData, isLoading: isRequestsLoading } = useRequests(activeTab)
+  const { useRequests, useStats, useMyConnections, removeConnection } = useConnections()
+  const { data: requestsData, isLoading: isRequestsLoading } = useRequests(activeTab === 'connections' ? 'all' : activeTab)
+  const { data: connectionsData, isLoading: isConnectionsLoading } = useMyConnections()
   const { data: statsData } = useStats()
 
   const requests = requestsData?.requests || []
+  const connections = connectionsData?.connections || []
   const stats = statsData
-  const isLoading = isRequestsLoading
+  const isLoading = activeTab === 'connections' ? isConnectionsLoading : isRequestsLoading
 
   // Deduplicate requests to prevent key errors
   const uniqueRequests = useMemo(() => {
@@ -83,8 +86,18 @@ export default function ConnectionsPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-             {/* Tabs */}
-            <div className="bg-card border border-border rounded-t-xl overflow-hidden flex border-b-0">
+           {/* Tabs */}
+            <div className="bg-card border border-border rounded-t-xl overflow-hidden flex border-b-0 overflow-x-auto">
+                 <button
+                    onClick={() => setActiveTab('connections')}
+                    className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors min-w-[120px] ${
+                        activeTab === 'connections' 
+                            ? 'border-primary text-primary bg-primary/5' 
+                            : 'border-transparent text-muted-foreground hover:bg-muted/50'
+                    }`}
+                >
+                    My Connections ({stats?.connectionsCount || 0})
+                </button>
                 <button
                     onClick={() => setActiveTab('incoming')}
                     className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors ${
@@ -112,26 +125,45 @@ export default function ConnectionsPage() {
                      <div className="flex justify-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
-                ) : uniqueRequests.length > 0 ? (
+                ) : (activeTab === 'connections' ? connections.length > 0 : uniqueRequests.length > 0) ? (
                     <div className="grid grid-cols-1 gap-4">
-                        {uniqueRequests.map((request, index) => (
-                            <RequestCard key={`${request.id}-${index}`} request={request} type={activeTab} />
-                        ))}
+                        {activeTab === 'connections' ? (
+                             <ConnectionList 
+                                connections={connections} 
+                                onRemove={(id) => removeConnection(id)} 
+                             />
+                        ) : (
+                            uniqueRequests.map((request, index) => (
+                                <RequestCard key={`${request.id}-${index}`} request={request} type={activeTab as 'incoming' | 'outgoing'} />
+                            ))
+                        )}
                     </div>
                 ) : (
                     <div className="text-center py-16">
                          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                            {activeTab === 'incoming' ? <UserPlus className="h-8 w-8 text-muted-foreground" /> : <ExternalLink className="h-8 w-8 text-muted-foreground" />}
+                            {activeTab === 'incoming' ? (
+                                <UserPlus className="h-8 w-8 text-muted-foreground" />
+                            ) : activeTab === 'outgoing' ? (
+                                <ExternalLink className="h-8 w-8 text-muted-foreground" />
+                            ) : (
+                                <Network className="h-8 w-8 text-muted-foreground" />
+                            )}
                         </div>
                         <h3 className="text-lg font-semibold mb-2">
-                            No {activeTab} requests
+                            {activeTab === 'connections' 
+                                ? 'No connections yet'
+                                : `No ${activeTab} requests`
+                            }
                         </h3>
                         <p className="text-muted-foreground max-w-sm mx-auto">
-                            {activeTab === 'incoming' 
-                                ? "When people want to join your professional network, you'll see their requests here." 
-                                : "You haven't sent any connection requests recently."}
+                            {activeTab === 'connections'
+                                ? "Start growing your network by finding people with similar interests."
+                                : activeTab === 'incoming' 
+                                    ? "When people want to join your professional network, you'll see their requests here." 
+                                    : "You haven't sent any connection requests recently."
+                            }
                         </p>
-                         {activeTab === 'outgoing' && (
+                         {(activeTab === 'outgoing' || activeTab === 'connections') && (
                              <Link href="/search" className="inline-block mt-4 text-primary hover:underline">
                                  Grow your network
                              </Link>

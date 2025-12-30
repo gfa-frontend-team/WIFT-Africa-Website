@@ -69,9 +69,8 @@ export function mapPrivateToPublicProfile(privateProfile: any): PublicProfileRes
       instagramHandle: profile.instagramHandle ?? user.instagramHandle,
       twitterHandle: profile.twitterHandle ?? user.twitterHandle,
       
-      // Extra fields
-      chapter: user.chapter, 
-      privacySettings: user.privacySettings 
+      // Completeness
+      completeness: profile.completeness ?? user.completeness
     }
   }
 }

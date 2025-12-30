@@ -135,6 +135,17 @@ export interface Profile {
   twitterHandle?: string
   createdAt: Date
   updatedAt: Date
+  completeness?: {
+    completionPercentage: number
+    missingFields: string[]
+    isComplete: boolean
+  }
+}
+
+export interface ProfileCompleteness {
+  completionPercentage: number
+  missingFields: string[]
+  isComplete: boolean
 }
 
 // ============================================

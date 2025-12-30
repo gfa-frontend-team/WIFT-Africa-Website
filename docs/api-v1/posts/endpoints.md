@@ -98,6 +98,101 @@ Create a new regular post.
 
 ---
 
+## Endpoint: Get Single Post
+
+### Request
+**`GET /api/v1/posts/:id`**
+
+Retrieve details of a single post.
+
+**Authentication**: Required
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID of the post |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "post": {
+    "id": "676f2...",
+    "content": "Just finished filming...",
+    "author": { ... }
+    // ... typical post fields
+  }
+}
+```
+
+---
+
+## Endpoint: Update Post
+
+### Request
+**`PATCH /api/v1/posts/:id`**
+
+Update an existing post.
+
+**Authentication**: Required (Author only)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID of the post |
+
+#### Request Body
+```json
+{
+  "content": "Updated content...",
+  "visibility": "CONNECTIONS_ONLY"
+}
+```
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Post updated successfully",
+  "post": { ... }
+}
+```
+
+---
+
+## Endpoint: Delete Post
+
+### Request
+**`DELETE /api/v1/posts/:id`**
+
+Delete a post.
+
+**Authentication**: Required (Author or Admin)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID of the post |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Post deleted successfully"
+}
+```
+
+---
+
 ## Endpoint: Like Post
 
 ### Request
@@ -230,6 +325,33 @@ Add a comment to a post.
 
 ---
 
+## Endpoint: Delete Comment
+
+### Request
+**`DELETE /api/v1/posts/comments/:commentId`**
+
+Delete a comment.
+
+**Authentication**: Required (Author or Admin)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| commentId | string | ID of the comment |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Comment deleted successfully"
+}
+```
+
+---
+
 ## Endpoint: Share Post
 
 ### Request
@@ -265,6 +387,45 @@ Share an existing post to your own feed.
 
 ---
 
+## Endpoint: Get Post Shares
+
+### Request
+**`GET /api/v1/posts/:id/shares`**
+
+Get a list of users who shared a specific post.
+
+**Authentication**: Required
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID of the post |
+
+#### Query Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| page | number | Page number |
+| limit | number | Items per page |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "shares": [
+    {
+      "id": "ShareId...",
+      "user": { ... },
+      "createdAt": "..."
+    }
+  ]
+}
+```
+
+---
+
 ## Endpoint: Save Post
 
 ### Request
@@ -290,6 +451,89 @@ Toggle saved status of a post.
 {
   "saved": true,
   "message": "Post saved"
+}
+```
+
+---
+
+## Endpoint: Get Saved Posts
+
+### Request
+**`GET /api/v1/posts/saved`**
+
+Retrieve posts saved by the current user.
+
+**Authentication**: Required
+
+#### Query Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| page | number | Page number |
+| limit | number | Items per page |
+| collection | string | Filter by collection name |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "posts": [ ... ]
+}
+```
+
+---
+
+## Endpoint: Get Saved Collections
+
+### Request
+**`GET /api/v1/posts/saved/collections`**
+
+Get a list of the user's saved post collections.
+
+**Authentication**: Required
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "collections": [
+    {
+      "name": "Inspiration",
+      "count": 5
+    }
+  ]
+}
+```
+
+---
+
+## Endpoint: Check if Post is Saved
+
+### Request
+**`GET /api/v1/posts/:id/is-saved`**
+
+Check if a specific post is saved by the current user.
+
+**Authentication**: Required
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID of the post |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "saved": true
 }
 ```
 
@@ -326,5 +570,33 @@ Create a highlighted announcement post.
     "isPinned": true
   },
   "message": "Announcement posted to 1 chapter(s)"
+}
+```
+
+---
+
+## Endpoint: Pin Post (Admin)
+
+### Request
+**`POST /api/v1/posts/:id/pin`**
+
+Pin or unpin a post to the top of the feed.
+
+**Authentication**: Required (Admin only)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID of the post |
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "pinned": true,
+  "message": "Post pinned successfully"
 }
 ```

@@ -468,6 +468,60 @@ Set a new password using a valid reset token.
 }
 ```
 
+
+---
+
+## Endpoint: Change Password
+
+### Request
+**`POST /api/v1/auth/change-password`**
+
+Change the password for the currently authenticated user.
+
+**Authentication**: Required
+
+#### Headers
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | Bearer \<token\> | Yes |
+| Content-Type | application/json | Yes |
+
+#### Request Body
+```json
+{
+  "currentPassword": "OldPassword123!",
+  "newPassword": "NewPassword123!"
+}
+```
+
+**Field Descriptions**:
+- `currentPassword` (string, required): The user's current password
+- `newPassword` (string, required): The new password to set
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Password changed successfully"
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Unauthorized or incorrect current password"
+  }
+}
+```
+
 ---
 
 ## Endpoint: Check Email Availability

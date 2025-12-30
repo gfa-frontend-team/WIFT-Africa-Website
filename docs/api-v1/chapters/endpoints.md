@@ -177,7 +177,7 @@ Reject a pending membership request.
 
 Get a list of all approved members in the chapter.
 
-**Authentication**: Required (Admin Role)
+**Authentication**: Required
 
 #### Headers
 | Header | Value | Required |
@@ -252,9 +252,9 @@ List all chapters with optional filtering.
 **`GET /api/v1/chapters/:chapterId`**
 
 Retrieve details for a specific chapter.
-**Note**: Only accessible by Chapter Admins of the target chapter or Super Admins.
+**Note**: Accessible by any authenticated user.
 
-**Authentication**: Required (Chapter Admin or Super Admin Role)
+**Authentication**: Required
 
 #### Headers
 | Header | Value | Required |
