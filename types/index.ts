@@ -199,6 +199,100 @@ export interface Chapter {
 }
 
 // ============================================
+// EVENTS
+// ============================================
+
+export enum EventType {
+  WORKSHOP = 'WORKSHOP',
+  SCREENING = 'SCREENING',
+  NETWORKING = 'NETWORKING',
+  MEETUP = 'MEETUP',
+  CONFERENCE = 'CONFERENCE',
+  OTHER = 'OTHER'
+}
+
+export enum LocationType {
+  PHYSICAL = 'PHYSICAL',
+  VIRTUAL = 'VIRTUAL',
+  HYBRID = 'HYBRID'
+}
+
+export enum RSVPStatus {
+  GOING = 'GOING',
+  INTERESTED = 'INTERESTED',
+  NOT_GOING = 'NOT_GOING'
+}
+
+export interface EventLocation {
+  type: LocationType
+  address?: string
+  city?: string
+  country?: string
+  virtualLink?: string
+  instructions?: string
+}
+
+export interface Event {
+  id: string
+  title: string
+  description: string
+  type: EventType
+  chapter: {
+    id: string
+    name: string
+  }
+  startDate: string
+  endDate: string
+  timezone?: string
+  location: EventLocation
+  organizer: {
+    id: string
+    firstName: string
+    lastName: string
+  }
+  coverImage?: string
+  capacity?: number
+  currentAttendees: number
+  tags?: string[]
+  myRSVP?: RSVPStatus | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface EventRSVP {
+  eventId: string
+  userId: string
+  status: RSVPStatus
+  rsvpDate: string
+}
+
+export interface EventsListResponse {
+  events: Event[]
+  total: number
+  pages: number
+}
+
+export interface EventAttendee {
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    profilePhoto?: string
+  }
+  status: RSVPStatus
+  rsvpDate: string
+}
+
+export interface EventAttendeesResponse {
+  attendees: EventAttendee[]
+  stats: {
+    going: number
+    interested: number
+    notGoing: number
+  }
+}
+
+// ============================================
 // API REQUEST/RESPONSE TYPES
 // ============================================
 
