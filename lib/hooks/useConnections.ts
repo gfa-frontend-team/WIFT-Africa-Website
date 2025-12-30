@@ -19,6 +19,7 @@ export function useConnections() {
     queryKey: connectionKeys.requests(type),
     queryFn: () => connectionsApi.getRequests(type),
     staleTime: 1000 * 60, // 1 minute
+    enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
   })
 
   const useStats = () => useQuery({
@@ -26,6 +27,7 @@ export function useConnections() {
     queryFn: () => connectionsApi.getStats(),
     staleTime: 1000 * 60, // 1 minute
     refetchInterval: 1000 * 60 * 2, // Auto-refetch every 2 mins
+    enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
   })
 
   // Mutations
@@ -65,7 +67,7 @@ export function useConnections() {
   const useConnectionStatus = (userId?: string) => useQuery({
     queryKey: userId ? connectionKeys.status(userId) : [],
     queryFn: () => connectionsApi.checkStatus(userId!),
-    enabled: !!userId,
+    enabled: !!userId && typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
     staleTime: 1000 * 60, // 1 minute
   })
 

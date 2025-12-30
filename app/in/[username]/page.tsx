@@ -12,6 +12,7 @@ import ProfileLayout from '@/components/layout/ProfileLayout'
 import ProfileContent from '@/components/profile/ProfileContent'
 import PrivateProfileSections from '@/components/profile/PrivateProfileSections'
 import { mapPrivateToPublicProfile } from '@/lib/utils/profile-mapper'
+import PublicProfileCTA from '@/components/profile/PublicProfileCTA'
 
 export default function UnifiedProfilePage() {
   const params = useParams()
@@ -19,7 +20,7 @@ export default function UnifiedProfilePage() {
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
   
-  const { sendRequest, useRequests, useConnectionStatus } = useConnections()
+  const { sendRequest, useRequests, useConnectionStatus, isSending } = useConnections()
 
   // Determine ownership
   const isOwner = !!(user && (
@@ -91,6 +92,11 @@ export default function UnifiedProfilePage() {
 
   // Actions
   const handleConnect = async () => {
+    if (!isAuthenticated) {
+      router.push('/login')
+      return
+    }
+
     if (!targetId) return
     try {
        await sendRequest(targetId)
@@ -142,12 +148,18 @@ export default function UnifiedProfilePage() {
         isAuthenticated={isAuthenticated}
         isOwnProfile={isOwner}
         onConnect={handleConnect}
+        isConnecting={isSending}
         onMessage={handleMessage}
         connectionStatus={connectionStatus}
       />
       
       {isOwner && ownerProfile && ownerUser && (
         <PrivateProfileSections profile={{ user: ownerUser, profile: ownerProfile }} />
+      )}
+
+      {/* Public Profile Call-to-Action */}
+      {!isAuthenticated && displayProfile && (
+        <PublicProfileCTA firstName={displayProfile.profile.firstName} />
       )}
     </ProfileLayout>
   )

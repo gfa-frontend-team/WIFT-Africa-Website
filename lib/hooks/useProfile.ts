@@ -24,6 +24,8 @@ export function useProfile() {
     },
     // Don't refetch too often, but keep it fresh enough
     staleTime: 1000 * 60 * 5, // 5 minutes
+    // Only fetch if we have a token (prevents 401 redirect for public profile viewers)
+    enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
   })
 
   // Mutation: Update Profile
