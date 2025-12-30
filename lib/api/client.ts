@@ -219,6 +219,9 @@ class ApiClient {
   private forceLogout(): void {
     if (typeof window === 'undefined') return
     
+    // Clear tokens immediately explicitly
+    this.clearTokens()
+
     // Clear user from Zustand store
     // We need to import and use the store directly since we're in the API client
     import('../stores/userStore').then(({ useUserStore }) => {
@@ -227,8 +230,15 @@ class ApiClient {
     
     // Redirect to login
     // Use window.location only if we are not already on a public page
-    const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/', '/onboarding', '/verify-email']
-    if (!publicPaths.includes(window.location.pathname)) {
+    const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/', '/verify-email']
+    
+    // Check if current path starts with any public path (to cover sub-routes if any)
+    const isPublic = publicPaths.some(path => 
+      window.location.pathname === path || 
+      (path !== '/' && window.location.pathname.startsWith(path + '/'))
+    )
+
+    if (!isPublic) {
         window.location.href = '/login'
     }
   }
