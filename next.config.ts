@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
               default-src 'self';
               script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com;
               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com;
-              img-src 'self' blob: data: https://api.dicebear.com https://images.unsplash.com https://lh3.googleusercontent.com https://wiftstorage.blob.core.windows.net;
+              img-src 'self' blob: data: https://api.dicebear.com https://images.unsplash.com https://lh3.googleusercontent.com https://wiftstorage.blob.core.windows.net https://flagsapi.com;
               font-src 'self' https://fonts.gstatic.com;
               connect-src 'self' http://localhost:3001 https://api.dicebear.com https://accounts.google.com https://wiftafricabackend-test.azurewebsites.net;
               frame-src 'self' https://accounts.google.com;
