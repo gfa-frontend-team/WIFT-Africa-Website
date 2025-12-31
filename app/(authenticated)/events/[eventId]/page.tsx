@@ -183,7 +183,7 @@ export default function EventDetailsPage() {
                             {event.currentAttendees} / {event.capacity} attending
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {event.capacity - event.currentAttendees} spots remaining
+                            {event.capacity - (event.currentAttendees || 0)} spots remaining
                           </div>
                         </div>
                       </div>
@@ -224,7 +224,7 @@ export default function EventDetailsPage() {
                 <Card className="p-6">
                   <h3 className="font-semibold mb-4">RSVP</h3>
                   <RSVPControls 
-                    eventId={event.id} 
+                    eventId={event.id || event._id} 
                     currentRSVP={event.myRSVP}
                   />
                 </Card>

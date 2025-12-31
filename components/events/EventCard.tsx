@@ -129,7 +129,7 @@ export function EventCard({ event, showRSVP = true, compact = false }: EventCard
           
           {showRSVP && (
             <RSVPControls 
-              eventId={event.id} 
+              eventId={event.id || event._id} 
               currentRSVP={event.myRSVP}
               compact={true}
             />
