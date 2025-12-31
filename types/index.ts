@@ -199,6 +199,110 @@ export interface Chapter {
 }
 
 // ============================================
+// EVENTS
+// ============================================
+
+export enum EventType {
+  WORKSHOP = 'WORKSHOP',
+  SCREENING = 'SCREENING',
+  NETWORKING = 'NETWORKING',
+  MEETUP = 'MEETUP',
+  CONFERENCE = 'CONFERENCE',
+  OTHER = 'OTHER'
+}
+
+export enum LocationType {
+  PHYSICAL = 'PHYSICAL',
+  VIRTUAL = 'VIRTUAL',
+  HYBRID = 'HYBRID'
+}
+
+export enum RSVPStatus {
+  GOING = 'GOING',
+  INTERESTED = 'INTERESTED',
+  NOT_GOING = 'NOT_GOING'
+}
+
+export interface EventLocation {
+  type: LocationType
+  address?: string
+  city?: string
+  country?: string
+  virtualUrl?: string  // Changed from virtualLink to match API
+  instructions?: string
+}
+
+export interface Event {
+  _id: string  // MongoDB uses _id
+  id?: string  // Keep for compatibility, will be mapped from _id
+  title: string
+  description: string
+  type: EventType
+  chapterId?: {  // API returns chapterId as object
+    _id: string
+    name: string
+    code: string
+  }
+  chapter?: {  // Keep for compatibility, will be mapped from chapterId
+    id: string
+    name: string
+  }
+  startDate: string
+  endDate: string
+  timezone?: string
+  location: EventLocation
+  organizer?: {
+    _id: string  // MongoDB uses _id
+    id?: string  // Keep for compatibility
+    firstName: string
+    lastName: string
+  }
+  coverImage?: string
+  capacity?: number
+  currentAttendees?: number
+  tags?: string[]
+  myRSVP?: RSVPStatus | null
+  status?: string
+  isPublished?: boolean
+  isCancelled?: boolean
+  createdAt: string
+  updatedAt: string
+  __v?: number  // MongoDB version field
+}
+
+export interface EventRSVP {
+  eventId: string
+  userId: string
+  status: RSVPStatus
+}
+
+export interface EventsListResponse {
+  events: Event[]
+  total: number
+  pages: number
+}
+
+export interface EventAttendee {
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    profilePhoto?: string
+  }
+  status: RSVPStatus
+  rsvpDate: string
+}
+
+export interface EventAttendeesResponse {
+  attendees: EventAttendee[]
+  stats: {
+    going: number
+    interested: number
+    notGoing: number
+  }
+}
+
+// ============================================
 // API REQUEST/RESPONSE TYPES
 // ============================================
 
