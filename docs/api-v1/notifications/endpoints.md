@@ -23,11 +23,11 @@ Retrieve the user's recent notifications, paginated.
 {
   "notifications": [
     {
-      "id": "679f...",
+      "_id": "679f...",
       "type": "NEW_MESSAGE",
       "title": "New Message",
       "message": "Alice sent you a message",
-        "id": "...",
+        "_id": "...",
         "firstName": "Alice",
         "lastName": "Smith",
         "username": "alicesmith",

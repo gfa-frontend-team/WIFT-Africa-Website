@@ -233,17 +233,18 @@ export interface EventLocation {
 }
 
 export interface Event {
-  _id: string  // MongoDB uses _id
-  id?: string  // Keep for compatibility, will be mapped from _id
+  _id?: string  // MongoDB uses _id
+  id: string  // Primary identifier
   title: string
   description: string
   type: EventType
   chapterId?: {  // API returns chapterId as object
-    _id: string
+    _id?: string
+    id?: string
     name: string
     code: string
   }
-  chapter?: {  // Keep for compatibility, will be mapped from chapterId
+  chapter?: {  // Normalized field
     id: string
     name: string
   }
@@ -252,10 +253,11 @@ export interface Event {
   timezone?: string
   location: EventLocation
   organizer?: {
-    _id: string  // MongoDB uses _id
-    id?: string  // Keep for compatibility
+    _id?: string
+    id?: string
     firstName: string
     lastName: string
+    profilePhoto?: string
   }
   coverImage?: string
   capacity?: number

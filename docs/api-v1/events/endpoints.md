@@ -14,10 +14,16 @@ Retrieve a list of events with optional filtering.
 |-----------|------|-------------|
 | page | number | Page number (default: 1) |
 | limit | number | Items per page (default: 20) |
-| chapterId | string | Filter by chapter |
+| status | string | Filter by status (`PUBLISHED`, `DRAFT`, `CANCELLED`). *Admins only.* |
+| chapterId | string | Filter by chapter. (Empty = Global events). |
 | type | string | Filter by event type (`WORKSHOP`, `SCREENING`, `NETWORKING`, `MEETUP`, `CONFERENCE`, `OTHER`) |
 | startDate | string | Filter events starting from this date (YYYY-MM-DD) |
 | endDate | string | Filter events up to this date (YYYY-MM-DD) |
+
+### Visibility Rules
+- **Public/Members**: Can only see `PUBLISHED` events. Filter `status` is ignored.
+- **Admins**: Can see `DRAFT` and `CANCELLED` events by explicitly filtering with `status`.
+
 
 ### Response
 
@@ -28,12 +34,12 @@ Retrieve a list of events with optional filtering.
 {
   "events": [
     {
-      "id": "evt_123...",
+      "_id": "evt_123...",
       "title": "Film Industry Networking Mixer",
       "description": "Join us for an evening...",
       "type": "NETWORKING",
       "chapter": {
-        "id": "...",
+        "_id": "...",
         "name": "WIFT Africa HQ"
       },
       "startDate": "2024-02-15T18:00:00Z",
@@ -45,8 +51,11 @@ Retrieve a list of events with optional filtering.
       },
       "coverImage": "/uploads/events/evt-123.jpg",
       "capacity": 50,
-      "currentAttendees": 25
+      "currentAttendees": 25,
+      "status": "PUBLISHED",
+      "myRSVP": "GOING"
     }
+
   ],
   "total": 1,
   "pages": 1
@@ -76,7 +85,7 @@ Get detailed information about a specific event.
 **Status Code**: `200 OK`
 ```json
 {
-  "id": "evt_123...",
+  "_id": "evt_123...",
   "title": "Film Industry Networking Mixer",
   "description": "Full description...",
   "type": "NETWORKING",
@@ -87,12 +96,14 @@ Get detailed information about a specific event.
     "country": "Nigeria"
   },
   "organizer": {
-    "id": "usr_...",
+    "_id": "usr_...",
     "firstName": "Jane",
     "lastName": "Doe"
   },
+  "status": "PUBLISHED",
   "myRSVP": "GOING"
 }
+
 ```
 *Note: `myRSVP` field will be `null` if user is not authenticated or hasn't RSVP'd.*
 
@@ -250,7 +261,7 @@ Create a new chapter event.
 - `title` (string, required): Event title (max 200 characters)
 - `description` (string, required): Event description (max 5000 characters)
 - `type` (string, required): Event type enum
-- `chapterId` (string, required): Chapter ID
+- `chapterId` (string, optional): Chapter ID. **Send empty string `""` or omit to create a Global Event.**
 - `startDate` (string, required): ISO datetime string
 - `endDate` (string, required): ISO datetime string
 - `timezone` (string, required): Timezone identifier
@@ -272,7 +283,7 @@ Create a new chapter event.
 {
   "message": "Event created successfully",
   "event": {
-    "id": "evt_789...",
+    "_id": "evt_789...",
     "title": "Screenwriting Workshop",
     "description": "Learn the basics...",
     "type": "WORKSHOP",
@@ -338,9 +349,8 @@ List all users who have RSVP'd to the event.
 | eventId | string | ID of the event |
 
 #### Query Parameters
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| export | boolean | If true, may trigger CSV download (default: false) |
+(None)
+
 
 ### Response
 
@@ -351,7 +361,7 @@ List all users who have RSVP'd to the event.
   "attendees": [
     {
       "user": {
-        "id": "usr_123...",
+        "_id": "usr_123...",
         "firstName": "Jane",
         "lastName": "Doe",
         "email": "jane@example.com",
@@ -393,19 +403,106 @@ List all users who have RSVP'd to the event.
 
 ---
 
-## Endpoints NOT YET IMPLEMENTED
+## Endpoint: Update Event (Admin)
 
-The following endpoints are defined in the routes but return placeholder responses:
-
-### Update Event (Admin)
+### Request
 **`PATCH /api/v1/events/admin/events/:eventId`**
-- Returns: `{"message": "Event updated successfully"}`
-- Status: Placeholder implementation (TODO in controller)
 
-### Cancel Event (Admin)
+Update details of an existing event.
+
+**Authentication**: Required (Chapter Admin or Super Admin)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| eventId | string | ID of the event |
+
+#### Request Body
+```json
+{
+  "title": "Updated Workshop Title",
+  "startDate": "2024-03-01T11:00:00Z"
+}
+```
+**Field Descriptions**: Any field from Create Event (except chapterId/organizer) can be updated.
+
+### Response
+
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Event updated successfully",
+  "event": {
+    "_id": "evt_789...",
+    "title": "Updated Workshop Title",
+    ...
+  }
+}
+```
+
+#### Error Responses
+**Status Code**: `403 Forbidden`
+```json
+{
+  "error": "Admin privileges required"
+}
+```
+**Status Code**: `404 Not Found`
+```json
+{
+  "error": "Event not found"
+}
+```
+
+---
+
+## Endpoint: Cancel Event (Admin)
+
+### Request
 **`DELETE /api/v1/events/admin/events/:eventId`**
-- Returns: `{"message": "Event cancelled successfully", "notifiedAttendees": 0}`
-- Status: Placeholder implementation (TODO in controller)
+
+Cancel an event. This sets the status to `CANCELLED` and hides it from public lists.
+
+**Authentication**: Required (Chapter Admin or Super Admin)
+
+#### Path Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| eventId | string | ID of the event |
+
+#### Request Body
+```json
+{
+  "reason": "Speaker unavailable due to illness"
+}
+```
+**Field Descriptions**:
+- `reason` (string, required): Reason for cancellation.
+
+### Response
+
+#### Success Response
+**Status Code**: `200 OK`
+```json
+{
+  "message": "Event cancelled successfully",
+  "event": {
+    "_id": "evt_789...",
+    "status": "CANCELLED",
+    "isCancelled": true,
+    "cancellationReason": "Speaker unavailable due to illness"
+  }
+}
+```
+
+#### Error Responses
+**Status Code**: `400 Bad Request`
+```json
+{
+  "error": "Cancellation reason is required"
+}
+```
 
 ---
 

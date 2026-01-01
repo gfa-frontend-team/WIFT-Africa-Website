@@ -26,7 +26,7 @@ Retrieve the public profile of a user by their username, profile slug, or User I
 ```json
 {
   "profile": {
-    "id": "usr_123456789",
+    "_id": "usr_123456789",
     "firstName": "Jane",
     "lastName": "Doe",
     "username": "jane-doe",
@@ -44,7 +44,7 @@ Retrieve the public profile of a user by their username, profile slug, or User I
     "isMultihyphenate": true,
     "writerSpecialization": "FILM",
     "chapter": {
-      "id": "676bd...",
+      "_id": "676bd...",
       "name": "WIFT Africa HQ"
     },
     "website": "https://janedoe.com",

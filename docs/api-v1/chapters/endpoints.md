@@ -28,16 +28,16 @@ Retrieve a list of pending membership applications for a specific chapter.
 {
   "requests": [
     {
-      "id": "676e1a...",
+      "_id": "676e1a...",
       "user": {
-        "id": "676ac5...",
+        "_id": "676ac5...",
         "firstName": "Jane",
         "lastName": "Doe",
         "email": "jane@example.com",
         "profilePhoto": "..."
       },
       "chapter": {
-        "id": "676bd2...",
+        "_id": "676bd2...",
         "name": "WIFT Africa HQ"
       },
       "memberType": "NEW",
@@ -108,7 +108,7 @@ Approve a pending membership request. This grants the user full member access to
 {
   "message": "Membership request approved successfully",
   "request": {
-    "id": "676e1a...",
+    "_id": "676e1a...",
     "status": "APPROVED",
     "reviewedAt": "2024-02-12T10:00:00.000Z"
   }
@@ -159,7 +159,7 @@ Reject a pending membership request.
 {
   "message": "Membership request rejected",
   "request": {
-    "id": "676e1a...",
+    "_id": "676e1a...",
     "status": "REJECTED",
     "reviewedAt": "2024-02-12T10:05:00.000Z",
     "canReapply": true,
@@ -199,7 +199,7 @@ Get a list of all approved members in the chapter.
 {
   "members": [
     {
-      "id": "676ac5...",
+      "_id": "676ac5...",
       "firstName": "Jane",
       "lastName": "Doe",
       "email": "jane@example.com",
@@ -239,7 +239,7 @@ List all chapters with optional filtering.
   "data": {
     "chapters": [
       {
-        "id": "676bd...",
+        "_id": "676bd...",
         "name": "WIFT Africa HQ",
         "country": "Kenya",
         "city": "Nairobi"
@@ -277,7 +277,7 @@ Retrieve details for a specific chapter.
 ```json
 {
   "chapter": {
-    "id": "676bd2...",
+    "_id": "676bd2...",
     "name": "WIFT Africa HQ",
     "code": "WA-HQ",
     "country": "Kenya",
@@ -348,7 +348,7 @@ Update editable details for a specific chapter.
 **Status Code**: `200 OK`
 ```json
 {
-  "id": "676bd2...",
+  "_id": "676bd2...",
   "name": "WIFT Africa HQ",
   "description": "New description...",
   ...

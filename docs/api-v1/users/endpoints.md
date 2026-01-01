@@ -86,7 +86,7 @@ Get the user's complete profile including roles, specializations, and additional
     "username": "johndoe"
   },
   "profile": {
-    "id": "prf_123456789",
+    "_id": "prf_123456789",
     "bio": "Film enthusiast and producer",
     "headline": "Independent Producer",
     "location": "Nairobi, Kenya",
@@ -178,7 +178,7 @@ Update the user's public profile information.
 **Status Code**: `200 OK`
 ```json
 {
-  "id": "prf_123456789",
+  "_id": "prf_123456789",
   "bio": "New bio content...",
   "headline": "Senior Director",
   "location": "Lagos, Nigeria",

@@ -123,7 +123,7 @@ Get specific analytics for a single chapter.
 ```json
 {
   "chapter": {
-    "id": "...",
+    "_id": "...",
     "name": "WIFT Africa HQ",
     "country": "Kenya",
     "city": "Nairobi"
@@ -178,7 +178,7 @@ Retrieve a paginated, filterable list of all chapters.
 {
   "chapters": [
     {
-      "id": "676bd...",
+      "_id": "676bd...",
       "name": "WIFT Africa HQ",
       "code": "HQ",
       "country": "South Africa",
@@ -236,7 +236,7 @@ Create a new chapter configuration.
 {
   "message": "Chapter created successfully",
   "chapter": {
-    "id": "677c...",
+    "_id": "677c...",
     "name": "WIFT Kenya",
     "isActive": true
   }
@@ -262,7 +262,7 @@ Get full details of a specific chapter, including member statistics.
 ```json
 {
   "chapter": {
-    "id": "676bd...",
+    "_id": "676bd...",
     "name": "WIFT Africa HQ",
     "adminIds": [
       {
