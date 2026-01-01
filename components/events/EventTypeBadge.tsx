@@ -1,48 +1,27 @@
-import { EventType } from '@/types'
-import { cn } from '@/lib/utils'
+import { Badge } from "@/components/ui/badge"
+import { EventType } from "@/types"
+
+const TYPE_COLORS: Record<EventType, string> = {
+  [EventType.WORKSHOP]: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+  [EventType.SCREENING]: "bg-purple-100 text-purple-800 hover:bg-purple-200",
+  [EventType.NETWORKING]: "bg-green-100 text-green-800 hover:bg-green-200",
+  [EventType.MEETUP]: "bg-orange-100 text-orange-800 hover:bg-orange-200",
+  [EventType.CONFERENCE]: "bg-indigo-100 text-indigo-800 hover:bg-indigo-200",
+  [EventType.OTHER]: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+}
 
 interface EventTypeBadgeProps {
   type: EventType
   className?: string
 }
 
-const eventTypeConfig = {
-  [EventType.WORKSHOP]: {
-    label: 'Workshop',
-    className: 'bg-blue-100 text-blue-800 border-blue-200'
-  },
-  [EventType.SCREENING]: {
-    label: 'Screening',
-    className: 'bg-purple-100 text-purple-800 border-purple-200'
-  },
-  [EventType.NETWORKING]: {
-    label: 'Networking',
-    className: 'bg-green-100 text-green-800 border-green-200'
-  },
-  [EventType.MEETUP]: {
-    label: 'Meetup',
-    className: 'bg-orange-100 text-orange-800 border-orange-200'
-  },
-  [EventType.CONFERENCE]: {
-    label: 'Conference',
-    className: 'bg-red-100 text-red-800 border-red-200'
-  },
-  [EventType.OTHER]: {
-    label: 'Other',
-    className: 'bg-gray-100 text-gray-800 border-gray-200'
-  }
-}
-
 export function EventTypeBadge({ type, className }: EventTypeBadgeProps) {
-  const config = eventTypeConfig[type]
-  
   return (
-    <span className={cn(
-      'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border',
-      config.className,
-      className
-    )}>
-      {config.label}
-    </span>
+    <Badge 
+      variant="secondary" 
+      className={`${TYPE_COLORS[type] || TYPE_COLORS.OTHER} ${className}`}
+    >
+      {type}
+    </Badge>
   )
 }

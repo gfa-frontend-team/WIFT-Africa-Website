@@ -213,7 +213,7 @@ Fetch a list of all active chapters that a user can join.
 {
   "chapters": [
     {
-      "id": "676ac5...",
+      "_id": "676ac5...",
       "name": "WIFT Africa HQ",
       "code": "HQ",
       "country": "South Africa",
@@ -222,7 +222,7 @@ Fetch a list of all active chapters that a user can join.
       "requiresApproval": false
     },
     {
-      "id": "676bd2...",
+      "_id": "676bd2...",
       "name": "WIFT Nigeria",
       "code": "NG",
       "country": "Nigeria",

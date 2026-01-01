@@ -32,7 +32,7 @@ Search for users with various filters. Returns a paginated list of results with 
 {
   "users": [
     {
-      "id": "678e...",
+      "_id": "678e...",
       "firstName": "Sarah",
       "lastName": "Connor",
       "username": "sconnor",
@@ -43,7 +43,7 @@ Search for users with various filters. Returns a paginated list of results with 
       "profileSlug": "sarah-connor",
       "profilePhoto": "...",
       "chapter": {
-        "id": "...",
+        "_id": "...",
         "name": "WIFT Kenya",
         "code": "KE"
       },
@@ -86,7 +86,7 @@ Get user recommendations based on shared chapter, similar roles, or location.
 {
   "recommendations": [
     {
-      "id": "679f...",
+      "_id": "679f...",
       "firstName": "Jane",
       "lastName": "Doe",
       "username": "janedoe",
@@ -148,7 +148,7 @@ Get static and dynamic filter options (available roles, top chapters, top locati
 {
   "availableRoles": ["PRODUCER", "DIRECTOR", "..."],
   "availableChapters": [
-    { "id": "...", "name": "WIFT Nigeria", "memberCount": 150 }
+    { "_id": "...", "name": "WIFT Nigeria", "memberCount": 150 }
   ],
   "locationSuggestions": ["Lagos", "Accra", "Cape Town"]
 }

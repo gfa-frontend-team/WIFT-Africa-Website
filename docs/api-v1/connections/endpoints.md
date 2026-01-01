@@ -22,9 +22,9 @@ Retrieve a list of the authenticated user's confirmed connections.
 {
   "connections": [
     {
-      "id": "678d...",
+      "_id": "678d...",
       "user": {
-        "id": "UserA...",
+        "_id": "UserA...",
         "firstName": "Alice",
         "lastName": "Smith",
         "profilePhoto": "..."
@@ -68,7 +68,7 @@ Send a request to connect with another user.
 ```json
 {
   "request": {
-    "id": "Req123...",
+    "_id": "Req123...",
     "sender": "UserMe...",
     "receiver": "UserB...",
     "status": "PENDING",
@@ -108,7 +108,7 @@ Get a list of pending connection requests.
 {
   "requests": [
     {
-      "id": "Req123...",
+      "_id": "Req123...",
       "sender": { "firstName": "Bob" },
       "status": "PENDING",
       "createdAt": "..."
@@ -150,12 +150,12 @@ Handle a connection request. `action` can be `accept`, `decline`, or `cancel`.
 ```json
 {
   "connection": {
-    "id": "ConnNew...",
+    "_id": "ConnNew...",
     "user1": "...",
     "user2": "..."
   },
   "request": {
-    "id": "Req123...",
+    "_id": "Req123...",
     "status": "ACCEPTED",
     "respondedAt": "..."
   },
@@ -298,7 +298,7 @@ Retrieve a list of users blocked by the current user.
   "blocked": [
     {
       "user": {
-        "id": "UserBad...",
+        "_id": "UserBad...",
         "firstName": "Spammer",
         "lastName": "User",
         "profilePhoto": "..."

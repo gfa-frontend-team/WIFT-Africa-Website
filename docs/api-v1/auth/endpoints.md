@@ -43,7 +43,7 @@ Register a new user account with email and password. Triggers a verification ema
 {
   "message": "Registration successful. Please check your email to verify your account.",
   "user": {
-    "id": "676ac5...",
+    "_id": "676ac5...",
     "email": "jane.doe@example.com",
     "firstName": "Jane",
     "lastName": "Doe"
@@ -144,7 +144,7 @@ Authenticate a user with email and password to receive access tokens.
 {
   "message": "Login successful",
   "user": {
-    "id": "676ac5...",
+    "_id": "676ac5...",
     "email": "jane.doe@example.com",
     "firstName": "Jane",
     "lastName": "Doe",
@@ -224,7 +224,7 @@ Login or register using a Google ID token.
 {
   "message": "Google authentication successful",
   "user": {
-    "id": "676ac5...",
+    "_id": "676ac5...",
     "email": "jane.doe@example.com",
     "firstName": "Jane",
     "lastName": "Doe",
@@ -295,7 +295,7 @@ Verify a user's email address using the token sent via email.
 {
   "message": "Email verified successfully",
   "user": {
-    "id": "676ac5...",
+    "_id": "676ac5...",
     "email": "jane.doe@example.com",
     "emailVerified": true
   }

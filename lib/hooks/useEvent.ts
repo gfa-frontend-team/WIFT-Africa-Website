@@ -1,44 +1,25 @@
-import { useState, useEffect } from 'react'
-import { eventsApi } from '@/lib/api/events'
-import type { Event } from '@/types'
+import { useQuery } from '@tanstack/react-query'
+import { eventsApi } from '../api/events'
+import { eventKeys } from './useEvents'
 
-export function useEvent(eventId: string) {
-  const [event, setEvent] = useState<Event | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export function useEvent(id: string) {
+  const {
+    data: event,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: eventKeys.detail(id),
+    queryFn: () => eventsApi.getEvent(id),
+    enabled: !!id, // Only fetch if ID is present
+  })
 
-  useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const eventData = await eventsApi.getEvent(eventId)
-        setEvent(eventData)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch event')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (eventId) {
-      fetchEvent()
-    }
-  }, [eventId])
-
-  const refetch = async () => {
-    if (eventId) {
-      try {
-        setLoading(true)
-        const eventData = await eventsApi.getEvent(eventId)
-        setEvent(eventData)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch event')
-      } finally {
-        setLoading(false)
-      }
-    }
+  return {
+    event,
+    isLoading,
+    isError,
+    error,
+    refetch,
   }
-
-  return { event, loading, error, refetch }
 }

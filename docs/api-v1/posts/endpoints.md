@@ -22,7 +22,7 @@ Retrieve the main feed of posts, including regular posts from other users, chapt
 {
   "posts": [
     {
-      "id": "676f2...",
+      "_id": "676f2...",
       "content": "Just finished filming my new documentary! #FilmLife",
       "author": {
         "firstName": "Sarah",
@@ -86,7 +86,7 @@ Create a new regular post.
 ```json
 {
   "post": {
-    "id": "676f3...",
+    "_id": "676f3...",
     "content": "Excited to join WIFT Africa! 🌍",
     "visibility": "PUBLIC",
     "createdAt": "2024-02-15T12:05:00.000Z"
@@ -118,7 +118,7 @@ Retrieve details of a single post.
 ```json
 {
   "post": {
-    "id": "676f2...",
+    "_id": "676f2...",
     "content": "Just finished filming...",
     "author": { ... }
     // ... typical post fields
@@ -236,7 +236,7 @@ Get top-level comments for a post.
 {
   "comments": [
     {
-      "id": "676f4...",
+      "_id": "676f4...",
       "content": "Welcome!",
       "author": { ... },
       "repliesCount": 0,
@@ -274,7 +274,7 @@ Get nested replies for a specific comment.
 {
   "comments": [
     {
-      "id": "676f6...",
+      "_id": "676f6...",
       "content": "I agree!",
       "author": { ... },
       "parentComment": "676f4...",
@@ -313,7 +313,7 @@ Add a comment to a post.
 ```json
 {
   "comment": {
-    "id": "676f5...",
+    "_id": "676f5...",
     "content": "Great post!",
     "post": "PostId..."
   }
@@ -375,7 +375,7 @@ Share an existing post to your own feed.
 {
   "message": "Post shared successfully",
   "post": {
-    "id": "NewPostId...",
+    "_id": "NewPostId...",
     "originalPost": { ... },
     "isShared": true
   }
@@ -413,7 +413,7 @@ Get a list of users who shared a specific post.
 {
   "shares": [
     {
-      "id": "ShareId...",
+      "_id": "ShareId...",
       "user": { ... },
       "createdAt": "..."
     }
@@ -564,7 +564,7 @@ Create a highlighted announcement post.
 ```json
 {
   "post": {
-    "id": "...",
+    "_id": "...",
     "postType": "ADMIN_ANNOUNCEMENT",
     "isPinned": true
   },

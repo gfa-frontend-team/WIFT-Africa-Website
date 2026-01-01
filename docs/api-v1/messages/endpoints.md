@@ -23,7 +23,7 @@ Retrieve the user's list of conversations, sorted by the most recent message. Su
 {
   "conversations": [
     {
-      "id": "677d...",
+      "_id": "677d...",
       "type": "DIRECT",
       "otherParticipant": {
         "firstName": "Jane",
@@ -37,7 +37,7 @@ Retrieve the user's list of conversations, sorted by the most recent message. Su
       }
     },
     {
-      "id": "678e...",
+      "_id": "678e...",
       "type": "BROADCAST",
       "title": "Monthly Newsletter",
       "description": "Updates for March",
@@ -93,10 +93,10 @@ Fetch messages within a specific conversation.
   },
   "messages": [
     {
-      "id": "677f...",
+      "_id": "677f...",
       "content": "Hello!",
       "sender": {
-        "id": "...",
+        "_id": "...",
         "firstName": "John"
       },
       "isReadByMe": true,
@@ -140,13 +140,13 @@ Send a direct message to another user.
 ```json
 {
   "message": {
-    "id": "678a...",
+    "_id": "678a...",
     "content": "Hey, are you going to the event?",
     "receiver": "...",
     "createdAt": "..."
   },
   "conversation": {
-    "id": "..."
+    "_id": "..."
   }
 }
 ```
@@ -189,12 +189,12 @@ Send a message to multiple users (e.g., all members or specific chapter).
   "data": {
     "recipientCount": 150,
     "message": {
-      "id": "...",
+      "_id": "...",
       "content": "Please check your email...",
       "createdAt": "..."
     },
     "conversation": {
-      "id": "...",
+      "_id": "...",
       "title": "Urgent Update",
       "type": "BROADCAST"
     }
@@ -267,7 +267,7 @@ Get read receipts and statistics for a broadcast.
 ```json
 {
   "conversation": {
-    "id": "...",
+    "_id": "...",
     "title": "Urgent Update",
     "description": "Policy update notification",
     "creator": {

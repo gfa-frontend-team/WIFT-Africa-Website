@@ -1,44 +1,45 @@
-import { useState, useEffect } from 'react'
-import { eventsApi, type EventsListParams } from '@/lib/api/events'
-import type { Event, EventsListResponse } from '@/types'
+import { useQuery } from '@tanstack/react-query'
+import { eventsApi, EventFilters } from '../api/events'
 
-export function useEvents(params: EventsListParams = {}) {
-  const [events, setEvents] = useState<Event[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    total: 0,
-    pages: 0
+
+// Create a query keys file if it keeps getting complex, 
+// for now define it here or imported if exists.
+// Checking if we should follow existing pattern or make new one.
+// Let's create a dedicated keys constant here for now to be safe.
+
+export const eventKeys = {
+  all: ['events'] as const,
+  lists: () => [...eventKeys.all, 'list'] as const,
+  list: (filters: EventFilters) => [...eventKeys.lists(), filters] as const,
+  details: () => [...eventKeys.all, 'detail'] as const,
+  detail: (id: string) => [...eventKeys.details(), id] as const,
+}
+
+export function useEvents(filters: EventFilters = {}) {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching
+  } = useQuery({
+    queryKey: eventKeys.list(filters),
+    queryFn: () => eventsApi.getEvents(filters),
+    placeholderData: (prev) => prev, // Keep previous data while fetching new page
   })
 
-  const fetchEvents = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await eventsApi.listEvents(params)
-      setEvents(response.events)
-      setPagination({
-        page: params.page || 1,
-        total: response.total,
-        pages: response.pages
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch events')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchEvents()
-  }, [JSON.stringify(params)])
-
   return {
-    events,
-    loading,
+    events: data?.events ?? [],
+    pagination: {
+      page: filters.page ?? 1,
+      total: data?.total ?? 0,
+      pages: data?.pages ?? 0,
+    },
+    isLoading,
+    isError,
     error,
-    pagination,
-    refetch: fetchEvents
+    refetch,
+    isFetching
   }
 }
