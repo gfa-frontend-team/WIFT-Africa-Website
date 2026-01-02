@@ -16,7 +16,7 @@ export default function LandingFooter() {
             </p>
             <div className="flex space-x-3">
               <a 
-                href="https://www.linkedin.com/company/wift-africa" 
+                href="https://www.linkedin.com/company/women-in-film-and-tv-africa/" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
@@ -43,7 +43,7 @@ export default function LandingFooter() {
                 <Instagram className="h-5 w-5 text-primary" />
               </a>
               <a 
-                href="https://www.youtube.com/@wiftafrica" 
+                href="http://www.youtube.com/@wiftafrica4002" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
