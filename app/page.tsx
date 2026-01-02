@@ -148,7 +148,7 @@ export default function LandingPage() {
             {/* Social Media Links */}
             <div className="flex items-center justify-center gap-4 mb-8">
               <a 
-                href="https://www.linkedin.com/company/wift-africa" 
+                href="https://www.linkedin.com/company/women-in-film-and-tv-africa/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full hover:bg-white/20 transition-colors"
@@ -175,7 +175,7 @@ export default function LandingPage() {
                 <Instagram className="h-5 w-5 text-white" />
               </a>
               <a 
-                href="https://www.youtube.com/@wiftafrica" 
+                href="http://www.youtube.com/@wiftafrica4002" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full hover:bg-white/20 transition-colors"
@@ -216,6 +216,38 @@ export default function LandingPage() {
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-white mb-2">92%</div>
                 <div className="text-sm md:text-base text-white/80">Recommend to Colleagues</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section id="about" className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">About Us</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+                WIFT Africa is an organization set up to empower and support African and Pan African Women in the Film and TV industry. The main objective of the organization is to provide support, capacity building, network, mentorship, educational and economic empowerment for women.
+              </p>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                WIFT Africa aims to build effective collaboration and partnerships within Africa and the rest of the world; sustain relationships amongst women in the TV and Film community in Africa and encourage the establishment of more WIFT chapters across Africa. We aim to improve access to resources and funding by collaborating with relevant organizations, agencies and stakeholders that are in the position to help.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all">
+                <h3 className="text-2xl font-bold text-primary mb-4">VISION</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  To help African women in film & TV become key industry players through networking, capacity building, mentorship and access to funding.
+                </p>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all">
+                <h3 className="text-2xl font-bold text-primary mb-4">MISSION</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  To create a strong network of African/Pan African women in Film & TV.
+                </p>
               </div>
             </div>
           </div>
@@ -365,29 +397,45 @@ export default function LandingPage() {
               <p className="text-sm font-medium text-muted-foreground mb-8 text-center uppercase tracking-wider">
                 Trusted by professionals at
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-                <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6 flex items-center justify-center hover:border-primary/30 transition-colors">
-                  <div className="text-center">
-                    <div className="text-base font-semibold text-foreground">WIF</div>
-                    <div className="text-xs text-muted-foreground mt-1">Los Angeles</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto items-center">
+                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/WIF LA.jpg"
+                      alt="WIF Los Angeles"
+                      fill
+                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                    />
                   </div>
                 </div>
-                <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6 flex items-center justify-center hover:border-primary/30 transition-colors">
-                  <div className="text-center">
-                    <div className="text-base font-semibold text-foreground">Gates</div>
-                    <div className="text-xs text-muted-foreground mt-1">Foundation</div>
+                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/bill & melinda gates logo.png.png"
+                      alt="Bill & Melinda Gates Foundation"
+                      fill
+                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                    />
                   </div>
                 </div>
-                <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6 flex items-center justify-center hover:border-primary/30 transition-colors">
-                  <div className="text-center">
-                    <div className="text-base font-semibold text-foreground">Film</div>
-                    <div className="text-xs text-muted-foreground mt-1">Independent</div>
+                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/Film Independent_logo png.png"
+                      alt="Film Independent"
+                      fill
+                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                    />
                   </div>
                 </div>
-                <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6 flex items-center justify-center hover:border-primary/30 transition-colors">
-                  <div className="text-center">
-                    <div className="text-base font-semibold text-foreground">MultiChoice</div>
-                    <div className="text-xs text-muted-foreground mt-1">Group</div>
+                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src="/MultiChoice logo.png.webp"
+                      alt="MultiChoice Group"
+                      fill
+                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                    />
                   </div>
                 </div>
               </div>
