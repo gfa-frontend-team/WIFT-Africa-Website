@@ -4,9 +4,11 @@ import Link from 'next/link'
 import { Eye, Users, TrendingUp, Bookmark, Briefcase, Calendar } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useSavedPostsCount } from '@/lib/hooks/useSavedPosts'
 
 export default function LeftSidebar() {
   const { user } = useAuth()
+  const { data: savedCount } = useSavedPostsCount()
 
   if (!user) return null
 
@@ -103,7 +105,7 @@ export default function LeftSidebar() {
         
         <div className="space-y-2">
           <Link
-            href="/saved/posts"
+            href="/saved-posts"
             className="flex items-center justify-between text-sm hover:bg-accent p-2 rounded-lg transition-colors"
           >
             <span className="text-muted-foreground flex items-center gap-2">
@@ -111,8 +113,7 @@ export default function LeftSidebar() {
               Posts
             </span>
             <span className="font-semibold text-foreground">
-              {/* TODO: Get saved posts count */}
-              —
+              {typeof savedCount === 'number' ? savedCount : '—'}
             </span>
           </Link>
           

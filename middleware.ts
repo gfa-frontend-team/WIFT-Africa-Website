@@ -29,6 +29,7 @@ export function middleware(request: NextRequest) {
     '/chapter',
     '/_next',
     '/favicon.ico',
+    '/saved-posts',
   ]
 
   // Check if pathname starts with any reserved route

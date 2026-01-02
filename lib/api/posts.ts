@@ -40,6 +40,10 @@ export interface Post {
   isAdminPost: boolean
   createdAt: string
   updatedAt: string
+  // Shared Post Fields
+  postType?: 'REGULAR' | 'SHARED' | 'ADMIN_ANNOUNCEMENT'
+  isShared?: boolean
+  originalPost?: Post
 }
 
 export interface Comment {
@@ -113,10 +117,12 @@ const mapPost = (post: any): Post => {
   return {
     ...post,
     id: post.id || post._id,
+    isSaved: post.isSaved || post.saves?.length > 0 || false, // Fallback if isSaved isn't directly boolean
     author: post.author ? {
       ...post.author,
       id: post.author.id || post.author._id
-    } : post.author
+    } : post.author,
+    originalPost: post.originalPost ? mapPost(post.originalPost) : undefined
   }
 }
 
@@ -142,10 +148,8 @@ export const postsApi = {
    * Get posts feed with pagination
    */
   getFeed: async (page = 1, limit = 10): Promise<FeedResponse> => {
-    console.log(`🔄 Fetching feed: page=${page}, limit=${limit}`)
     try {
       const response = await apiClient.get<FeedResponse>(`/posts/feed?page=${page}&limit=${limit}`)
-      console.log('✅ Feed response received:', response)
       
       // Map posts to ensure IDs exist
       if (response && response.posts) {
@@ -286,10 +290,6 @@ export const postsApi = {
   deleteComment: async (commentId: string): Promise<{ message: string }> => {
     return await apiClient.delete<{ message: string }>(`/posts/comments/${commentId}`)
   },
-
-  // ============================================
-  // SAVED POSTS
-  // ============================================
 
   /**
    * Get saved posts
