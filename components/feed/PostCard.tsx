@@ -8,6 +8,10 @@ import Avatar from '@/components/ui/Avatar'
 import { usePostMutations } from '@/lib/hooks/usePostMutations'
 import CommentSection from './CommentSection'
 import { useAuth } from '@/lib/hooks/useAuth'
+import SharePostModal from './SharePostModal'
+import EmbeddedPost from './EmbeddedPost'
+import { toast } from 'sonner'
+import { useSavedPostsStore } from '@/lib/stores/savedPostsStore'
 
 interface PostCardProps {
   post: Post
@@ -16,9 +20,16 @@ interface PostCardProps {
 
 export default function PostCard({ post, initialShowComments = false }: PostCardProps) {
   const [showComments, setShowComments] = useState(initialShowComments)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const { likePost, savePost, isLiking, isSaving } = usePostMutations()
   const { user } = useAuth()
   
+  // Use store for saved state, fallback to prop if store not ready (or prop is true)
+  const isPostSavedInStore = useSavedPostsStore(state => state.hasSavedPost(post.id))
+  // We trust the store if plain prop is false (because prop is known to be missing/false in feed)
+  // If prop is true (e.g. on Saved Posts page), we assume true.
+  const isSaved = post.isSaved || isPostSavedInStore
+
   const handleLike = async () => {
     try {
       await likePost(post.id)
@@ -29,15 +40,17 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
 
   const handleSave = async () => {
     try {
-      await savePost(post.id)
-    } catch (error) {
+      const { saved } = await savePost(post.id)
+      const message = saved ? 'Post saved to your collection' : 'Post removed from saved'
+      toast.success(message)
+    } catch (error: any) {
       console.error('Failed to save post:', error)
+      toast.error(error.message || 'Failed to update saved status')
     }
   }
 
   const handleShare = () => {
-    // TODO: Implement share modal
-    console.log('Share post:', post.id)
+    setIsShareModalOpen(true)
   }
 
   const formatTimestamp = (dateString: string) => {
@@ -164,6 +177,11 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           ))}
         </div>
       )}
+      
+      {/* Shared Post Content */}
+      {post.postType === 'SHARED' && post.originalPost && (
+        <EmbeddedPost post={post.originalPost} />
+      )}
 
       {/* Interaction Stats */}
       <div className="px-4 py-2 flex items-center justify-between text-sm text-muted-foreground border-t border-border">
@@ -232,12 +250,12 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           onClick={handleSave}
           disabled={isSaving}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 ${
-            post.isSaved
+            isSaved
               ? 'text-primary bg-primary/10'
               : 'text-muted-foreground hover:bg-accent'
           }`}
         >
-          <Bookmark className={`h-5 w-5 ${post.isSaved ? 'fill-current' : ''}`} />
+          <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-current' : ''}`} />
         </button>
       </div>
 
@@ -259,6 +277,12 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           }}
         />
       )}
+      
+      <SharePostModal 
+        post={post}
+        isOpen={isShareModalOpen} 
+        onClose={() => setIsShareModalOpen(false)} 
+      />
     </article>
   )
 }
