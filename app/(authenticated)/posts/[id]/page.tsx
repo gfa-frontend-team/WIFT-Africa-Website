@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { postsApi, type Post } from '@/lib/api/posts'
 import PostCard from '@/components/feed/PostCard'
 import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
@@ -10,7 +11,9 @@ import Link from 'next/link'
 export default function SinglePostPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const id = params?.id as string
+  const showComments = searchParams.get('comments') === 'true'
 
   const [post, setPost] = useState<Post | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -73,7 +76,7 @@ export default function SinglePostPage() {
         <span>Back</span>
       </button>
 
-      <PostCard post={post} />
+      <PostCard post={post} initialShowComments={showComments} />
     </div>
   )
 }

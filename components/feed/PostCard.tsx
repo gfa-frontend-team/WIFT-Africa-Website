@@ -11,10 +11,11 @@ import { useAuth } from '@/lib/hooks/useAuth'
 
 interface PostCardProps {
   post: Post
+  initialShowComments?: boolean
 }
 
-export default function PostCard({ post }: PostCardProps) {
-  const [showComments, setShowComments] = useState(false)
+export default function PostCard({ post, initialShowComments = false }: PostCardProps) {
+  const [showComments, setShowComments] = useState(initialShowComments)
   const { likePost, savePost, isLiking, isSaving } = usePostMutations()
   const { user } = useAuth()
   

@@ -7,10 +7,30 @@ import ConnectionList from '@/components/connections/ConnectionList'
 import { Users, UserPlus, ExternalLink, Network } from 'lucide-react'
 import Link from 'next/link'
 
+import { useSearchParams, useRouter } from 'next/navigation'
+
 export default function ConnectionsPage() {
-  const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing' | 'connections'>('connections')
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get('tab') as 'incoming' | 'outgoing' | 'connections' | null
+  const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing' | 'connections'>(
+    initialTab && ['incoming', 'outgoing', 'connections'].includes(initialTab) ? initialTab : 'connections'
+  )
+
+  const handleTabChange = (tab: 'incoming' | 'outgoing' | 'connections') => {
+    setActiveTab(tab)
+    router.push(`/connections?tab=${tab}`)
+  }
   
   const { useRequests, useStats, useMyConnections, removeConnection } = useConnections()
+
+  useEffect(() => {
+    const tab = searchParams.get('tab') as 'incoming' | 'outgoing' | 'connections' | null
+    if (tab && ['incoming', 'outgoing', 'connections'].includes(tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
+
   const { data: requestsData, isLoading: isRequestsLoading } = useRequests(activeTab === 'connections' ? 'all' : activeTab)
   const { data: connectionsData, isLoading: isConnectionsLoading } = useMyConnections()
   const { data: statsData } = useStats()
@@ -89,7 +109,7 @@ export default function ConnectionsPage() {
            {/* Tabs */}
             <div className="bg-card border border-border rounded-t-xl overflow-hidden flex border-b-0 overflow-x-auto">
                  <button
-                    onClick={() => setActiveTab('connections')}
+                    onClick={() => handleTabChange('connections')}
                     className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors min-w-[120px] ${
                         activeTab === 'connections' 
                             ? 'border-primary text-primary bg-primary/5' 
@@ -99,7 +119,7 @@ export default function ConnectionsPage() {
                     My Connections ({stats?.connectionsCount || 0})
                 </button>
                 <button
-                    onClick={() => setActiveTab('incoming')}
+                    onClick={() => handleTabChange('incoming')}
                     className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors ${
                         activeTab === 'incoming' 
                             ? 'border-primary text-primary bg-primary/5' 
@@ -109,7 +129,7 @@ export default function ConnectionsPage() {
                     Incoming Requests ({stats?.pendingIncoming || 0})
                 </button>
                 <button
-                    onClick={() => setActiveTab('outgoing')}
+                    onClick={() => handleTabChange('outgoing')}
                     className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors ${
                         activeTab === 'outgoing' 
                             ? 'border-primary text-primary bg-primary/5' 

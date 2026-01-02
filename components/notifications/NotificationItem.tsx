@@ -33,25 +33,50 @@ export default function NotificationItem({ notification }: NotificationItemProps
     }
   }
 
-  // Sanitize action URL to handle legacy or incorrect routes
-  const getSanitizedUrl = (url?: string) => {
-    if (!url) return undefined
-    
-    // Map non-existent dashboard to feed
-    if (url === '/dashboard' || url.startsWith('/dashboard/')) {
-       return url.replace('/dashboard', '/feed')
+  // Construct smart deep links based on notification type
+  const getNotificationLink = () => {
+    // If backend provides a specific action URL, prefer that (with sanitization)
+    if (notification.actionUrl) {
+        if (notification.actionUrl === '/dashboard' || notification.actionUrl.startsWith('/dashboard/')) {
+            return notification.actionUrl.replace('/dashboard', '/feed')
+        }
+        if (notification.actionUrl.startsWith('/profile/')) {
+            return notification.actionUrl.replace('/profile/', '/in/')
+        }
+        if (notification.actionUrl === '/connections/requests') {
+            return '/connections?tab=incoming'
+        }
+        return notification.actionUrl
     }
 
-    // Map legacy profile routes
-    // Backend might match /profile/:id, frontend uses /in/:id
-    if (url.startsWith('/profile/')) {
-      return url.replace('/profile/', '/in/')
-    }
+    const metadata = notification.metadata || {}
+    const entityId = metadata.entityId || metadata.postId
 
-    return url
+    // Construct from entities
+    switch (notification.type) {
+        case 'LIKE':
+            // Assuming LIKE is generally for posts for now, or check metadata
+            return entityId ? `/posts/${entityId}` : undefined
+        
+        case 'COMMENT':
+            return entityId ? `/posts/${entityId}?comments=true` : undefined
+        
+        case 'CONNECTION_REQUEST':
+            return '/connections?tab=incoming'
+            
+        case 'CONNECTION_ACCEPTED':
+            // Use ID as fallback since username is not in the type definition currently
+            return notification.sender?.id ? `/in/${notification.sender.id}` : '/connections'
+
+        case 'NEW_MESSAGE':
+            return '/messages'
+            
+        default:
+            return undefined
+    }
   }
 
-  const actionUrl = getSanitizedUrl(notification.actionUrl)
+  const actionUrl = getNotificationLink()
 
   const handleClick = (e?: React.MouseEvent) => {
     // If it's a link click, let it propagate naturally unless we specifically want to intercept
