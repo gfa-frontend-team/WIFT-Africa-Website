@@ -15,6 +15,7 @@ import ProfileContent from '@/components/profile/ProfileContent'
 import PrivateProfileSections from '@/components/profile/PrivateProfileSections'
 import { mapPrivateToPublicProfile } from '@/lib/utils/profile-mapper'
 import PublicProfileCTA from '@/components/profile/PublicProfileCTA'
+import { useAnalytics } from '@/lib/hooks/useAnalytics'
 
 export default function UnifiedProfilePage() {
   const params = useParams()
@@ -79,8 +80,12 @@ export default function UnifiedProfilePage() {
   
   // Stats for Owner
   const { data: myStats } = useStats()
+  
+  const { useUserPostsStats } = useAnalytics()
+  const { data: myPostsStats } = useUserPostsStats()
+  
   const connectionsCount = isOwner ? (myStats?.connectionsCount || 0) : (displayProfile?.profile?.stats?.connectionsCount || 0)
-  const postsCount = isOwner ? 0 : (displayProfile?.profile?.stats?.postsCount || 0) 
+  const postsCount = isOwner ? (myPostsStats?.total || 0) : (displayProfile?.profile?.stats?.postsCount || 0) 
 
 
   const connectionStatus = useMemo(() => {

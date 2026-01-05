@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import type { PublicProfileResponse } from '@/lib/api/profiles'
 import { User, Profile } from '@/types'
 import ProfileHeader from './ProfileHeader'
+import ProfileAnalytics from './ProfileAnalytics'
 import ProfileStats from './ProfileStats'
 import BadgeDisplay from './BadgeDisplay'
 import AvailabilityBanner from '../ui/AvailabilityBanner'
@@ -98,9 +99,15 @@ export default function ProfileContent({
         postsCount={postsCount}
         onConnect={onConnect} // Always pass onConnect so the parent can handle the redirect behavior
         isConnecting={isConnecting}
-        onMessage={isAuthenticated ? onMessage : undefined}
-        onEdit={handleEdit}
+        onMessage={onMessage}
+        onEdit={() => {}} // Handle edit in parent/header
       />
+
+      {isOwnProfile && isAuthenticated && (
+        <div className="px-4 mt-6 max-w-4xl mx-auto w-full">
+            <ProfileAnalytics />
+        </div>
+      )}
 
       <div className="mt-6">
         <AvailabilityBanner 
