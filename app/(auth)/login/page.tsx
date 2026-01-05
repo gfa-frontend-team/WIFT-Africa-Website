@@ -332,7 +332,7 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-black/50" />
           <div className="absolute inset-0 flex items-center justify-center p-12">
             <div className="text-white text-center max-w-md">
-              <h2 className="text-4xl font-bold mb-4">Welcome Back!</h2>
+              <h2 className="text-4xl font-bold mb-4">Welcome!</h2>
               <p className="text-xl text-white/90">
                 Continue your journey with Africa's premier network for women in film, television & media.
               </p>
