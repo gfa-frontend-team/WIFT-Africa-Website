@@ -87,7 +87,7 @@ export default function JobDetailPage() {
           <div className="flex flex-wrap gap-3 mt-4">
              <Badge variant="outline" className="px-3 py-1">
                 <Briefcase className="w-3 h-3 mr-2" />
-                {job.type.replace('_', ' ')}
+                {(job.employmentType || job.type || '').replace('_', ' ')}
              </Badge>
              {job.salaryRange && (
                <Badge variant="outline" className="px-3 py-1">
@@ -132,7 +132,7 @@ export default function JobDetailPage() {
       <JobApplicationModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        jobId={job.id}
+        jobId={job._id}
         jobTitle={job.title}
       />
     </div>

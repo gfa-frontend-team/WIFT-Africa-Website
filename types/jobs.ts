@@ -1,10 +1,11 @@
 
 export interface Job {
-  id: string
+  _id: string
   title: string
   companyName: string
   location: string
-  type: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'FREELANCE' | 'INTERNSHIP'
+  employmentType: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'FREELANCE' | 'INTERNSHIP' | string
+  type?: string // Keeping for backward compatibility if needed, but API returns employmentType
   description: string
   requirements?: string[]
   responsibilities?: string[]

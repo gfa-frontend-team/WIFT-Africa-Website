@@ -38,7 +38,7 @@ export function JobCard({ job }: JobCardProps) {
               </div>
               <div className="flex items-center">
                 <Briefcase className="w-4 h-4 mr-1" />
-                {job.type.replace('_', ' ')}
+                {(job.employmentType || job.type || '').replace('_', ' ')}
               </div>
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-1" />
@@ -49,7 +49,7 @@ export function JobCard({ job }: JobCardProps) {
 
           <div className="flex flex-col justify-center items-start md:items-end gap-2 min-w-[120px]">
             <Button asChild className="w-full md:w-auto">
-              <Link href={`/opportunities/jobs/${job.id}`}>View Details</Link>
+              <Link href={`/opportunities/jobs/${job._id}`}>View Details</Link>
             </Button>
             {job.hasApplied && (
               <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
