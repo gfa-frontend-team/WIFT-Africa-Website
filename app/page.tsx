@@ -398,7 +398,7 @@ export default function LandingPage() {
                 Trusted by professionals at
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto items-center">
-                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
                   <div className="relative w-full h-full">
                     <Image
                       src="/WIF LA.jpg"
@@ -408,7 +408,7 @@ export default function LandingPage() {
                     />
                   </div>
                 </div>
-                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
                   <div className="relative w-full h-full">
                     <Image
                       src="/bill & melinda gates logo.png.png"
@@ -418,7 +418,7 @@ export default function LandingPage() {
                     />
                   </div>
                 </div>
-                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
                   <div className="relative w-full h-full">
                     <Image
                       src="/Film Independent_logo png.png"
@@ -428,7 +428,7 @@ export default function LandingPage() {
                     />
                   </div>
                 </div>
-                <div className="bg-white/5 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
                   <div className="relative w-full h-full">
                     <Image
                       src="/MultiChoice logo.png.webp"

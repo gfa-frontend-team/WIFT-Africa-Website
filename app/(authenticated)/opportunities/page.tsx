@@ -22,9 +22,9 @@ export default function OpportunitiesPage() {
             <FileText className="w-4 h-4" />
             Grants
           </TabsTrigger>
-          <TabsTrigger value="casting" className="flex items-center gap-2">
+          <TabsTrigger value="mentorship" className="flex items-center gap-2">
             <Video className="w-4 h-4" />
-            Casting
+            Mentorship
           </TabsTrigger>
         </TabsList>
 
@@ -44,12 +44,12 @@ export default function OpportunitiesPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="casting">
+        <TabsContent value="mentorship" className="mt-6">
           <div className="bg-white p-12 rounded-xl border border-gray-200 shadow-sm text-center">
             <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Video className="w-8 h-8 text-purple-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Casting Calls</h3>
+            <h3 className="text-xl font-semibold mb-2">Mentorship Calls</h3>
             <p className="text-gray-500 max-w-md mx-auto">
               Looking for talent? Or looking to be cast? Our casting board is coming soon.
             </p>
