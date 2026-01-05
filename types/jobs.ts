@@ -1,0 +1,45 @@
+
+export interface Job {
+  id: string
+  title: string
+  companyName: string
+  location: string
+  type: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'FREELANCE' | 'INTERNSHIP'
+  description: string
+  requirements?: string[]
+  responsibilities?: string[]
+  salaryRange?: {
+    min: number
+    max: number
+    currency: string
+  }
+  isRemote: boolean
+  postedAt: string
+  applicationCount: number
+  hasApplied?: boolean
+}
+
+export interface JobFilters {
+  search?: string
+  location?: string
+  type?: string
+  isRemote?: boolean
+  page?: number
+  limit?: number
+}
+
+export interface JobApplicationInput {
+  coverLetter: string
+  resumeId?: string // If selecting an existing resume
+  resumeFile?: File // If uploading a new one (handled by formData)
+}
+
+export interface JobsResponse {
+  data: Job[]
+  pagination: {
+    total: number
+    pages: number
+    page: number
+    limit: number
+  }
+}

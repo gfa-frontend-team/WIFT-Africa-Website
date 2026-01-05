@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
     '/events',
     '/resources',
     '/messages',
+    '/jobs',
     '/notifications',
     '/connections',
     '/settings',

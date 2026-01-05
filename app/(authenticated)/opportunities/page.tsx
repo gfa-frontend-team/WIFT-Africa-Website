@@ -1,63 +1,61 @@
 'use client'
 
-import { Briefcase, ExternalLink } from 'lucide-react'
-import FeatureGate, { FeatureButton } from '@/components/access/FeatureGate'
-import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { JobsList } from '@/components/jobs/JobsList'
+import { Briefcase, FileText, Video } from 'lucide-react'
 
 export default function OpportunitiesPage() {
-  const { access } = useFeatureAccess()
-
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-6">
-      <FeatureGate 
-        feature="canViewOpportunities"
-        restrictionTitle="Opportunities Require Verification"
-        restrictionDescription="Complete your membership verification to view and apply for opportunities in the film industry."
-        size="lg"
-      >
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Opportunities</h1>
-              <p className="text-muted-foreground mt-2">
-                Discover jobs, grants, mentorship programs, and collaboration opportunities
-              </p>
-            </div>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Opportunities</h1>
+        <p className="text-gray-600">Explore career opportunities, grants, and casting calls.</p>
+      </div>
 
-          {/* Coming Soon Content */}
-          <div className="bg-card border border-border rounded-lg p-12 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Briefcase className="h-10 w-10 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground mb-3">
-                Opportunities Coming Soon
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                Discover jobs, grants, mentorship programs, and collaboration opportunities in the film industry.
-              </p>
+      <Tabs defaultValue="jobs" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
+          <TabsTrigger value="jobs" className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4" />
+            Jobs
+          </TabsTrigger>
+          <TabsTrigger value="grants" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Grants
+          </TabsTrigger>
+          <TabsTrigger value="casting" className="flex items-center gap-2">
+            <Video className="w-4 h-4" />
+            Casting
+          </TabsTrigger>
+        </TabsList>
 
-              {/* Example restricted action */}
-              <div className="space-y-3">
-                <FeatureButton
-                  feature="canApplyToOpportunities"
-                  className="w-full py-3 px-4 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors"
-                >
-                  Apply to Opportunities
-                </FeatureButton>
-                
-                {!access.canApplyToOpportunities && (
-                  <p className="text-xs text-muted-foreground">
-                    Complete verification to apply for opportunities
-                  </p>
-                )}
-              </div>
+        <TabsContent value="jobs">
+          <JobsList />
+        </TabsContent>
+
+        <TabsContent value="grants">
+          <div className="bg-white p-12 rounded-xl border border-gray-200 shadow-sm text-center">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-blue-600" />
             </div>
+            <h3 className="text-xl font-semibold mb-2">Grants & Funding</h3>
+            <p className="text-gray-500 max-w-md mx-auto">
+              We're aggregating potential grants and funding opportunities for you. Check back soon for updates.
+            </p>
           </div>
-        </div>
-      </FeatureGate>
+        </TabsContent>
+
+        <TabsContent value="casting">
+          <div className="bg-white p-12 rounded-xl border border-gray-200 shadow-sm text-center">
+            <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Video className="w-8 h-8 text-purple-600" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Casting Calls</h3>
+            <p className="text-gray-500 max-w-md mx-auto">
+              Looking for talent? Or looking to be cast? Our casting board is coming soon.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
