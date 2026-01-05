@@ -461,6 +461,7 @@ Toggle saved status of a post.
 
 Retrieve posts saved by the current user.
 
+
 **Authentication**: Required
 
 #### Query Parameters

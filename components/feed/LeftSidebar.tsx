@@ -162,6 +162,12 @@ export default function LeftSidebar() {
             My Applications
             <span className="text-xs ml-2">Coming Soon</span>
           </div>
+          <Link
+            href="/opportunities"
+            className="block text-sm text-muted-foreground hover:text-primary hover:bg-accent p-2 rounded-lg transition-colors"
+          >
+            Opportunities
+          </Link>
           <div className="block text-sm text-muted-foreground p-2 rounded-lg opacity-50">
             My Events
             <span className="text-xs ml-2">Coming Soon</span>

@@ -23,7 +23,7 @@ Retrieve the user's list of conversations, sorted by the most recent message. Su
 {
   "conversations": [
     {
-      "_id": "677d...",
+      "id": "677d...",
       "type": "DIRECT",
       "otherParticipant": {
         "firstName": "Jane",
@@ -37,7 +37,7 @@ Retrieve the user's list of conversations, sorted by the most recent message. Su
       }
     },
     {
-      "_id": "678e...",
+      "id": "678e...",
       "type": "BROADCAST",
       "title": "Monthly Newsletter",
       "description": "Updates for March",
@@ -123,14 +123,19 @@ Send a direct message to another user.
 {
   "receiverId": "676ac...",
   "content": "Hey, are you going to the event?",
-  "media": []
+  "media": [
+    {
+      "type": "image",
+      "url": "https://example.com/image.jpg"
+    }
+  ]
 }
 ```
 
 **Field Descriptions**:
 - `receiverId` (string, required): User ID of recipient.
 - `content` (string, required): Message text.
-- `media` (object array, optional): Attachments.
+- `media` (array, optional): List of attachments `{ type: 'image'|'video'|'document', url: string }`.
 
 ### Response
 
@@ -146,7 +151,7 @@ Send a direct message to another user.
     "createdAt": "..."
   },
   "conversation": {
-    "_id": "..."
+    "id": "..."
   }
 }
 ```
@@ -169,14 +174,20 @@ Send a message to multiple users (e.g., all members or specific chapter).
   "content": "Please check your email for the new policy.",
   "recipientType": "CHAPTER",
   "chapterId": "676bd...",
-  "description": "Policy update notification"
+  "description": "Policy update notification",
+  "recipientIds": [], 
+  "media": []
 }
 ```
 
 **Field Descriptions**:
-- `recipientType` (enum): `ALL` (Super Admin), `CHAPTER` (Chapter Admin), `CUSTOM`.
-- `content` (string): Message body.
-- `title` (string): Broadcast title.
+- `recipientType` (enum, required): `ALL` (Super Admin), `CHAPTER` (Chapter Admin), `CUSTOM`.
+- `content` (string, required): Message body.
+- `title` (string, optional): Broadcast title.
+- `description` (string, optional): Additional context or subtitle.
+- `chapterId` (string, optional): Required if `recipientType` is `CHAPTER`.
+- `recipientIds` (string array, optional): Required if `recipientType` is `CUSTOM`.
+- `media` (array, optional): Attachments `{ type: 'image'|'video'|'document', url: string }`.
 
 ### Response
 
