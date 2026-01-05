@@ -28,6 +28,7 @@ interface ProfileHeaderProps {
   isOwner: boolean
   connectionStatus: 'NONE' | 'CONNECTED' | 'PENDING'
   connectionsCount: number
+  postsCount: number
   onConnect?: (message?: string) => void
   isConnecting?: boolean
   onMessage?: () => void
@@ -40,6 +41,7 @@ export default function ProfileHeader({
   isOwner,
   connectionStatus,
   connectionsCount,
+  postsCount,
   onConnect,
   isConnecting = false,
   onMessage,
@@ -178,7 +180,10 @@ export default function ProfileHeader({
                {/* Badges & Stats */}
                <div className="mt-4">
                  <BadgeDisplay />
-                 <ProfileStats connectionsCount={connectionsCount} />
+                 <ProfileStats 
+                   connectionsCount={connectionsCount} 
+                   postsCount={postsCount}
+                 />
                </div>
             </div>
           </div>

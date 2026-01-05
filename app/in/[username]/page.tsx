@@ -22,7 +22,7 @@ export default function UnifiedProfilePage() {
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
   
-  const { sendRequest, useRequests, useConnectionStatus, isSending } = useConnections()
+  const { sendRequest, useRequests, useConnectionStatus, useStats, isSending } = useConnections()
 
   // Determine ownership
   const isOwner = !!(user && (
@@ -76,6 +76,12 @@ export default function UnifiedProfilePage() {
   // We unconditionally call hooks, but their query keys/enabled depend on data
   const { data: outgoingRequests } = useRequests('outgoing')
   const { data: connectionStatusData } = useConnectionStatus(targetId)
+  
+  // Stats for Owner
+  const { data: myStats } = useStats()
+  const connectionsCount = isOwner ? (myStats?.connectionsCount || 0) : (displayProfile?.profile?.stats?.connectionsCount || 0)
+  const postsCount = isOwner ? 0 : (displayProfile?.profile?.stats?.postsCount || 0) 
+
 
   const connectionStatus = useMemo(() => {
     if (isOwner || !isAuthenticated || !targetId) return 'NONE'
@@ -168,6 +174,8 @@ export default function UnifiedProfilePage() {
         isConnecting={isSending}
         onMessage={handleMessage}
         connectionStatus={connectionStatus}
+        connectionsCount={connectionsCount}
+        postsCount={postsCount}
       />
       
       {targetId && (

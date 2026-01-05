@@ -111,6 +111,20 @@ export const connectionsApi = {
   },
 
   /**
+   * Unblock a user
+   */
+  unblockUser: async (blockedUserId: string): Promise<{ message: string }> => {
+    return await apiClient.delete<{ message: string }>(`/connections/block/${blockedUserId}`)
+  },
+
+  /**
+   * Get blocked users
+   */
+  getBlockedUsers: async (page = 1, limit = 20): Promise<{ blockedUsers: any[]; total: number }> => {
+    return await apiClient.get<{ blockedUsers: any[]; total: number }>(`/connections/blocked?page=${page}&limit=${limit}`)
+  },
+
+  /**
    * Get connection statistics
    */
   getStats: async (): Promise<ConnectionStats> => {

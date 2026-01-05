@@ -23,6 +23,8 @@ interface ProfileContentProps {
   onMessage?: () => void
   onShare?: () => void
   connectionStatus?: 'NONE' | 'PENDING' | 'CONNECTED'
+  connectionsCount?: number
+  postsCount?: number
 }
 
 export default function ProfileContent({ 
@@ -33,7 +35,9 @@ export default function ProfileContent({
   isConnecting = false,
   onMessage,
   onShare,
-  connectionStatus = 'NONE'
+  connectionStatus = 'NONE',
+  connectionsCount = 0,
+  postsCount = 0,
 }: ProfileContentProps) {
   const router = useRouter()
   const { profile: data } = profile
@@ -90,7 +94,8 @@ export default function ProfileContent({
         profile={profileObj as any}
         isOwner={isOwnProfile}
         connectionStatus={isAuthenticated ? connectionStatus : 'NONE'}
-        connectionsCount={156}
+        connectionsCount={connectionsCount}
+        postsCount={postsCount}
         onConnect={onConnect} // Always pass onConnect so the parent can handle the redirect behavior
         isConnecting={isConnecting}
         onMessage={isAuthenticated ? onMessage : undefined}

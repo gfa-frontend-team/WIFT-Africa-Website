@@ -46,6 +46,10 @@ export default function NotificationItem({ notification }: NotificationItemProps
         if (notification.actionUrl === '/connections/requests') {
             return '/connections?tab=incoming'
         }
+        if (notification.actionUrl.startsWith('/messages/')) {
+             const id = notification.actionUrl.split('/').pop()
+             return `/messages?id=${id}`
+        }
         return notification.actionUrl
     }
 
@@ -69,6 +73,12 @@ export default function NotificationItem({ notification }: NotificationItemProps
             return notification.sender?.id ? `/in/${notification.sender.id}` : '/connections'
 
         case 'NEW_MESSAGE':
+            if (metadata?.conversationId) {
+                return `/messages?id=${metadata.conversationId}`
+            }
+            if (notification.sender?.id) {
+                return `/messages?userId=${notification.sender.id}`
+            }
             return '/messages'
             
         default:

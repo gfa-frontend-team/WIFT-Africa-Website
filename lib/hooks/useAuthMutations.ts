@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useUserStore } from '../stores/userStore'
 import { authKeys } from './useAuthQuery'
 import { apiClient } from '../api/client'
+import { notificationsApi } from '../api/notifications'
 
 export function useAuthMutations() {
   const queryClient = useQueryClient()
@@ -76,6 +77,17 @@ export function useAuthMutations() {
           console.warn('Logout API failed, clearing local state anyway', e)
         }
       }
+
+      const pushToken = localStorage.getItem('push_token')
+      if (pushToken) {
+        try {
+          await notificationsApi.unregisterPushToken(pushToken)
+          localStorage.removeItem('push_token')
+        } catch (e) {
+          console.warn('Failed to unregister push token', e)
+        }
+      }
+
       return true
     },
     onSettled: () => {

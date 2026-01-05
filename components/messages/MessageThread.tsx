@@ -1,10 +1,13 @@
 'use client'
 
-import { Message, Conversation } from '@/lib/api/messages'
+import { Message, Conversation, messagesApi } from '@/lib/api/messages'
 import Image from 'next/image'
 import { format } from 'date-fns'
 import { useRef, useEffect, useLayoutEffect } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Trash2 } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 
 interface MessageThreadProps {
   conversation: Conversation
@@ -23,6 +26,7 @@ export default function MessageThread({
   fetchNextPage,
   isFetchingNextPage
 }: MessageThreadProps) {
+  const queryClient = useQueryClient()
   const bottomRef = useRef<HTMLDivElement>(null)
   const topRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -31,6 +35,25 @@ export default function MessageThread({
   const prevMessagesLength = useRef(messages.length)
   const isInitialLoad = useRef(true)
   const prevScrollHeight = useRef(0)
+
+  const deleteMutation = useMutation({
+    mutationFn: (messageId: string) => messagesApi.deleteMessage(messageId),
+    onSuccess: () => {
+      toast.success('Message deleted')
+      queryClient.invalidateQueries({ queryKey: ['message-thread', conversation.id] })
+      // Also update conversations list to reflect last message change if needed
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    },
+    onError: () => {
+      toast.error('Failed to delete message')
+    }
+  })
+
+  const handleDelete = (messageId: string) => {
+    if (confirm('Are you sure you want to delete this message?')) {
+      deleteMutation.mutate(messageId)
+    }
+  }
 
   // Infinite Scroll Observer
   useEffect(() => {
@@ -195,7 +218,7 @@ export default function MessageThread({
                 </div>
               )}
 
-              <div className={`flex flex-col max-w-[75%] ${isMine ? 'items-end' : 'items-start'}`}>
+              <div className={`flex flex-col max-w-[75%] ${isMine ? 'items-end' : 'items-start'} group`}>
                 {/* Sender Name for non-mine messages (only if group or first in sequence) */}
                 {showSenderInfo && (
                   <span className="text-[10px] font-semibold text-muted-foreground ml-1 mb-1">
@@ -203,7 +226,7 @@ export default function MessageThread({
                   </span>
                 )}
                 
-                <div className={`rounded-2xl px-4 py-2.5 shadow-sm ${
+                <div className={`relative rounded-2xl px-4 py-2.5 shadow-sm ${
                   isMine 
                     ? 'bg-primary text-primary-foreground rounded-br-none' 
                     : 'bg-card border border-border text-foreground rounded-bl-none'
@@ -222,6 +245,18 @@ export default function MessageThread({
                        </span>
                     )}
                   </div>
+
+                  {isMine && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute -left-8 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity bg-background border shadow-sm rounded-full"
+                      onClick={() => handleDelete(message.id)}
+                      title="Delete message"
+                    >
+                      <Trash2 className="h-3 w-3 text-red-500" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
