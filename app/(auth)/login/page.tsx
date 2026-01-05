@@ -140,7 +140,7 @@ export default function LoginPage() {
           <div className="w-full max-w-md space-y-8">
             {/* Header */}
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-foreground">Welcome back to WIFT Africa</h1>
+              <h1 className="text-3xl font-bold text-foreground">Welcome to WIFT Africa</h1>
               <p className="mt-2 text-muted-foreground">Sign in to your professional account</p>
             </div>
 
