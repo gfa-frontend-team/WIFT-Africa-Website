@@ -79,7 +79,7 @@ export default function JobDetailPage() {
                 {job.hasApplied ? 'Applied' : 'Apply Now'}
                </Button>
                <span className="text-sm text-gray-500">
-                Posted {new Date(job.postedAt).toLocaleDateString()}
+                Posted {new Date(job.createdAt || job.postedAt || new Date().toISOString()).toLocaleDateString()}
                </span>
             </div>
           </div>

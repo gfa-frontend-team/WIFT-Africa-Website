@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { jobsApi } from '@/lib/api/jobs'
+import { uploadApi } from '@/lib/api/upload'
 import { toast } from 'sonner'
 import { Loader2, Upload, FileText } from 'lucide-react'
 import { useUserStore } from '@/lib/stores/userStore'
@@ -43,10 +44,21 @@ export function JobApplicationModal({ isOpen, onClose, jobId, jobTitle }: JobApp
 
     setIsSubmitting(true)
     try {
+      let resumeUrl = ''
+
+      if (useStoredCV && user?.cvFileUrl) {
+         resumeUrl = user.cvFileUrl
+      } else if (resumeFile) {
+         // Upload file first
+         const { url } = await uploadApi.uploadFile(resumeFile, 'cv')
+         resumeUrl = url
+      } else {
+        throw new Error("No resume available")
+      }
+
       await jobsApi.applyForJob(jobId, {
         coverLetter,
-        resumeFile: useStoredCV ? undefined : (resumeFile || undefined),
-        resumeId: useStoredCV ? 'stored' : undefined // Basic flag, backend logic should handle 'stored' context or real ID
+        resumeUrl
       })
       
       toast.success("Application Submitted", {
@@ -54,6 +66,7 @@ export function JobApplicationModal({ isOpen, onClose, jobId, jobTitle }: JobApp
       })
       onClose()
     } catch (error) {
+      console.error(error)
       toast.error("Application Failed", {
         description: "Something went wrong. Please try again later."
       })

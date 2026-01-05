@@ -42,7 +42,7 @@ export function JobCard({ job }: JobCardProps) {
               </div>
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-1" />
-                Posted {new Date(job.postedAt).toLocaleDateString()}
+                Posted {new Date(job.createdAt || job.postedAt || new Date().toISOString()).toLocaleDateString()}
               </div>
             </div>
           </div>

@@ -15,7 +15,8 @@ export interface Job {
     currency: string
   }
   isRemote: boolean
-  postedAt: string
+  createdAt: string
+  postedAt?: string
   applicationCount: number
   hasApplied?: boolean
 }
@@ -31,8 +32,7 @@ export interface JobFilters {
 
 export interface JobApplicationInput {
   coverLetter: string
-  resumeId?: string // If selecting an existing resume
-  resumeFile?: File // If uploading a new one (handled by formData)
+  resumeUrl: string
 }
 
 export interface JobsResponse {

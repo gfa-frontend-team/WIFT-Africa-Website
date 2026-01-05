@@ -54,7 +54,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
              {/* If job exists, link to it. If we had an application details page, we'd link there. */}
             {job && (
               <Button asChild variant="outline" className="w-full md:w-auto">
-                <Link href={`/opportunities/jobs/${job.id}`}>View Job</Link>
+                <Link href={`/opportunities/jobs/${job._id}`}>View Job</Link>
               </Button>
             )}
              {application.resume && (

@@ -30,25 +30,9 @@ export const jobsApi = {
    * Apply for a job
    */
   applyForJob: async (jobId: string, data: JobApplicationInput): Promise<{ message: string }> => {
-    const formData = new FormData()
-    formData.append('coverLetter', data.coverLetter)
-    
-    if (data.resumeId) {
-      formData.append('resumeId', data.resumeId)
-    }
-    
-    if (data.resumeFile) {
-      formData.append('resume', data.resumeFile)
-    }
-
     return apiClient.post<{ message: string }>(
       `/jobs/${jobId}/apply`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      data
     )
   }
 }
