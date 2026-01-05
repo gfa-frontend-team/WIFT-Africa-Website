@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Pin } from 'lucide-react'
+import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Pin, Flag } from 'lucide-react'
 import { type Post } from '@/lib/api/posts'
 import Avatar from '@/components/ui/Avatar'
 import { usePostMutations } from '@/lib/hooks/usePostMutations'
@@ -12,6 +12,13 @@ import SharePostModal from './SharePostModal'
 import EmbeddedPost from './EmbeddedPost'
 import { toast } from 'sonner'
 import { useSavedPostsStore } from '@/lib/stores/savedPostsStore'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { ReportModal } from '@/components/reports/ReportModal'
 
 interface PostCardProps {
   post: Post
@@ -21,6 +28,7 @@ interface PostCardProps {
 export default function PostCard({ post, initialShowComments = false }: PostCardProps) {
   const [showComments, setShowComments] = useState(initialShowComments)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const { likePost, savePost, isLiking, isSaving } = usePostMutations()
   const { user } = useAuth()
   
@@ -126,9 +134,25 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           </div>
         </div>
         
-        <button className="p-2 hover:bg-accent rounded-lg transition-colors">
-          <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-2 hover:bg-accent rounded-lg transition-colors">
+              <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {!isOwnPost && (
+              <DropdownMenuItem 
+                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                onClick={() => setIsReportModalOpen(true)}
+              >
+                <Flag className="mr-2 h-4 w-4" />
+                Report Post
+              </DropdownMenuItem>
+            )}
+            {/* TODO: Add more options like delete/edit for own posts */}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Post Content */}
@@ -282,6 +306,13 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
         post={post}
         isOpen={isShareModalOpen} 
         onClose={() => setIsShareModalOpen(false)} 
+      />
+
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetId={post.id}
+        targetType="POST"
       />
     </article>
   )
