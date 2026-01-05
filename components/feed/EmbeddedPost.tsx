@@ -23,6 +23,10 @@ export default function EmbeddedPost({ post }: EmbeddedPostProps) {
     return date.toLocaleDateString()
   }
 
+  if (!post.author) {
+    return null
+  }
+
   return (
     <div className="mt-3 mx-4 p-3 border border-border rounded-lg bg-accent/30">
       {/* Embedded Header */}

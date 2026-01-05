@@ -40,8 +40,8 @@ export default function NotificationItem({ notification }: NotificationItemProps
         if (notification.actionUrl === '/dashboard' || notification.actionUrl.startsWith('/dashboard/')) {
             return notification.actionUrl.replace('/dashboard', '/feed')
         }
-        if (notification.actionUrl.startsWith('/profile/')) {
-            return notification.actionUrl.replace('/profile/', '/in/')
+        if (notification.actionUrl.startsWith('/profile/') || notification.actionUrl.startsWith('/profiles/')) {
+            return notification.actionUrl.replace('/profile/', '/in/').replace('/profiles/', '/in/')
         }
         if (notification.actionUrl === '/connections/requests') {
             return '/connections?tab=incoming'
