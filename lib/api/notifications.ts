@@ -113,5 +113,12 @@ export const notificationsApi = {
       deviceType,
       deviceId
     })
+  },
+
+  /**
+   * Unregister push token
+   */
+  unregisterPushToken: async (token: string): Promise<{ message: string }> => {
+    return await apiClient.delete<{ message: string }>(`/notifications/push-tokens/${token}`)
   }
 }

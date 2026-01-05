@@ -52,6 +52,13 @@ export interface PublicProfileResponse {
       missingFields: string[]
       isComplete: boolean
     }
+
+    // Stats
+    stats?: {
+      postsCount: number
+      connectionsCount: number
+      viewsCount?: number
+    }
   }
 }
 

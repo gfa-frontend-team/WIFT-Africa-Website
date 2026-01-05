@@ -83,4 +83,18 @@ export const messagesApi = {
   getUnreadCount: async (): Promise<UnreadCountResponse> => {
     return await apiClient.get<UnreadCountResponse>('/messages/unread-count')
   },
+
+  /**
+   * Archive a conversation
+   */
+  archiveConversation: async (conversationId: string): Promise<{ message: string }> => {
+    return await apiClient.post<{ message: string }>(`/messages/conversations/${conversationId}/archive`)
+  },
+
+  /**
+   * Delete a message
+   */
+  deleteMessage: async (messageId: string): Promise<{ message: string }> => {
+    return await apiClient.delete<{ message: string }>(`/messages/${messageId}`)
+  },
 }

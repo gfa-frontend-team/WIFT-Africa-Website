@@ -70,7 +70,10 @@ export function mapPrivateToPublicProfile(privateProfile: any): PublicProfileRes
       twitterHandle: profile.twitterHandle ?? user.twitterHandle,
       
       // Completeness
-      completeness: profile.completeness ?? user.completeness
+      completeness: profile.completeness ?? user.completeness,
+      
+      // Stats
+      stats: profile.stats ?? user.stats
     }
   }
 }

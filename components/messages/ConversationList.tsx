@@ -1,8 +1,12 @@
 'use client'
 
-import { Conversation } from '@/lib/api/messages'
+import { Conversation, messagesApi } from '@/lib/api/messages'
 import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
+import { Archive } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 interface ConversationListProps {
   conversations: Conversation[]
@@ -17,6 +21,26 @@ export default function ConversationList({
   onSelectConversation,
   isLoading
 }: ConversationListProps) {
+  const queryClient = useQueryClient()
+
+  const archiveMutation = useMutation({
+    mutationFn: (conversationId: string) => messagesApi.archiveConversation(conversationId),
+    onSuccess: () => {
+      toast.success('Conversation archived')
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    },
+    onError: () => {
+      toast.error('Failed to archive conversation')
+    }
+  })
+
+  const handleArchive = (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation()
+    if (confirm('Are you sure you want to archive this conversation?')) {
+      archiveMutation.mutate(conversationId)
+    }
+  }
+
   if (isLoading && conversations.length === 0) {
     return (
       <div className="p-4 space-y-4">
@@ -51,7 +75,7 @@ export default function ConversationList({
           <div
             key={conversation.id}
             onClick={() => onSelectConversation(conversation.id)}
-            className={`p-4 cursor-pointer hover:bg-muted/50 transition-all duration-200 border-l-4 ${
+            className={`group p-4 cursor-pointer hover:bg-muted/50 transition-all duration-200 border-l-4 relative ${
               isSelected 
                 ? 'bg-primary/5 border-primary' 
                 : 'border-transparent'
@@ -93,12 +117,24 @@ export default function ConversationList({
                     </span>
                   )}
                 </div>
-                <p className={`text-xs truncate leading-tight ${
-                  conversation.unreadCount > 0 ? 'text-foreground font-semibold' : 'text-muted-foreground'
-                }`}>
-                  {conversation.lastMessage?.isMine && <span className="text-primary/70 font-medium">You: </span>}
-                  {conversation.lastMessage?.content || 'No messages yet'}
-                </p>
+                <div className="flex justify-between items-center">
+                  <p className={`text-xs truncate leading-tight flex-1 ${
+                    conversation.unreadCount > 0 ? 'text-foreground font-semibold' : 'text-muted-foreground'
+                  }`}>
+                    {conversation.lastMessage?.isMine && <span className="text-primary/70 font-medium">You: </span>}
+                    {conversation.lastMessage?.content || 'No messages yet'}
+                  </p>
+                  
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0"
+                    onClick={(e) => handleArchive(e, conversation.id)}
+                    title="Archive Conversation"
+                  >
+                    <Archive className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
