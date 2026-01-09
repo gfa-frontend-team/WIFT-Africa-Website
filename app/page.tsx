@@ -225,31 +225,19 @@ export default function LandingPage() {
       {/* About Us Section */}
       <section id="about" className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">About Us</h2>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                WIFT Africa is an organization set up to empower and support African and Pan African Women in the Film and TV industry. The main objective of the organization is to provide support, capacity building, network, mentorship, educational and economic empowerment for women.
-              </p>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                WIFT Africa aims to build effective collaboration and partnerships within Africa and the rest of the world; sustain relationships amongst women in the TV and Film community in Africa and encourage the establishment of more WIFT chapters across Africa. We aim to improve access to resources and funding by collaborating with relevant organizations, agencies and stakeholders that are in the position to help.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all">
-                <h3 className="text-2xl font-bold text-primary mb-4">VISION</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  To help African women in film & TV become key industry players through networking, capacity building, mentorship and access to funding.
-                </p>
-              </div>
-              <div className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all">
-                <h3 className="text-2xl font-bold text-primary mb-4">MISSION</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  To create a strong network of African/Pan African women in Film & TV.
-                </p>
-              </div>
-            </div>
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">About Us</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+              WIFT Africa is an organization set up to empower and support African and Pan African Women in the Film and TV industry. We are dedicated to providing support, capacity building, networking, mentorship, and economic empowerment for women in our industry.
+            </p>
+            
+            <Link 
+              href="/about"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 py-2"
+            >
+              Read More
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
