@@ -2,17 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, Linkedin, Facebook, Instagram, Youtube } from "lucide-react";
 
 export default function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === '/';
 
   const navItems = [
+    { path: "/about", label: "About Us" },
     { path: "#success-stories", label: "Success Stories" },
     { path: "#benefits", label: "Benefits" },
   ];
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    // If it's a page navigation (doesn't start with #), let it behave normally or use router
+    if (!path.startsWith('#')) {
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
     e.preventDefault();
     const targetId = path.replace('#', '');
     const element = document.getElementById(targetId);
@@ -46,16 +56,45 @@ export default function LandingNavbar() {
 
           {/* Navigation Links - Desktop */}
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <a
-                key={item.path}
-                href={item.path}
-                onClick={(e) => handleSmoothScroll(e, item.path)}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              >
-                {item.label}
-              </a>
-            ))}
+            {navItems.map((item) => {
+              const isHashLink = item.path.startsWith('#');
+              
+              if (isHashLink && isHome) {
+                return (
+                  <a
+                    key={item.path}
+                    href={item.path}
+                    onClick={(e) => handleSmoothScroll(e, item.path)}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  >
+                    {item.label}
+                  </a>
+                );
+              }
+              
+              if (isHashLink && !isHome) {
+                return (
+                  <Link
+                    key={item.path}
+                    href={`/${item.path}`}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                );
+              }
+
+              // Normal link (e.g. /about)
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right side actions */}
@@ -130,16 +169,47 @@ export default function LandingNavbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border py-4">
             <div className="space-y-2">
-              {navItems.map((item) => (
-                <a
-                  key={item.path}
-                  href={item.path}
-                  onClick={(e) => handleSmoothScroll(e, item.path)}
-                  className="block px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-                >
-                  {item.label}
-                </a>
-              ))}
+              {navItems.map((item) => {
+                const isHashLink = item.path.startsWith('#');
+                
+                if (isHashLink && isHome) {
+                  return (
+                    <a
+                      key={item.path}
+                      href={item.path}
+                      onClick={(e) => handleSmoothScroll(e, item.path)}
+                      className="block px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                    >
+                      {item.label}
+                    </a>
+                  );
+                }
+                
+                if (isHashLink && !isHome) {
+                  return (
+                    <Link
+                      key={item.path}
+                      href={`/${item.path}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                }
+
+                // Normal link
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
               
               {/* Mobile Auth Links */}
               <div className="border-t border-border pt-4 mt-4 space-y-2">
