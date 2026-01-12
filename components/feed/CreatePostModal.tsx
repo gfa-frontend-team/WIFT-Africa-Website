@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { usePostMutations } from '@/lib/hooks/usePostMutations'
 import { uploadApi } from '@/lib/api/upload'
 import ConfirmationModal from '@/components/ui/ConfirmationModal'
+import { Modal } from '@/components/ui/Modal'
 
 interface CreatePostModalProps {
   isOpen: boolean
@@ -198,24 +199,66 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
 
   if (!isOpen || !user) return null
 
-  return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">Create Post</h2>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-accent rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-muted-foreground" />
-          </button>
-        </div>
+  const footerContent = (
+    <div className="flex flex-col gap-3">
+      {/* Media Buttons */}
+      <div className="flex items-center gap-2">
+        <label className="flex items-center gap-2 px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors">
+          <ImageIcon className="h-5 w-5 text-green-600" />
+          <span className="text-sm font-medium text-foreground">Photo</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => handleMediaUpload(e, 'image')}
+            className="hidden"
+            disabled={mediaFiles.some(f => f.type.startsWith('video/'))}
+          />
+        </label>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <label className="flex items-center gap-2 px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors">
+          <Video className="h-5 w-5 text-red-600" />
+          <span className="text-sm font-medium text-foreground">Video</span>
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => handleMediaUpload(e, 'video')}
+            className="hidden"
+            disabled={mediaFiles.some(f => f.type.startsWith('image/'))}
+          />
+        </label>
+      </div>
+
+      {/* Character Counter & Submit */}
+      <div className="flex items-center justify-between">
+        <span className={`text-sm ${
+          isOverLimit ? 'text-red-500' : 'text-muted-foreground'
+        }`}>
+          {charCount} / {maxChars}
+        </span>
+        <button
+          onClick={handleSubmit}
+          disabled={!content.trim() || isOverLimit || isCreating || isUploading}
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isCreating || isUploading ? 'Posting...' : 'Post'}
+        </button>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Create Post"
+        contentClassName="max-w-2xl h-[600px]"
+        footer={footerContent}
+      >
+        <div className="flex flex-col gap-4">
           {/* User Info */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3">
             <Avatar 
               src={user.profilePhoto} 
               name={`${user.firstName} ${user.lastName}`} 
@@ -228,7 +271,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
               <div className="relative">
                 <button
                   onClick={() => setShowVisibilityMenu(!showVisibilityMenu)}
-                  className="flex items-center gap-1 px-3 py-1 bg-muted hover:bg-muted/80 rounded-full text-sm transition-colors"
+                  className="flex items-center gap-1 px-3 py-1 bg-muted hover:bg-muted/80 rounded-full text-sm transition-colors mt-1"
                 >
                   {selectedVisibility && <selectedVisibility.icon className="h-3 w-3" />}
                   <span>{selectedVisibility?.label}</span>
@@ -270,7 +313,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
 
           {/* Media Previews */}
           {mediaPreviews.length > 0 && (
-            <div className={`grid gap-2 mb-4 ${
+            <div className={`grid gap-2 ${
               mediaPreviews.length === 1 ? 'grid-cols-1' :
               mediaPreviews.length === 2 ? 'grid-cols-2' :
               'grid-cols-3'
@@ -298,54 +341,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="border-t border-border p-4">
-          {/* Media Buttons */}
-          <div className="flex items-center gap-2 mb-3">
-            <label className="flex items-center gap-2 px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors">
-              <ImageIcon className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-medium text-foreground">Photo</span>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => handleMediaUpload(e, 'image')}
-                className="hidden"
-                disabled={mediaFiles.some(f => f.type.startsWith('video/'))}
-              />
-            </label>
-
-            <label className="flex items-center gap-2 px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors">
-              <Video className="h-5 w-5 text-red-600" />
-              <span className="text-sm font-medium text-foreground">Video</span>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => handleMediaUpload(e, 'video')}
-                className="hidden"
-                disabled={mediaFiles.some(f => f.type.startsWith('image/'))}
-              />
-            </label>
-          </div>
-
-          {/* Character Counter & Submit */}
-          <div className="flex items-center justify-between">
-            <span className={`text-sm ${
-              isOverLimit ? 'text-red-500' : 'text-muted-foreground'
-            }`}>
-              {charCount} / {maxChars}
-            </span>
-            <button
-              onClick={handleSubmit}
-              disabled={!content.trim() || isOverLimit || isCreating || isUploading}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCreating || isUploading ? 'Posting...' : 'Post'}
-            </button>
-          </div>
-        </div>
-      </div>
+      </Modal>
 
       <ConfirmationModal
         isOpen={showDiscardDialog}
@@ -356,6 +352,6 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
         confirmText="Discard"
         variant="danger"
       />
-    </div>
+    </>
   )
 }
