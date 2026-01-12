@@ -11,7 +11,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import SharePostModal from './SharePostModal'
 import EmbeddedPost from './EmbeddedPost'
 import { toast } from 'sonner'
-import { useSavedPostsStore } from '@/lib/stores/savedPostsStore'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,11 +32,9 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
   const { likePost, savePost, isLiking, isSaving } = usePostMutations()
   const { user } = useAuth()
   
-  // Use store for saved state, fallback to prop if store not ready (or prop is true)
-  const isPostSavedInStore = useSavedPostsStore(state => state.hasSavedPost(post.id))
-  // We trust the store if plain prop is false (because prop is known to be missing/false in feed)
-  // If prop is true (e.g. on Saved Posts page), we assume true.
-  const isSaved = post.isSaved || isPostSavedInStore
+  // API now returns computed isSaved status. 
+  // Optimistic updates are handled via React Query cache in usePostMutations.
+  const isSaved = post.isSaved
 
   const handleLike = async () => {
     try {

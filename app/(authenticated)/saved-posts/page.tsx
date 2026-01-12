@@ -1,32 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { postsApi, type Post } from '@/lib/api/posts'
+import { useQuery } from '@tanstack/react-query'
+import { postsApi } from '@/lib/api/posts'
 import PostCard from '@/components/feed/PostCard'
 import { Loader2, Bookmark } from 'lucide-react'
 import Link from 'next/link'
 
 export default function SavedPostsPage() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['saved-posts'],
+    queryFn: () => postsApi.getSavedPosts()
+  })
 
-  useEffect(() => {
-    const fetchSavedPosts = async () => {
-      try {
-        setIsLoading(true)
-        const response = await postsApi.getSavedPosts()
-        setPosts(response.posts)
-      } catch (err) {
-        console.error('Failed to fetch saved posts:', err)
-        setError('Failed to load saved posts')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchSavedPosts()
-  }, [])
+  const posts = data?.posts || []
 
   if (isLoading) {
     return (
@@ -51,9 +37,8 @@ export default function SavedPostsPage() {
 
       {posts.length > 0 ? (
         <div className="max-w-2xl mx-auto space-y-6">
-          {posts.map((post) => (
-             // Re-verify isSaved is true, though backend should guarantee it
-             <PostCard key={post.id} post={{...post, isSaved: true}} />
+          {posts.map((post: any) => (
+             <PostCard key={post.id} post={{ ...post, isSaved: true }} />
           ))}
         </div>
       ) : (
