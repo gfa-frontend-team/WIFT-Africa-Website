@@ -10,6 +10,8 @@ import { useConnections } from '@/lib/hooks/useConnections'
 import ConnectModal from '@/components/connections/ConnectModal'
 import { usePublicProfile } from '@/lib/hooks/usePublicProfile'
 import { useProfile } from '@/lib/hooks/useProfile'
+import { useQuery } from '@tanstack/react-query'
+import { profilesApi } from '@/lib/api/profiles'
 import ProfileLayout from '@/components/layout/ProfileLayout'
 import ProfileContent from '@/components/profile/ProfileContent'
 import PrivateProfileSections from '@/components/profile/PrivateProfileSections'
@@ -80,6 +82,13 @@ export default function UnifiedProfilePage() {
   
   // Stats for Owner
   const { data: myStats } = useStats()
+
+  // Fetch Views for Owner (align with Analytics page default of 90 days)
+  const { data: profileViews } = useQuery({
+    queryKey: ['profile-views', user?.id, '90days'],
+    queryFn: () => profilesApi.getProfileViews(user!.id, false),
+    enabled: !!isOwner && !!user?.id,
+  })
   
   const { useUserPostsStats } = useAnalytics()
   const { data: myPostsStats } = useUserPostsStats()
@@ -181,6 +190,7 @@ export default function UnifiedProfilePage() {
         connectionStatus={connectionStatus}
         connectionsCount={connectionsCount}
         postsCount={postsCount}
+        viewsCount={isOwner ? (profileViews?.count || 0) : undefined}
       />
       
       {targetId && (
