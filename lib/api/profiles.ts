@@ -1,5 +1,6 @@
 import { apiClient } from './client'
 import type { User, Profile } from '@/types'
+import type { ProfileViewsResponse } from '@/types/analytics'
 
 // ============================================
 // PUBLIC PROFILES API
@@ -69,5 +70,17 @@ export const profilesApi = {
    */
   getPublicProfile: async (identifier: string): Promise<PublicProfileResponse> => {
     return await apiClient.get<PublicProfileResponse>(`/profiles/${identifier}`)
+  },
+
+  /**
+   * Get analytics for profile views
+   * @param userId - The ID of the profile owner (must be current user)
+   * @param lastMonth - If true, return stats for last 30 days, else last 90 days
+   */
+  getProfileViews: async (userId: string, lastMonth: boolean = false): Promise<ProfileViewsResponse> => {
+    const response = await apiClient.get<ProfileViewsResponse>(`/profiles/views/${userId}`, {
+      params: { lastMonth },
+    })
+    return response
   },
 }

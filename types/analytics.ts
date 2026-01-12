@@ -13,6 +13,7 @@ export interface ViewerDemography {
 export interface PostAnalytics {
   postId: string
   postType: 'IMAGE' | 'VIDEO'
+  timestamp?: string // Added based on docs
   discovery: {
     impressions: number
     membersReached: number
@@ -29,4 +30,26 @@ export interface PostAnalytics {
 
 export interface AnalyticsResponse {
   summary: PostAnalyticsSummary
+}
+
+export interface ProfileView {
+  viewerId: string
+  firstName: string
+  lastName: string
+  email: string
+  profilePhoto?: string
+  headline?: string
+  location?: string
+  viewedAt: string
+  chapter?: {
+    id: string
+    name: string
+    code: string
+    country: string
+  }
+}
+
+export interface ProfileViewsResponse {
+  count: number
+  viewers: ProfileView[]
 }

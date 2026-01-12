@@ -2,6 +2,7 @@
 
 import { useAnalytics } from '@/lib/hooks/useAnalytics'
 import { BarChart3, Users, Eye, TrendingUp, Lock } from 'lucide-react'
+import Link from 'next/link'
 
 export default function ProfileAnalytics() {
   const { useSummary } = useAnalytics()
@@ -80,10 +81,10 @@ export default function ProfileAnalytics() {
       )}
       
       <div className="mt-4 pt-4 border-t border-border flex justify-end">
-         <button className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
+         <Link href="/me/analytics" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
             View detailed insights
             <span className="text-xs">→</span>
-         </button>
+         </Link>
       </div>
     </div>
   )
