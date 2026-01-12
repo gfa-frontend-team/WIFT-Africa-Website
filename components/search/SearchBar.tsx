@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchStore } from '@/lib/stores/searchStore'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 import { Search } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -8,10 +9,22 @@ export default function SearchBar() {
   const { currentQuery, setQuery } = useSearchStore()
   const [localQuery, setLocalQuery] = useState(currentQuery)
 
+  const debouncedQuery = useDebounce(localQuery, 500)
+
   // Sync local state if store updates externally
   useEffect(() => {
     setLocalQuery(currentQuery)
   }, [currentQuery])
+
+  // Debounced update to store
+  useEffect(() => {
+    // Only update if different to avoid loops
+    // We intentionally omit currentQuery from deps to avoid triggering this effect 
+    // when store updates externally (which would use stale debounced value)
+    if (debouncedQuery !== currentQuery) {
+        setQuery(debouncedQuery)
+    }
+  }, [debouncedQuery])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
