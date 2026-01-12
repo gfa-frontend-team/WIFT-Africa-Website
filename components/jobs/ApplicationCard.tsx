@@ -18,6 +18,8 @@ const statusColors: Record<ApplicationStatus, string> = {
 
 export function ApplicationCard({ application }: ApplicationCardProps) {
   const { job } = application
+  const title = application.jobTitleSnapshot || job?.title || 'Unknown Position'
+  const company = application.companyNameSnapshot || job?.companyName || 'Unknown Company'
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -26,16 +28,16 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
           <div className="space-y-2">
             <div className="flex items-start justify-between md:justify-start gap-4">
               <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
-                {job?.title || 'Unknown Position'}
+                {title}
               </h3>
-              <Badge variant="secondary" className={statusColors[application.status] || 'bg-gray-100 text-gray-800'}>
+              <Badge variant="secondary" className={statusColors[application.status as ApplicationStatus] || 'bg-gray-100 text-gray-800'}>
                 {application.status}
               </Badge>
             </div>
             
             <div className="flex items-center text-gray-600 font-medium">
               <Building2 className="w-4 h-4 mr-2" />
-              {job?.companyName || 'Unknown Company'}
+              {company}
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
@@ -45,7 +47,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-1" />
-                Applied {new Date(application.appliedAt).toLocaleDateString()}
+                Applied {new Date(application.appliedAt || application.createdAt || Date.now()).toLocaleDateString()}
               </div>
             </div>
           </div>

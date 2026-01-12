@@ -22,9 +22,8 @@ export interface Job {
 }
 
 export interface JobFilters {
-  search?: string
+  role?: string
   location?: string
-  type?: string
   isRemote?: boolean
   page?: number
   limit?: number
@@ -36,11 +35,8 @@ export interface JobApplicationInput {
 }
 
 export interface JobsResponse {
+  status: string
+  message: string
+  results: number
   data: Job[]
-  pagination: {
-    total: number
-    pages: number
-    page: number
-    limit: number
-  }
 }

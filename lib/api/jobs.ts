@@ -10,11 +10,15 @@ export const jobsApi = {
   /**
    * Get list of jobs with filters
    */
-  getJobs: async (filters: JobFilters = {}): Promise<JobsResponse> => {
+  getJobs: async (filters: JobFilters = {}, page = 1, limit = 20): Promise<JobsResponse> => {
     // Filter out undefined values
-    const params = Object.fromEntries(
-      Object.entries(filters).filter(([_, v]) => v !== undefined && v !== '')
-    )
+    const params = {
+      ...Object.fromEntries(
+        Object.entries(filters).filter(([_, v]) => v !== undefined && v !== '')
+      ),
+      page,
+      limit
+    }
     
     return apiClient.get<JobsResponse>('/jobs', { params })
   },

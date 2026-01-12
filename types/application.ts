@@ -10,14 +10,19 @@ export enum ApplicationStatus {
 
 export interface Application {
   id: string
+  _id?: string
   job: Job
-  user: User // The applicant
-  status: ApplicationStatus
+  user: User | string // string if just ID
+  status: ApplicationStatus | string // string because backend sends lowercase
   coverLetter: string
-  resume?: string // URL to resume
+  resume?: string // URL to resume (mapped from resumeUrl)
+  resumeUrl?: string
   resumeId?: string
   resumeName?: string
-  appliedAt: string
+  jobTitleSnapshot?: string
+  companyNameSnapshot?: string
+  appliedAt?: string
+  createdAt?: string // Usually present if appliedAt is missing
   updatedAt: string
 }
 
