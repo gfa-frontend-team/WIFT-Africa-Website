@@ -27,11 +27,14 @@ The Posts module powers the main social feed. It handles content creation (text,
 #### Response (200 OK)
 ```typescript
 {
-  posts: Array<Post>;
+  posts: Array<Post & { isSaved: boolean }>;
   total: number;
   page: number;
   pages: number;
 }
+```
+
+> **Note:** The `isSaved` boolean is dynamically computed for the current user.
 ```
 
 ---
