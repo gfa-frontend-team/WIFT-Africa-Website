@@ -30,6 +30,7 @@ export enum MemberType {
 }
 
 export interface User {
+  _id: string | undefined
   id: string
   email: string
   firstName: string
