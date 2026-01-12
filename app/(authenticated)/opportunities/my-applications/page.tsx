@@ -4,11 +4,22 @@ import { useMyApplications } from '@/hooks/use-applications'
 import { ApplicationCard } from '@/components/jobs/ApplicationCard'
 import { Loader2, Briefcase } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Link from 'next/link'
 import { Application } from '@/types/application'
+import { useState } from 'react'
+import SearchPagination from '@/components/search/SearchPagination'
 
 export default function MyApplicationsPage() {
-  const { data, isLoading, error } = useMyApplications()
+  const [page, setPage] = useState(1)
+  const [status, setStatus] = useState<string | undefined>(undefined)
+  const limit = 10
+  const { data, isLoading, error } = useMyApplications(page, limit, status)
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value === 'ALL' ? undefined : value)
+    setPage(1)
+  }
 
   if (isLoading) {
     return (
@@ -28,19 +39,35 @@ export default function MyApplicationsPage() {
 
   // Explicitly cast or access safely
   const applications = (data?.applications as Application[]) || []
+  const totalPages = data?.pages || 1
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto px-4 py-8 space-y-6">
+
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">My Applications</h1>
           <p className="text-muted-foreground mt-1">
             Track the status of your job applications
           </p>
         </div>
-        <Button asChild>
-          <Link href="/opportunities/jobs">Browse Jobs</Link>
-        </Button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+            <Select value={status || 'ALL'} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="ALL">All Applications</SelectItem>
+                    <SelectItem value="RECEIVED">Received</SelectItem>
+                    <SelectItem value="SHORTLISTED">Shortlisted</SelectItem>
+                    <SelectItem value="HIRED">Hired</SelectItem>
+                    <SelectItem value="REJECTED">Rejected</SelectItem>
+                </SelectContent>
+            </Select>
+            <Button asChild className="w-full sm:w-auto">
+                <Link href="/opportunities">Browse Jobs</Link>
+            </Button>
+        </div>
       </div>
 
       {applications.length === 0 ? (
@@ -51,14 +78,22 @@ export default function MyApplicationsPage() {
             Start applying to open positions to see them here.
           </p>
           <Button asChild>
-            <Link href="/opportunities/jobs">Browse Opportunities</Link>
+            <Link href="/opportunities">Browse Opportunities</Link>
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {applications.map((application) => (
-            <ApplicationCard key={application.id} application={application} />
-          ))}
+        <div className="space-y-6">
+          <div className="space-y-4">
+            {applications.map((application) => (
+              <ApplicationCard key={application.id} application={application} />
+            ))}
+          </div>
+
+          <SearchPagination 
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
         </div>
       )}
     </div>

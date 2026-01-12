@@ -2,12 +2,13 @@
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Search, RotateCcw } from 'lucide-react'
 import { JobFilters as FilterType } from '@/types'
 import { useState } from 'react'
+import { useDebounce } from '@/lib/hooks/useDebounce'
+import { useEffect } from 'react'
 
 interface JobFiltersProps {
   onFilter: (filters: FilterType) => void
@@ -16,19 +17,22 @@ interface JobFiltersProps {
 
 export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
   const [filters, setFilters] = useState<FilterType>(initialFilters || {})
+  const debouncedFilters = useDebounce(filters, 500)
+
+  // Auto-trigger filter on debounce
+  useEffect(() => {
+     onFilter(debouncedFilters)
+  }, [debouncedFilters, onFilter])
 
   const handleChange = (key: keyof FilterType, value: any) => {
     const newFilters = { ...filters, [key]: value }
     setFilters(newFilters)
-  }
-
-  const handleSearch = () => {
-    onFilter(filters)
+    // onFilter is called by effect
   }
 
   const handleReset = () => {
     setFilters({})
-    onFilter({})
+    // effect will trigger
   }
 
   return (
@@ -38,36 +42,19 @@ export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input 
-              placeholder="Search jobs, companies..." 
-              value={filters.search || ''}
-              onChange={(e) => handleChange('search', e.target.value)}
+              placeholder="Filter by Role (e.g. Producer)..." 
+              value={filters.role || ''}
+              onChange={(e) => handleChange('role', e.target.value)}
               className="w-full pl-9"
             />
           </div>
         </div>
-        <div className="w-full md:w-48">
+        <div className="w-full md:w-64">
           <Input 
             placeholder="Location..." 
             value={filters.location || ''}
             onChange={(e) => handleChange('location', e.target.value)}
           />
-        </div>
-        <div className="w-full md:w-48">
-          <Select 
-            value={filters.type} 
-            onValueChange={(value) => handleChange('type', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Job Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="FULL_TIME">Full Time</SelectItem>
-              <SelectItem value="PART_TIME">Part Time</SelectItem>
-              <SelectItem value="CONTRACT">Contract</SelectItem>
-              <SelectItem value="FREELANCE">Freelance</SelectItem>
-              <SelectItem value="INTERNSHIP">Internship</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -85,9 +72,6 @@ export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
           <Button variant="outline" size="sm" onClick={handleReset}>
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset
-          </Button>
-          <Button size="sm" onClick={handleSearch}>
-            Apply Filters
           </Button>
         </div>
       </div>
