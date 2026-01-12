@@ -97,6 +97,7 @@ export default function ProfileContent({
         connectionStatus={isAuthenticated ? connectionStatus : 'NONE'}
         connectionsCount={connectionsCount}
         postsCount={postsCount}
+        viewsCount={isOwnProfile ? (data.stats?.viewsCount || 0) : 0}
         onConnect={onConnect} // Always pass onConnect so the parent can handle the redirect behavior
         isConnecting={isConnecting}
         onMessage={onMessage}

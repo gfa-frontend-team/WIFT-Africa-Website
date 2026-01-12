@@ -29,6 +29,7 @@ interface ProfileHeaderProps {
   connectionStatus: 'NONE' | 'CONNECTED' | 'PENDING'
   connectionsCount: number
   postsCount: number
+  viewsCount?: number
   onConnect?: (message?: string) => void
   isConnecting?: boolean
   onMessage?: () => void
@@ -42,6 +43,7 @@ export default function ProfileHeader({
   connectionStatus,
   connectionsCount,
   postsCount,
+  viewsCount = 0,
   onConnect,
   isConnecting = false,
   onMessage,
@@ -183,6 +185,8 @@ export default function ProfileHeader({
                  <ProfileStats 
                    connectionsCount={connectionsCount} 
                    postsCount={postsCount}
+                   viewsCount={viewsCount}
+                   isOwner={isOwner}
                  />
                </div>
             </div>
