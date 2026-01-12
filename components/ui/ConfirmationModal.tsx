@@ -1,4 +1,4 @@
-'use client'
+import { Modal } from './Modal'
 
 interface ConfirmationModalProps {
   isOpen: boolean
@@ -21,12 +21,15 @@ export default function ConfirmationModal({
   cancelText = 'Cancel',
   variant = 'primary'
 }: ConfirmationModalProps) {
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-      <div className="bg-card rounded-lg shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
-        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      className="z-[60]"
+      contentClassName="max-w-sm"
+    >
+      <div className="pt-2">
         <p className="text-sm text-muted-foreground mb-6">{message}</p>
         
         <div className="flex justify-end gap-3">
@@ -51,6 +54,6 @@ export default function ConfirmationModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
