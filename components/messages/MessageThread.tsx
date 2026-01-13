@@ -198,7 +198,7 @@ export default function MessageThread({
           const showSenderInfo = !isMine && (index === 0 || messages[index - 1].sender.id !== message.sender.id)
           return (
             <div
-              key={message._id}
+              key={message.id}
               className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
             >
               {/* Other User Avatar */}
