@@ -286,15 +286,15 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
         <CommentSection
           postId={post.id}
           onAddComment={(content) => {
-            console.log('Add comment:', content)
+            // console.log('Add comment:', content)
             // TODO: Implement add comment functionality
           }}
           onLikeComment={(commentId) => {
-            console.log('Like comment:', commentId)
+            // console.log('Like comment:', commentId)
             // TODO: Implement like comment functionality
           }}
           onReply={(commentId, content) => {
-            console.log('Reply to comment:', commentId, content)
+            // console.log('Reply to comment:', commentId, content)
             // TODO: Implement reply functionality
           }}
         />

@@ -174,7 +174,7 @@ export default function MessagesPage() {
       }));
     }, [threadData, data]);
     
-    console.log(activeMessages, "messages in thread")
+    // console.log(activeMessages, "messages in thread")
   useEffect(() => {
     if (activeConversationId && !activeConversationId.startsWith("new_")) {
       markAsRead(activeConversationId);

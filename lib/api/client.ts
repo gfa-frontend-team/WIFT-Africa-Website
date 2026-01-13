@@ -60,7 +60,7 @@ class ApiClient {
           
           if (retryCount < MAX_RETRIES) {
             const delay = RETRY_DELAYS[retryCount] || RETRY_DELAYS[RETRY_DELAYS.length - 1]
-            console.log(`🔄 Rate limited, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`)
+            // console.log(`🔄 Rate limited, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`)
             
             // Wait before retrying
             await new Promise(resolve => setTimeout(resolve, delay))
