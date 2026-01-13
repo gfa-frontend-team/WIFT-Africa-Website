@@ -11,7 +11,7 @@ export const getSocket = (token: string) => {
       transports: ['websocket'],
     });
 
-    socket.on('connect', () => console.log('✅ Real-time connected'));
+    // socket.on('connect', () => console.log('✅ Real-time connected'));
     socket.on('connect_error', (err) => console.error('❌ Socket error:', err.message));
   }
   return socket;
