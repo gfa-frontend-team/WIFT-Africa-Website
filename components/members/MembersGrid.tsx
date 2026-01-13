@@ -2,6 +2,8 @@
 
 import { SearchUserResult } from '@/lib/api/search'
 import MemberCard from './MemberCard'
+import { useConnections } from '@/lib/hooks/useConnections'
+import { toast } from 'sonner'
 
 interface MembersGridProps {
   members: SearchUserResult[]
@@ -16,6 +18,17 @@ export default function MembersGrid({
   onConnect,
   connectingId
 }: MembersGridProps) {
+  const { useRequests, respondToRequest, isResponding } = useConnections()
+  const { data: incomingRequests } = useRequests('incoming')
+
+  const handleAccept = async (requestId: string) => {
+    try {
+        await respondToRequest(requestId, 'accept')
+        toast.success('Connection accepted')
+    } catch (error) {
+        toast.error('Failed to accept request')
+    }
+  }
   
   if (isLoading && members.length === 0) {
     return (
@@ -53,7 +66,11 @@ export default function MembersGrid({
           key={member.id} 
           member={member} 
           onConnect={onConnect}
-          isConnecting={connectingId === member.id}
+          isConnecting={connectingId === member.id || isResponding}
+          onAccept={handleAccept}
+          incomingRequest={incomingRequests?.requests?.find(
+            r => r.sender.id === member.id && r.status === 'PENDING'
+          )}
         />
       ))}
     </div>

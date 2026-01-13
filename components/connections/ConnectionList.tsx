@@ -25,10 +25,10 @@ import { useState } from 'react'
 // I'll assume `GET /api/v1/connections` exists and returns User[] or Connection[]
 // For now, I will build a Generic User Card component for this list.
 
-import { Connection } from '@/lib/api/connections'
+import { ConnectionProfile } from '@/lib/api/connections'
 
 interface ConnectionListProps {
-  connections: Connection[]
+  connections: ConnectionProfile[]
   onRemove: (id: string) => void
   onBlock?: (id: string) => void
 }
@@ -37,50 +37,48 @@ export default function ConnectionList({ connections, onRemove, onBlock }: Conne
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {connections.map((connection) => {
-        const user = connection.user 
-        
-        if (!user) return null
-
+        // Data is now flat: id, name, profilePhoto, professionalHeadline
         return (
-          <div key={user.id || connection.id} className="bg-card border border-border rounded-lg p-6 flex flex-col items-center text-center">
+          <div key={connection.id} className="bg-card border border-border rounded-lg p-6 flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-muted relative mb-4">
-              {user.profilePhoto ? (
+              {connection.profilePhoto ? (
                 <Image
-                  src={user.profilePhoto}
-                  alt={user.firstName}
+                  src={connection.profilePhoto}
+                  alt={connection.name}
                   fill
                   className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-2xl font-bold">
-                  {user.firstName?.[0]}
+                  {connection.name?.[0]}
                 </div>
               )}
             </div>
             
             <Link 
-              href={`/in/${user.username || user.id}`}
+              href={`/in/${connection.id}`} // Assuming ID maps to profile
               className="font-bold text-lg text-foreground hover:underline mb-1"
             >
-              {user.firstName} {user.lastName}
+              {connection.name}
             </Link>
-            <p className="text-sm text-muted-foreground mb-4">
-              {user.accountType?.replace('_', ' ').toLowerCase() || 'Member'}
+            <p className="text-sm text-muted-foreground mb-4 line-clamp-2 min-h-[40px]">
+              {connection.professionalHeadline || 'Member'}
             </p>
             
             <div className="flex items-center gap-2 w-full">
               <Link 
-                href={`/messages?userId=${user.id}`}
+                href={`/messages?userId=${connection.id}`}
                 className="flex-1 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
               >
                 <MessageCircle className="h-4 w-4" />
                 Message
               </Link>
               <button 
-                className="p-2 border border-border rounded-md hover:bg-muted text-muted-foreground"
-                title="More options"
+                onClick={() => onRemove(connection.id)}
+                className="p-2 border border-border rounded-md hover:bg-muted text-destructive hover:text-destructive"
+                title="Remove connection"
               >
-                <MoreHorizontal className="h-4 w-4" />
+                <UserMinus className="h-4 w-4" />
               </button>
             </div>
           </div>

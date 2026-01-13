@@ -20,10 +20,12 @@ interface ProfileContentProps {
   isAuthenticated: boolean
   isOwnProfile?: boolean
   onConnect?: (message?: string) => void
+  onAccept?: () => void
+  onDecline?: () => void
   isConnecting?: boolean
   onMessage?: () => void
   onShare?: () => void
-  connectionStatus?: 'NONE' | 'PENDING' | 'CONNECTED'
+  connectionStatus?: 'NONE' | 'PENDING' | 'CONNECTED' | 'INCOMING'
   connectionsCount?: number
   postsCount?: number
   viewsCount?: number
@@ -34,6 +36,8 @@ export default function ProfileContent({
   isAuthenticated, 
   isOwnProfile = false,
   onConnect,
+  onAccept,
+  onDecline,
   isConnecting = false,
   onMessage,
   onShare,
@@ -101,6 +105,8 @@ export default function ProfileContent({
         postsCount={postsCount}
         viewsCount={viewsCount ?? (isOwnProfile ? (data.stats?.viewsCount || 0) : 0)}
         onConnect={onConnect} // Always pass onConnect so the parent can handle the redirect behavior
+        onAccept={onAccept}
+        onDecline={onDecline}
         isConnecting={isConnecting}
         onMessage={onMessage}
         onEdit={() => {}} // Handle edit in parent/header

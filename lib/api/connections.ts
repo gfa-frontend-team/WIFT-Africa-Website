@@ -11,13 +11,18 @@ export interface ConnectionRequest {
   expiresAt: string
 }
 
-export interface Connection {
+export interface ConnectionProfile {
   id: string
-  user1: User
-  user2: User
-  user?: User // For list endpoint
-  connectedAt?: string
-  createdAt: string
+  name: string
+  profilePhoto?: string
+  professionalHeadline?: string
+  connectedAt: string
+}
+
+export interface ConnectionsListResponse {
+  connections: ConnectionProfile[]
+  totalConnections: number
+  pages: number
 }
 
 export interface ConnectionStats {
@@ -62,22 +67,8 @@ export const connectionsApi = {
   /**
    * Get confirmed connections
    */
-  getConnections: async (page = 1, limit = 20): Promise<{ connections: Connection[]; total: number; pages: number }> => {
-    const response = await apiClient.get<{ connections: Connection[]; total: number; pages: number }>(`/connections?page=${page}&limit=${limit}`)
-    
-    // Map _id to id if needed
-    if (response.connections && Array.isArray(response.connections)) {
-      response.connections = response.connections.map((conn: any) => ({
-        ...conn,
-        id: conn.id || conn._id,
-        user: {
-          ...conn.user,
-          id: conn.user.id || conn.user._id
-        }
-      }))
-    }
-    
-    return response
+  getConnections: async (page = 1, limit = 20): Promise<ConnectionsListResponse> => {
+    return await apiClient.get<ConnectionsListResponse>(`/connections?page=${page}&limit=${limit}`)
   },
 
   /**
@@ -87,8 +78,8 @@ export const connectionsApi = {
     requestId: string,
     action: 'accept' | 'decline' | 'cancel',
     reason?: string
-  ): Promise<{ connection?: Connection; message: string }> => {
-    return await apiClient.patch<{ connection?: Connection; message: string }>(`/connections/requests/${requestId}/${action}`, {
+  ): Promise<{ connection?: ConnectionProfile; message: string }> => {
+    return await apiClient.patch<{ connection?: ConnectionProfile; message: string }>(`/connections/requests/${requestId}/${action}`, {
       reason,
     })
   },
@@ -134,7 +125,7 @@ export const connectionsApi = {
   /**
    * Check connection status with a specific user
    */
-  checkStatus: async (targetUserId: string): Promise<{ connected: boolean }> => {
-    return await apiClient.get<{ connected: boolean }>(`/connections/check/${targetUserId}`)
+  checkStatus: async (targetUserId: string): Promise<{ status: 'CONNECTED' | 'PENDING_INCOMING' | 'PENDING_OUTGOING' | 'NONE'; requestId?: string }> => {
+    return await apiClient.get<{ status: 'CONNECTED' | 'PENDING_INCOMING' | 'PENDING_OUTGOING' | 'NONE'; requestId?: string }>(`/connections/check/${targetUserId}`)
   },
 }

@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { connectionsApi, type ConnectionRequest, type ConnectionStats } from '../api/connections'
+import { useAuth } from './useAuth'
 
 // Query keys
 export const connectionKeys = {

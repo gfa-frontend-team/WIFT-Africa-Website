@@ -25,13 +25,21 @@ export default function UnifiedProfilePage() {
   const { user, isAuthenticated } = useAuth()
   const username = params.username as string
   
-  const { sendRequest, useRequests, useConnectionStatus, useStats, isSending } = useConnections()
+  const { sendRequest, respondToRequest, useConnectionStatus, useStats, isSending, isResponding } = useConnections()
 
   // Determine ownership
   const isOwner = !!(user && (
     (user.username && user.username === username) || 
     user.id === username
   ))
+
+  // Local state for optimistic updates
+  const [localConnectionStatus, setLocalConnectionStatus] = useState<'PENDING' | null>(null)
+
+  // Reset local state when profile changes
+  useEffect(() => {
+    setLocalConnectionStatus(null)
+  }, [username]) // username or targetId, but targetId is derived later. using username or moving targetId up. catch: targetId is derived at line 77.
 
   // 1. Owner Data Query
   const { 
@@ -77,8 +85,7 @@ export default function UnifiedProfilePage() {
   const targetId = displayProfile?.profile.id || displayProfile?.profile._id
 
   // We unconditionally call hooks, but their query keys/enabled depend on data
-  const { data: outgoingRequests } = useRequests('outgoing')
-  const { data: connectionStatusData } = useConnectionStatus(targetId)
+  const { data: connectionStatusData, refetch: refetchStatus } = useConnectionStatus(targetId)
   
   // Stats for Owner
   const { data: myStats } = useStats()
@@ -100,18 +107,18 @@ export default function UnifiedProfilePage() {
   const connectionStatus = useMemo(() => {
     if (isOwner || !isAuthenticated || !targetId) return 'NONE'
     
-    if (connectionStatusData?.connected) return 'CONNECTED'
-    
-    // Check pending
-    if (outgoingRequests?.requests) {
-      const hasPending = outgoingRequests.requests.find(
-        r => r.receiver.id === targetId && r.status === 'PENDING'
-      )
-      if (hasPending) return 'PENDING'
+    // Optimistic update
+    if (localConnectionStatus === 'PENDING') return 'PENDING'
+
+    // Status from backend
+    if (connectionStatusData) {
+        if (connectionStatusData.status === 'CONNECTED') return 'CONNECTED'
+        if (connectionStatusData.status === 'PENDING_INCOMING') return 'INCOMING'
+        if (connectionStatusData.status === 'PENDING_OUTGOING') return 'PENDING'
     }
     
     return 'NONE'
-  }, [isOwner, isAuthenticated, targetId, connectionStatusData, outgoingRequests])
+  }, [isOwner, isAuthenticated, targetId, connectionStatusData, localConnectionStatus])
 
 
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
@@ -130,6 +137,7 @@ export default function UnifiedProfilePage() {
     if (message !== undefined) {
         try {
             await sendRequest(targetId, message)
+            setLocalConnectionStatus('PENDING')
             setIsConnectModalOpen(false)
             toast.success('Connection request sent')
         } catch (error) {
@@ -141,6 +149,34 @@ export default function UnifiedProfilePage() {
 
     // Otherwise open modal
     setIsConnectModalOpen(true)
+  }
+
+  const handleAccept = async () => {
+      const requestId = connectionStatusData?.requestId
+      if (!requestId) return
+
+      try {
+          await respondToRequest(requestId, 'accept')
+          toast.success('Connection accepted')
+          refetchStatus()
+      } catch (error) {
+          console.error('Failed to accept request', error)
+          toast.error('Failed to accept connection request')
+      }
+  }
+
+  const handleDecline = async () => {
+      const requestId = connectionStatusData?.requestId
+      if (!requestId) return
+
+      try {
+          await respondToRequest(requestId, 'decline')
+          toast.success('Connection request declined')
+          refetchStatus()
+      } catch (error) {
+          console.error('Failed to decline request', error)
+          toast.error('Failed to decline connection request')
+      }
   }
 
   const handleMessage = () => {
@@ -185,7 +221,9 @@ export default function UnifiedProfilePage() {
         isAuthenticated={isAuthenticated}
         isOwnProfile={isOwner}
         onConnect={handleConnect}
-        isConnecting={isSending}
+        onAccept={handleAccept}
+        onDecline={handleDecline}
+        isConnecting={isSending || isResponding}
         onMessage={handleMessage}
         connectionStatus={connectionStatus}
         connectionsCount={connectionsCount}
