@@ -5,10 +5,13 @@ import { Eye, Users, TrendingUp, Bookmark, Briefcase, Calendar } from 'lucide-re
 import Avatar from '@/components/ui/Avatar'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useSavedPostsCount } from '@/lib/hooks/useSavedPosts'
+import { useConnections } from '@/lib/hooks/useConnections'
 
 export default function LeftSidebar() {
   const { user } = useAuth()
   const { data: savedCount } = useSavedPostsCount()
+  const { useStats } = useConnections()
+  const { data: stats } = useStats()
 
   if (!user) return null
 
@@ -45,36 +48,31 @@ export default function LeftSidebar() {
 
           {/* Quick Stats */}
           <div className="space-y-2 py-3 border-t border-border">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
+            <Link href="/me/analytics" className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
+              <span className="text-muted-foreground group-hover:text-foreground flex items-center gap-2 transition-colors">
                 <Eye className="h-4 w-4" />
                 Profile views
               </span>
               <span className="font-semibold text-primary">
-                {/* TODO: Get from API when available */}
-                —
               </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
+            </Link>
+            <Link href="/connections" className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
+              <span className="text-muted-foreground group-hover:text-foreground flex items-center gap-2 transition-colors">
                 <Users className="h-4 w-4" />
                 Connections
               </span>
               <span className="font-semibold text-primary">
-                {/* TODO: Get from connections API when available */}
-                —
+                {stats?.connectionsCount?.toLocaleString() || 0}
               </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
+            </Link>
+            <Link href={`/in/${user.username || user.id}`} className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
+              <span className="text-muted-foreground group-hover:text-foreground flex items-center gap-2 transition-colors">
                 <TrendingUp className="h-4 w-4" />
                 Posts
               </span>
               <span className="font-semibold text-primary">
-                {/* TODO: Get user's post count */}
-                —
               </span>
-            </div>
+            </Link>
           </div>
 
           {/* Membership Status */}
