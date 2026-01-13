@@ -1,19 +1,22 @@
 'use client'
 
 import { SearchUserResult } from '@/lib/api/search'
+import { ConnectionRequest } from '@/lib/api/connections'
 import { Button } from '@/components/ui/button' // Assuming we have this, or use standard html button with tailwind
 import Avatar from '@/components/ui/Avatar'
-import { MapPin, Users, UserPlus, MessageCircle, Check, Clock } from 'lucide-react'
+import { MapPin, Users, UserPlus, MessageCircle, Check, Clock, UserCheck, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 interface MemberCardProps {
   member: SearchUserResult
   onConnect: (id: string) => void
+  onAccept?: (requestId: string) => void
+  incomingRequest?: any // Using any for simplicity as import might fail or circular dependency? No, let's use ConnectionRequest if available or infer
   isConnecting?: boolean
 }
 
-export default function MemberCard({ member, onConnect, isConnecting }: MemberCardProps) {
+export default function MemberCard({ member, onConnect, onAccept, incomingRequest, isConnecting }: MemberCardProps) {
   const router = useRouter()
   
   // Navigate to profile on click (unless clicking button)
@@ -50,6 +53,23 @@ export default function MemberCard({ member, onConnect, isConnecting }: MemberCa
           Pending
         </Button>
       )
+    }
+
+    if (incomingRequest && onAccept) {
+        return (
+            <Button 
+              className="w-full gap-2 bg-primary hover:bg-primary/90" 
+              onClick={() => onAccept(incomingRequest.id)}
+              disabled={isConnecting}
+            >
+              {isConnecting ? (
+                  <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+              ) : (
+                  <UserCheck size={16} />
+              )}
+              Accept Request
+            </Button>
+        )
     }
 
     return (

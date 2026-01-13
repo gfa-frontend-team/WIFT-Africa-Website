@@ -33,13 +33,27 @@ export default function ProfileStats({
       )}
       
       <div className={cn("text-center", isOwner && "border-l border-r border-border/50")}>
-        <div className="flex items-center justify-center gap-1.5 text-2xl font-bold text-foreground mb-1">
-          <Users className="h-5 w-5 text-primary" />
-          <span>{connectionsCount.toLocaleString()}</span>
-        </div>
-        <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium text-[10px] sm:text-xs">
-          Connections
-        </p>
+        {isOwner ? (
+          <Link href="/connections" className="block group cursor-pointer hover:bg-muted/10 rounded-lg p-1 transition-colors -m-1">
+            <div className="flex items-center justify-center gap-1.5 text-2xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+              <Users className="h-5 w-5 text-primary" />
+              <span>{connectionsCount.toLocaleString()}</span>
+            </div>
+            <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium text-[10px] sm:text-xs">
+              Connections
+            </p>
+          </Link>
+        ) : (
+          <>
+            <div className="flex items-center justify-center gap-1.5 text-2xl font-bold text-foreground mb-1">
+              <Users className="h-5 w-5 text-primary" />
+              <span>{connectionsCount.toLocaleString()}</span>
+            </div>
+            <p className="text-sm text-muted-foreground uppercase tracking-wide font-medium text-[10px] sm:text-xs">
+              Connections
+            </p>
+          </>
+        )}
       </div>
       
       <div className="text-center">

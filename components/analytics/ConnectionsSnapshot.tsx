@@ -72,26 +72,24 @@ export function ConnectionsSnapshot() {
   return (
     <div className="space-y-3">
       {connections.map((conn) => {
-        const user = conn.user
-        if (!user) return null
-        
+        // Flat structure: id, name, profilePhoto, professionalHeadline
         return (
-          <div key={conn.id} className="flex items-center justify-between p-3 bg-white border rounded-lg hover:shadow-sm transition-shadow">
-            <Link href={`/profile/${user.username || user.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+          <div key={conn.id} className="flex items-center justify-center p-3 bg-white border rounded-lg hover:shadow-sm transition-shadow">
+            <Link href={`/in/${conn.id}`} className="flex items-center gap-3 flex-1 min-w-0">
                <Avatar 
-                  src={user.profilePhoto} 
-                  name={`${user.firstName} ${user.lastName}`}
+                  src={conn.profilePhoto} 
+                  name={conn.name}
                   size="md"
                />
                <div className="min-w-0">
-                  <h4 className="font-medium text-sm truncate">{user.firstName} {user.lastName}</h4>
-                  <p className="text-xs text-muted-foreground truncate">{(user as any).headline || (user as any).primaryRole || 'Member'}</p>
+                  <h4 className="font-medium text-sm truncate">{conn.name}</h4>
+                  <p className="text-xs text-muted-foreground truncate">{conn.professionalHeadline || 'Member'}</p>
                </div>
             </Link>
 
             <div className="flex items-center gap-1 ml-2">
                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" asChild>
-                  <Link href={`/messages?userId=${user.id}`}>
+                  <Link href={`/messages?userId=${conn.id}`}>
                       <MessageCircle className="h-4 w-4" />
                   </Link>
                </Button>
@@ -99,7 +97,7 @@ export function ConnectionsSnapshot() {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleRemove(conn.id, `${user.firstName} ${user.lastName}`)}
+                    onClick={() => handleRemove(conn.id, conn.name)}
                     disabled={removeMutation.isPending}
                >
                   <UserMinus className="h-4 w-4" />
@@ -109,9 +107,9 @@ export function ConnectionsSnapshot() {
         )
       })}
 
-      {data && data.total > 5 && (
+      {data && data.totalConnections > 5 && (
           <Button variant="ghost" className="w-full text-xs text-muted-foreground" asChild>
-              <Link href="/connections">View all ({data.total})</Link>
+              <Link href="/connections">View all ({data.totalConnections})</Link>
           </Button>
       )}
     </div>

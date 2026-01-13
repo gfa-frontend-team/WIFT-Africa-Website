@@ -26,11 +26,13 @@ interface ProfileHeaderProps {
   user: ProfileHeaderUser
   profile: ProfileHeaderProfile
   isOwner: boolean
-  connectionStatus: 'NONE' | 'CONNECTED' | 'PENDING'
+  connectionStatus: 'NONE' | 'CONNECTED' | 'PENDING' | 'INCOMING'
   connectionsCount: number
   postsCount: number
   viewsCount?: number
   onConnect?: (message?: string) => void
+  onAccept?: () => void
+  onDecline?: () => void
   isConnecting?: boolean
   onMessage?: () => void
   onEdit?: () => void
@@ -45,6 +47,8 @@ export default function ProfileHeader({
   postsCount,
   viewsCount = 0,
   onConnect,
+  onAccept,
+  onDecline,
   isConnecting = false,
   onMessage,
   onEdit
@@ -158,6 +162,23 @@ export default function ProfileHeader({
                         >
                           Request Pending
                         </button>
+                      ) : connectionStatus === 'INCOMING' ? (
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => onAccept?.()}
+                            disabled={isConnecting}
+                            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
+                          >
+                            Accept Request
+                          </button>
+                          <button 
+                            onClick={() => onDecline?.()}
+                            disabled={isConnecting}
+                            className="px-4 py-2 bg-background border border-border text-foreground rounded-lg hover:bg-accent transition-colors font-medium text-sm"
+                          >
+                            Decline
+                          </button>
+                        </div>
                       ) : (
                         <button 
                           onClick={() => onConnect?.()}

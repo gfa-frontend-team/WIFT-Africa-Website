@@ -36,7 +36,8 @@ export default function ConnectionsPage() {
   const { data: statsData } = useStats()
 
   const requests = requestsData?.requests || []
-  const connections = connectionsData?.connections || []
+  // Force cast/type assertion because we updated API return type but useMyConnections might infer old type or generic
+  const connections = (connectionsData?.connections || []) as any[] 
   const stats = statsData
   const isLoading = activeTab === 'connections' ? isConnectionsLoading : isRequestsLoading
 
