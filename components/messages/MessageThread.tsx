@@ -8,6 +8,7 @@ import { Loader2, Trash2 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { messageKeys } from '@/lib/hooks/useMessages'
 
 interface MessageThreadProps {
   conversation: Conversation
@@ -35,6 +36,7 @@ export default function MessageThread({
   const prevMessagesLength = useRef(messages.length)
   const isInitialLoad = useRef(true)
   const prevScrollHeight = useRef(0)
+
 
   const deleteMutation = useMutation({
     mutationFn: (messageId: string) => messagesApi.deleteMessage(messageId),
@@ -129,6 +131,7 @@ export default function MessageThread({
 
   const otherUser = conversation.otherParticipant
 
+
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 bg-background/50">
       {/* Header */}
@@ -193,15 +196,14 @@ export default function MessageThread({
         {messages.map((message, index) => {
           const isMine = message.isMine
           const showSenderInfo = !isMine && (index === 0 || messages[index - 1].sender.id !== message.sender.id)
-          
           return (
             <div
-              key={message.id}
+              key={message._id}
               className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
             >
               {/* Other User Avatar */}
               {!isMine && (
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-muted flex-shrink-0 mb-1">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-muted shrink-0 mb-1">
                   {message.sender?.profilePhoto ? (
                     <Image
                       src={message.sender.profilePhoto}

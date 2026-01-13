@@ -16,7 +16,7 @@ class ApiClient {
   private requestQueue: Array<() => Promise<unknown>> = []
   private isProcessingQueue = false
   private lastRequestTime = 0
-  private minRequestInterval = 100 // Minimum 100ms between requests
+  private minRequestInterval = 50 // Minimum 100ms between requests
 
   // Token refresh queue
   private isRefreshing = false
