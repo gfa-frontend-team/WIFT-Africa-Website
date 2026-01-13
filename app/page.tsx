@@ -386,43 +386,43 @@ export default function LandingPage() {
                 Trusted by professionals at
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto items-center">
-                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                   <div className="relative w-full h-full">
                     <Image
                       src="/WIF LA.jpg"
                       alt="WIF Los Angeles"
                       fill
-                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                      className="object-contain"
                     />
                   </div>
                 </div>
-                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                   <div className="relative w-full h-full">
                     <Image
-                      src="/bill & melinda gates logo.png.png"
+                      src="/BMGFoundation_logo_banner.jpg"
                       alt="Bill & Melinda Gates Foundation"
                       fill
-                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                      className="object-contain"
                     />
                   </div>
                 </div>
-                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                   <div className="relative w-full h-full">
                     <Image
-                      src="/Film Independent_logo png.png"
+                      src="/Film Independent logo_png.png"
                       alt="Film Independent"
                       fill
-                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                      className="object-contain"
                     />
                   </div>
                 </div>
-                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center hover:border-primary/30 transition-colors h-24">
+                <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                   <div className="relative w-full h-full">
                     <Image
-                      src="/MultiChoice logo.png.webp"
+                      src="/multichoice.jpg"
                       alt="MultiChoice Group"
                       fill
-                      className="object-contain opacity-80 hover:opacity-100 transition-opacity"
+                      className="object-contain"
                     />
                   </div>
                 </div>

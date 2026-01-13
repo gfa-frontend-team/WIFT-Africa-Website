@@ -9,21 +9,29 @@ export default function AboutPage() {
     <LandingLayout>
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-20 lg:py-32 bg-primary/5">
+        <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden py-20 lg:py-32">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+             <Image
+                src="/about.jpg"
+                alt="WIFT Africa"
+                fill
+                className="object-cover"
+                priority
+             />
+             <div className="absolute inset-0 bg-black/60" /> {/* Dark Overlay */}
+          </div>
+
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-md">
                 About <span className="text-primary">WIFT Africa</span>
               </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
+              <p className="text-xl text-white/90 leading-relaxed font-medium drop-shadow-sm max-w-2xl mx-auto">
                 Empowering and supporting African and Pan-African Women in the Film and TV industry.
               </p>
             </div>
           </div>
-          
-          {/* Decorative background elements */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
         </section>
 
         {/* Main Content */}
