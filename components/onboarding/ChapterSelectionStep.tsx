@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, ArrowRight, MapPin, Users, Crown, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, MapPin, Users, Crown, CheckCircle, AlertCircle, Loader2, User } from 'lucide-react'
 import { Chapter } from '@/lib/api/onboarding'
 import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
@@ -291,10 +291,24 @@ export default function ChapterSelectionStep({
                     <span>{chapter.city}, {chapter.country}</span>
                   </div>
                 )}
+
+                {chapter.currentPresident && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Crown className="h-4 w-4 flex-shrink-0" />
+                    <span>President: {chapter.currentPresident}</span>
+                  </div>
+                )}
+
+                {chapter.adminName && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <User className="h-4 w-4 flex-shrink-0" />
+                    <span>Admin: {chapter.adminName}</span>
+                  </div>
+                )}
                 
                 <div className="flex items-center gap-2 text-foreground font-medium">
                   <Users className="h-4 w-4 flex-shrink-0" />
-                  <span>{chapter.memberCount.toLocaleString()} active members</span>
+                  <span>{(chapter.fixedMemberCount || 0).toLocaleString()} active members</span>
                 </div>
 
                 {chapter.description && (

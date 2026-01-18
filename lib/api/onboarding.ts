@@ -63,7 +63,10 @@ export interface Chapter {
   city?: string
   description?: string
   memberCount: number
+  fixedMemberCount: number
   requiresApproval: boolean
+  currentPresident?: string
+  adminName?: string
 }
 
 export const onboardingApi = {
