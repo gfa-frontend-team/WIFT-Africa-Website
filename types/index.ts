@@ -182,21 +182,52 @@ export interface OnboardingProgress {
 // ============================================
 
 export interface Chapter {
-  id: string
+  _id: string
+  id: string // keeping id for compatibility if needed, or mapping _id to id
   name: string
   code: string
   country: string
+  
+  // Optional Location & Details
   city?: string
   description?: string
   missionStatement?: string
+  
+  // Counts & Status
+  memberCount: number
+  fixedMemberCount: number
+  isActive: boolean
+  
+  // Populated Admin Data
+  adminIds: Array<{
+    _id: string
+    firstName: string
+    lastName: string
+    email?: string
+  }>
+  
+  // Leadership & Contact (Optional)
+  currentPresident?: string
+  presidentEmail?: string
+  presidentPhone?: string
   email?: string
   phone?: string
+  address?: string;
   website?: string
-  memberCount: number
-  isActive: boolean
-  adminIds: string[]
-  createdAt: Date
-  updatedAt: Date
+  
+  // Social Media (Optional)
+  facebookUrl?: string
+  twitterHandle?: string
+  instagramHandle?: string
+  linkedinUrl?: string
+  
+  // Metadata
+  foundedDate?: string
+  createdAt: string | Date // Keeping flexible
+  updatedAt: string | Date
+  
+  // Computed Field
+  adminName: string
 }
 
 // ============================================

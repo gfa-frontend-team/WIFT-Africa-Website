@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { chaptersApi } from '@/lib/api/chapters'
-import { Loader2, MapPin, Users, Globe, Mail, Phone, Calendar, ArrowLeft, CheckCircle2, ExternalLink } from 'lucide-react'
+import { Loader2, MapPin, Users, Globe, Mail, Phone, Calendar, ArrowLeft, CheckCircle2, ExternalLink, Crown, User, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -76,18 +76,20 @@ export default function ChapterDetailsPage() {
                     )}
                  </div>
                  
-                 <div className="flex flex-wrap gap-4 text-muted-foreground mb-6">
+                  <div className="flex flex-wrap gap-4 text-muted-foreground mb-6">
                     <div className="flex items-center gap-1.5">
                        <MapPin className="h-4 w-4" />
                        <span>{chapter.city ? `${chapter.city}, ` : ''}{chapter.country}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                        <Users className="h-4 w-4" />
-                       <span>{chapter.memberCount} Members</span>
+                       {/* Use fixedMemberCount per instruction */}
+                       <span>{chapter.fixedMemberCount || 0} Members</span>
                     </div>
+                    {/* Display Founded Date or Created At Year */}
                     <div className="flex items-center gap-1.5">
                         <Calendar className="h-4 w-4" />
-                        <span>Founded {new Date(chapter.createdAt).getFullYear()}</span>
+                        <span>Founded {chapter.foundedDate ? new Date(chapter.foundedDate).getFullYear() : new Date(chapter.createdAt).getFullYear()}</span>
                     </div>
                  </div>
 
@@ -97,7 +99,6 @@ export default function ChapterDetailsPage() {
                           You are a member of this chapter
                       </div>
                  ) : (
-                     // Placeholder for "Join This Chapter" if logic permits switching or applying
                      <Button className="gap-2" disabled>
                         Contact to Join
                      </Button>
@@ -117,30 +118,69 @@ export default function ChapterDetailsPage() {
                </div>
             </section>
 
-             {/* Mission Statement if available (API didn't show it in type properly but endpoints docs mentioned it) */}
-             {/* Adding it conditionally if I update types, but for now relying on what's in types or generic */}
+             {chapter.missionStatement && (
+                <section>
+                   <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
+                   <div className="p-6 bg-primary/5 border border-primary/10 rounded-xl relative">
+                      <div className="absolute top-4 left-4 text-4xl text-primary/20 font-serif leading-none">"</div>
+                      <p className="text-lg text-foreground italic relative z-10 pl-6">
+                         {chapter.missionStatement}
+                      </p>
+                   </div>
+                </section>
+             )}
          </div>
 
          {/* Sidebar */}
          <div className="space-y-6">
             <Card>
-               <CardContent className="pt-6 space-y-4">
+               <CardContent className="pt-6 space-y-6">
+                  {/* Leadership Section */}
+                  {(chapter.currentPresident || chapter.adminName) && (
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg">Leadership</h3>
+                      <div className="space-y-3">
+                        {chapter.currentPresident && (
+                          <div className="flex items-start gap-3">
+                            <div className="bg-primary/10 p-2 rounded-full mt-0.5">
+                              <Crown className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">President</p>
+                              <p className="text-sm text-muted-foreground mb-1">{chapter.currentPresident}</p>
+                              {chapter.presidentEmail && (
+                                <a href={`mailto:${chapter.presidentEmail}`} className="text-xs text-primary hover:underline block">
+                                  {chapter.presidentEmail}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {chapter.adminName && (
+                          <div className="flex items-start gap-3">
+                            <div className="bg-primary/10 p-2 rounded-full mt-0.5">
+                              <User className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Admin</p>
+                              <p className="text-sm text-muted-foreground">{chapter.adminName}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="border-t border-border" />
+                    </div>
+                  )}
+
                   <h3 className="font-semibold text-lg mb-2">Contact Information</h3>
                   
-                  {/* These fields might need to be added to the Chapter type if they aren't there yet, checking endpoints.md they exist in details response */}
-                  {/* Types file has limited fields on Chapter interface, I might need to update it or cast it */}
-                  
-                  {/* Using 'any' cast temporarily if types are strict, or just rendering safe fields */}
-                  {/* Actually, let's update the type definition in next step if fields are missing in index.ts */}
-                  
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                       <div className="flex items-start gap-3">
                           <Mail className="h-4 w-4 text-muted-foreground mt-1" />
                           <div>
                               <p className="text-sm font-medium">Email</p>
-                              {/* @ts-ignore - API returns email but type might be missing it */}
                               <a href={`mailto:${chapter.email || 'info@wiftafrica.org'}`} className="text-sm text-primary hover:underline break-all">
-                                  {/* @ts-ignore */}
                                   {chapter.email || 'N/A'}
                               </a>
                           </div>
@@ -150,7 +190,6 @@ export default function ChapterDetailsPage() {
                           <Phone className="h-4 w-4 text-muted-foreground mt-1" />
                           <div>
                               <p className="text-sm font-medium">Phone</p>
-                               {/* @ts-ignore */}
                               <p className="text-sm text-muted-foreground">{chapter.phone || 'N/A'}</p>
                           </div>
                       </div>
@@ -159,11 +198,9 @@ export default function ChapterDetailsPage() {
                           <Globe className="h-4 w-4 text-muted-foreground mt-1" />
                           <div>
                               <p className="text-sm font-medium">Website</p>
-                               {/* @ts-ignore */}
                               {chapter.website ? (
                                   <a 
-                                    // @ts-ignore
-                                    href={chapter.website} 
+                                    href={chapter.website.startsWith('http') ? chapter.website : `https://${chapter.website}`} 
                                     target="_blank" 
                                     rel="noopener noreferrer" 
                                     className="text-sm text-primary hover:underline flex items-center gap-1"
@@ -175,7 +212,56 @@ export default function ChapterDetailsPage() {
                               )}
                           </div>
                       </div>
+
+                      {chapter.address && (
+                          <div className="flex items-start gap-3">
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
+                              <div>
+                                  <p className="text-sm font-medium">Address</p>
+                                  <p className="text-sm text-muted-foreground whitespace-pre-line">{chapter.address}</p>
+                              </div>
+                          </div>
+                      )}
                   </div>
+
+                  {/* Social Media Section */}
+                  {(chapter.facebookUrl || chapter.twitterHandle || chapter.instagramHandle || chapter.linkedinUrl) && (
+                    <>
+                      <div className="border-t border-border my-4" />
+                      <div className="flex justify-start gap-4">
+                        {chapter.facebookUrl && (
+                          <a href={chapter.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                            <Facebook className="h-5 w-5" />
+                          </a>
+                        )}
+                        {chapter.twitterHandle && (
+                          <a 
+                            href={chapter.twitterHandle.startsWith('http') ? chapter.twitterHandle : `https://twitter.com/${chapter.twitterHandle.replace('@', '')}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <Twitter className="h-5 w-5" />
+                          </a>
+                        )}
+                        {chapter.instagramHandle && (
+                          <a 
+                             href={chapter.instagramHandle.startsWith('http') ? chapter.instagramHandle : `https://instagram.com/${chapter.instagramHandle.replace('@', '')}`}
+                             target="_blank" 
+                             rel="noopener noreferrer" 
+                             className="text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <Instagram className="h-5 w-5" />
+                          </a>
+                        )}
+                        {chapter.linkedinUrl && (
+                          <a href={chapter.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                            <Linkedin className="h-5 w-5" />
+                          </a>
+                        )}
+                      </div>
+                    </>
+                  )}
                </CardContent>
             </Card>
          </div>

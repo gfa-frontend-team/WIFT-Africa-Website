@@ -6,7 +6,7 @@ import { chaptersApi } from '@/lib/api/chapters'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Loader2, Search, MapPin, Users, Globe, ExternalLink, ArrowRight } from 'lucide-react'
+import { Loader2, Search, MapPin, Users, Globe, ExternalLink, ArrowRight, Crown, User } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -88,6 +88,21 @@ export default function ChaptersPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1">
+                  <div className="space-y-1 mb-3">
+                    {chapter.currentPresident && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Crown className="h-4 w-4 text-primary" />
+                        <span>President: {chapter.currentPresident}</span>
+                      </div>
+                    )}
+                    {chapter.adminName && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <User className="h-4 w-4 text-primary" />
+                        <span>Admin: {chapter.adminName}</span>
+                      </div>
+                    )}
+                  </div>
+
                   <p className="text-muted-foreground line-clamp-3 mb-4 text-sm">
                     {chapter.description || "Join this chapter to connect with women in film and television in this region."}
                   </p>
@@ -95,7 +110,7 @@ export default function ChaptersPage() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Users className="h-4 w-4" />
-                      <span>{chapter.memberCount || 0} Members</span>
+                      <span>{chapter.fixedMemberCount || 0} Members</span>
                     </div>
                   </div>
                 </CardContent>

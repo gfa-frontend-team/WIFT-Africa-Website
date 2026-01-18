@@ -25,10 +25,12 @@
 
 ### Profiles Module
 - **Purpose**: Handles public profile viewing and profile view analytics.
-- **Entry Point**: `/api/v1/profiles` (controller: `profileViewController` & `userController`)
+- **Entry Point**: `/api/v1/profiles` (controller: `profileViewController`, `userController`)
 - **Key Features**:
     - **Public Profile**: Get public profile by username or ID (`/:identifier`).
     - **Profile Views**: Record profile view, get view statistics and list of viewers.
+    - **Experience**: detailed professional history (CRUD).
+    - **Localization**: user language preferences and supported languages.
 
 ### Admin Module
 - **Purpose**: Administrative functions for managing the platform.
@@ -150,6 +152,13 @@
 - **Entry Point**: `/api/v1/reports` (controller: `report.controller.ts`)
 - **Key Features**:
     - **Reporting**: Report Posts, Comments, Users, or Jobs with reasons.
+
+### Portfolio Module
+- **Purpose**: Showcasing user creative work.
+- **Entry Point**: `/api/v1/portfolios` (controller: `portfolio.controller.ts`)
+- **Key Features**:
+    - **CRUD**: Manage portfolio items (Video, Image, External Link).
+    - **Visibility**: Control item visibility (Public/Connections).
 
 ### Analytics Module
 - **Purpose**: System-wide and feature-specific data analysis.
