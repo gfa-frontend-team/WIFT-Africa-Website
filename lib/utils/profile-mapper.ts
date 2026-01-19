@@ -44,6 +44,7 @@ export function mapPrivateToPublicProfile(privateProfile: any): PublicProfileRes
       username: user.username,
       profileSlug: user.profileSlug,
       profilePhoto: user.profilePhoto,
+      bannerUrl: profile.bannerUrl || user.bannerUrl, // Added bannerUrl
       email: user.email,
       accountType: user.accountType,
       membershipStatus: user.membershipStatus,
