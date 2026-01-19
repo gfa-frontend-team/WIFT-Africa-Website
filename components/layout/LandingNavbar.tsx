@@ -48,9 +48,7 @@ export default function LandingNavbar() {
           {/* Logo */}
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-lg font-bold text-foreground sm:text-xl">
-                WIFT Africa
-              </span>
+              <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
             </Link>
           </div>
 

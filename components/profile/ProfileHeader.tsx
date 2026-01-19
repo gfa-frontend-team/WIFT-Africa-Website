@@ -1,14 +1,18 @@
-import { Camera, MapPin, Users, CheckCircle, Edit3 } from 'lucide-react'
+import { Camera, MapPin, Users, CheckCircle, Edit3, Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import { useState, useRef } from 'react'
+import { usersApi } from '@/lib/api/users'
 // import { User, Profile } from '@/types' // usage replaced by local interfaces
 import BadgeDisplay from './BadgeDisplay'
 import ProfileStats from './ProfileStats'
+import { toast } from 'sonner'
 
 // Flexible interfaces matching the passed data
 interface ProfileHeaderUser {
   firstName: string
   lastName: string
   profilePhoto?: string
+  bannerUrl?: string
   membershipStatus?: string
   chapter?: {
     name: string
@@ -20,6 +24,7 @@ interface ProfileHeaderProfile {
   primaryRole?: string
   roles?: string[]
   location?: string
+  bannerUrl?: string
 }
 
 interface ProfileHeaderProps {
@@ -39,8 +44,8 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileHeader({
-  user,
-  profile,
+  user: initialUser,
+  profile: initialProfile,
   isOwner,
   connectionStatus,
   connectionsCount,
@@ -53,7 +58,14 @@ export default function ProfileHeader({
   onMessage,
   onEdit
 }: ProfileHeaderProps) {
-  
+  const [user, setUser] = useState(initialUser)
+  const [profile, setProfile] = useState(initialProfile)
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false)
+  const bannerInputRef = useRef<HTMLInputElement>(null)
+
+  // Use profile banner first, fallback to user banner (legacy support)
+  const bannerUrl = profile.bannerUrl || user.bannerUrl
+
   // Helper for chapter display
   const chapterName = user.chapter?.name || 'WIFT Africa'
   
@@ -61,17 +73,91 @@ export default function ProfileHeader({
   const roles = profile.roles || []
   const primaryRole = profile.primaryRole || roles[0] || 'Member'
 
+  const handleBannerClick = () => {
+    bannerInputRef.current?.click()
+  }
+
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validation
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      toast.error("Invalid file type", {
+        description: "Please upload a JPG, PNG, or WebP image."
+      })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      toast.error("File too large", {
+        description: "Image must be less than 5MB."
+      })
+      return
+    }
+
+    setIsUploadingBanner(true)
+    try {
+      const response = await usersApi.uploadProfileBanner(file)
+      // Update local state - assuming backend updates the PROFILE bannerUrl
+      setProfile(prev => ({ ...prev, bannerUrl: response.photoUrl }))
+      // Also update user state just in case of fallback usage
+      setUser(prev => ({ ...prev, bannerUrl: response.photoUrl }))
+      
+      toast.success("Success", {
+        description: "Cover photo updated successfully."
+      })
+    } catch (error) {
+      console.error('Failed to upload banner:', error)
+      toast.error("Error", {
+        description: "Failed to upload cover photo. Please try again."
+      })
+    } finally {
+      setIsUploadingBanner(false)
+      // Reset input
+      if (bannerInputRef.current) {
+        bannerInputRef.current.value = ''
+      }
+    }
+  }
+
   return (
     <div className="mb-6">
+      <input 
+        type="file" 
+        ref={bannerInputRef}
+        onChange={handleBannerUpload}
+        className="hidden" 
+        accept="image/jpeg,image/png,image/webp"
+      />
+
       {/* Header Banner */}
-      <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-t-2xl h-48">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-t-2xl" />
+      <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-t-2xl h-48 overflow-hidden group">
+        {bannerUrl ? (
+          <Image 
+            src={bannerUrl} 
+            alt="Cover Photo" 
+            fill 
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-t-2xl" />
+        )}
+        
         {isOwner && (
           <button 
-            className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full transition-colors backdrop-blur-sm"
-            title="Update Cover Photo (Coming Soon)"
+            onClick={handleBannerClick}
+            disabled={isUploadingBanner}
+            className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full transition-colors backdrop-blur-sm shadow-sm md:opacity-0 md:group-hover:opacity-100"
+            title="Update Cover Photo"
           >
-            <Camera className="h-5 w-5 text-gray-700" />
+            {isUploadingBanner ? (
+              <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            ) : (
+              <Camera className="h-5 w-5 text-gray-700" />
+            )}
           </button>
         )}
       </div>

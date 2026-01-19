@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-          <img src="/WIFT.png" alt="WIFT Africa" className="h-10 w-auto" />
+          <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
           <span className="text-xl font-bold text-foreground">WIFT Africa</span>
         </Link>
 

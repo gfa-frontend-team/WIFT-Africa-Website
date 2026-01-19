@@ -166,7 +166,7 @@ export default function RegisterPage() {
             {/* Header */}
             <div className="text-center">
               <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-                <img src="/WIFT.png" alt="WIFT Africa" className="h-10 w-auto" />
+                <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
                 <span className="text-xl font-bold text-foreground">WIFT Africa</span>
               </Link>
               <h1 className="text-3xl font-bold text-foreground">Join WIFT Africa</h1>

@@ -49,13 +49,7 @@ export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
             />
           </div>
         </div>
-        <div className="w-full md:w-64">
-          <Input 
-            placeholder="Location..." 
-            value={filters.location || ''}
-            onChange={(e) => handleChange('location', e.target.value)}
-          />
-        </div>
+
       </div>
 
       <div className="flex justify-between items-center pt-2">

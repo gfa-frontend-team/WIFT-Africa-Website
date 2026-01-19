@@ -36,6 +36,8 @@ export interface User {
   firstName: string
   lastName: string
   profilePhoto?: string
+  bannerUrl?: string
+  
   
   // CV/Resume fields
   cvFileName?: string
@@ -134,6 +136,7 @@ export interface Profile {
   linkedinUrl?: string
   instagramHandle?: string
   twitterHandle?: string
+  bannerUrl?: string; // Added field
   createdAt: Date
   updatedAt: Date
   completeness?: {
@@ -147,6 +150,18 @@ export interface ProfileCompleteness {
   completionPercentage: number
   missingFields: string[]
   isComplete: boolean
+}
+
+export interface Experience {
+  id: string
+  _id?: string
+  organizationName?: string
+  roleTitle: string
+  employmentType: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'FREELANCE' | 'INTERNSHIP' | string
+  startDate: string
+  endDate?: string
+  isPresent: boolean
+  description?: string
 }
 
 // ============================================

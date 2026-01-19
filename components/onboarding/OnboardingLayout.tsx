@@ -21,7 +21,7 @@ export default function OnboardingLayout({
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/WIFT.png" alt="WIFT Africa" className="h-8 w-auto" />
+              <img src="/logo.jpg" alt="WIFT Africa" className="h-8 w-auto" />
               <span className="text-lg font-bold text-foreground">WIFT Africa</span>
             </Link>
             <div className="text-sm text-muted-foreground">

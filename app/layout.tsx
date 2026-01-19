@@ -29,6 +29,9 @@ export const metadata: Metadata = {
     title: 'WIFT Africa - Women in Film, Television & Media',
     description: 'Join Africa\'s premier network for women in film, television & media.',
   },
+  icons: {
+    icon: '/fav.png',
+  },
 };
 
 export default function RootLayout({

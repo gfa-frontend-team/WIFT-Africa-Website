@@ -16,6 +16,7 @@ export interface PublicProfileResponse {
     username?: string
     profileSlug: string
     profilePhoto?: string
+    bannerUrl?: string // Added bannerUrl
     email?: string
     accountType?: string
     membershipStatus?: string
@@ -72,15 +73,39 @@ export const profilesApi = {
     return await apiClient.get<PublicProfileResponse>(`/profiles/${identifier}`)
   },
 
-  /**
-   * Get analytics for profile views
-   * @param userId - The ID of the profile owner (must be current user)
-   * @param lastMonth - If true, return stats for last 30 days, else last 90 days
-   */
   getProfileViews: async (userId: string, lastMonth: boolean = false): Promise<ProfileViewsResponse> => {
     const response = await apiClient.get<ProfileViewsResponse>(`/profiles/views/${userId}`, {
       params: { lastMonth },
     })
     return response
+  },
+
+  /**
+   * Get experience list
+   */
+  getExperience: async (): Promise<any[]> => {
+    // Note: The backend returns an array of experience objects
+    return await apiClient.get<any[]>('/profiles/experience')
+  },
+
+  /**
+   * Add experience
+   */
+  addExperience: async (data: any): Promise<any> => {
+    return await apiClient.post<any>('/profiles/experience', data)
+  },
+
+  /**
+   * Update experience
+   */
+  updateExperience: async (id: string, data: any): Promise<any> => {
+    return await apiClient.put<any>(`/profiles/experience/${id}`, data)
+  },
+
+  /**
+   * Delete experience
+   */
+  deleteExperience: async (id: string): Promise<void> => {
+    await apiClient.delete(`/profiles/experience/${id}`)
   },
 }

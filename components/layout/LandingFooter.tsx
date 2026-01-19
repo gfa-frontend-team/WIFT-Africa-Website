@@ -9,7 +9,7 @@ export default function LandingFooter() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <span className="text-lg font-bold text-foreground">WIFT Africa</span>
+              <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
             </div>
             <p className="text-muted-foreground text-sm mb-4 max-w-md">
               Empowering women in the African film and television industry. Connect with professionals, discover opportunities, and advance your career.

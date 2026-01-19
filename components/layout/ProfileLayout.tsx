@@ -91,7 +91,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
             </button>
             <div className="flex items-center space-x-3">
               <img 
-                src="/WIFT.png" 
+                src="/logo.jpg" 
                 alt="WIFT Africa" 
                 className="h-8 w-auto"
               />

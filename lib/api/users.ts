@@ -124,6 +124,25 @@ export const usersApi = {
     return await apiClient.delete<{ message: string }>('/users/me/profile-photo')
   },
 
+  /**
+   * Upload profile banner
+   * @param file - Image file (JPG, PNG, WebP, max 5MB)
+   */
+  uploadProfileBanner: async (file: File): Promise<{ message: string; photoUrl: string }> => {
+    const formData = new FormData()
+    formData.append('photo', file)
+
+    return await apiClient.patch<{ message: string; photoUrl: string }>(
+      '/users/me/banner/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
+  },
+
   // ============================================
   // USERNAME MANAGEMENT
   // ============================================

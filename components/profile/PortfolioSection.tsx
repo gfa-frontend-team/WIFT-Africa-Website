@@ -1,45 +1,377 @@
-import { Plus, PlayCircle, Image as ImageIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, PlayCircle, Image as ImageIcon, Link as LinkIcon, Calendar, Info, Loader2, Trash2, Pencil } from 'lucide-react'
+import { portfolioApi, PortfolioItem } from '@/lib/api/portfolio'
+import { toast } from 'sonner'
+import { useAuth } from '@/lib/hooks/useAuth'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface PortfolioSectionProps {
   isOwner?: boolean
+  userId?: string // We might need userId if not owner to fetch their portfolio
 }
 
-export default function PortfolioSection({ isOwner }: PortfolioSectionProps) {
+export default function PortfolioSection({ isOwner, userId }: PortfolioSectionProps) {
+  const { user } = useAuth()
+  const [items, setItems] = useState<PortfolioItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  
+  const targetUserId = userId || user?.id
+
+  // Form State
+  const initialFormState = {
+    title: '',
+    year: new Date().getFullYear().toString(),
+    role: '',
+    mediaType: 'VIDEO' as const,
+    mediaUrl: '',
+    description: '',
+    visibility: 'PUBLIC' as const
+  }
+  const [formData, setFormData] = useState<{
+    title: string
+    year: string
+    role: string
+    mediaType: 'IMAGE' | 'VIDEO' | 'EXTERNAL'
+    mediaUrl: string
+    description: string
+    visibility: 'PUBLIC' | 'CONNECTIONS'
+  }>(initialFormState)
+
+  useEffect(() => {
+    if (targetUserId) {
+      fetchPortfolio()
+    }
+  }, [targetUserId])
+
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!isDialogOpen) {
+      setFormData(initialFormState)
+      setEditingId(null)
+    }
+  }, [isDialogOpen])
+
+  const fetchPortfolio = async () => {
+    if (!targetUserId) return
+    try {
+      const response = await portfolioApi.getPortfolio(targetUserId)
+      let data: any = response
+      
+      // Handle various response structures
+      if (data && data.data && Array.isArray(data.data)) {
+        // format: { data: [...] }
+        setItems(data.data)
+      } else if (data && data.items && Array.isArray(data.items)) {
+        // format: { items: [...] }
+        setItems(data.items)
+      } else if (Array.isArray(data)) {
+        // format: [...]
+        setItems(data)
+      } else {
+        console.warn('Unexpected portfolio data format:', response)
+        setItems([])
+      }
+    } catch (error) {
+      console.error('Failed to fetch portfolio:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleEdit = (item: PortfolioItem) => {
+    setEditingId(item.id || item._id || null)
+    setFormData({
+      title: item.title,
+      year: item.year.toString(),
+      role: item.role,
+      mediaType: item.mediaType,
+      mediaUrl: item.mediaUrl,
+      description: item.description || '',
+      visibility: item.visibility || 'PUBLIC'
+    })
+    setIsDialogOpen(true)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      if (!formData.title || !formData.role || !formData.mediaUrl) {
+        toast.error("Missing fields", { description: "Please fill in all required fields." })
+        setIsSubmitting(false)
+        return
+      }
+
+      const payload = {
+        ...formData,
+        year: parseInt(formData.year)
+      }
+
+      if (editingId) {
+        await portfolioApi.updatePortfolioItem(editingId, payload)
+        toast.success("Portfolio item updated")
+      } else {
+        await portfolioApi.addPortfolioItem(payload)
+        toast.success("Work added to portfolio")
+      }
+      
+      setIsDialogOpen(false)
+      fetchPortfolio()
+    } catch (error) {
+      console.error('Failed to save portfolio item:', error)
+      toast.error("Error", { description: "Failed to save work." })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this item?")) return
+
+    try {
+      await portfolioApi.deletePortfolioItem(id)
+      toast.success("Item deleted")
+      setItems(prev => prev.filter(item => (item.id || item._id) !== id))
+    } catch (error) {
+      toast.error("Error", { description: "Failed to delete item." })
+    }
+  }
+
+  const getMediaIcon = (type: string) => {
+    switch (type) {
+      case 'VIDEO': return <PlayCircle className="h-8 w-8" />
+      case 'IMAGE': return <ImageIcon className="h-8 w-8" />
+      default: return <LinkIcon className="h-8 w-8" />
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-card border border-border rounded-lg p-6 shadow-sm flex justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
   return (
     <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Portfolio</h2>
+        <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+           <PlayCircle className="h-5 w-5 text-primary" />
+           Portfolio
+        </h2>
         {isOwner && (
-          <button className="flex items-center gap-2 px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors">
-            <Plus className="h-4 w-4" />
-            <span>Add Work</span>
-          </button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2 text-primary hover:text-primary hover:bg-primary/10 border-primary/20">
+                <Plus className="h-4 w-4" />
+                <span>Add Work</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{editingId ? 'Edit Work' : 'Add to Portfolio'}</DialogTitle>
+                <DialogDescription>
+                  {editingId ? 'Update project details.' : 'Showcase your best work.'}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4 py-2">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Project Title *</Label>
+                  <Input 
+                    id="title" 
+                    name="title" 
+                    value={formData.title} 
+                    onChange={handleInputChange} 
+                    placeholder="e.g. The Untold Story" 
+                    required 
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="year">Year *</Label>
+                    <Input 
+                      id="year" 
+                      name="year" 
+                      type="number"
+                      value={formData.year} 
+                      onChange={handleInputChange} 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">My Role *</Label>
+                    <Input 
+                      id="role" 
+                      name="role" 
+                      value={formData.role} 
+                      onChange={handleInputChange} 
+                      placeholder="e.g. Director"
+                      required 
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="mediaType">Media Type</Label>
+                    <Select value={formData.mediaType} onValueChange={(val) => handleSelectChange('mediaType', val)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="VIDEO">Video Link</SelectItem>
+                        <SelectItem value="IMAGE">Image Link</SelectItem>
+                        <SelectItem value="EXTERNAL">External Link</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="visibility">Visibility</Label>
+                    <Select value={formData.visibility} onValueChange={(val) => handleSelectChange('visibility', val)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select visibility" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PUBLIC">Public</SelectItem>
+                        <SelectItem value="CONNECTIONS">Connections Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="mediaUrl">Media URL *</Label>
+                  <Input 
+                    id="mediaUrl" 
+                    name="mediaUrl" 
+                    value={formData.mediaUrl} 
+                    onChange={handleInputChange} 
+                    placeholder="https://..."
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Textarea 
+                    id="description" 
+                    name="description" 
+                    value={formData.description} 
+                    onChange={handleInputChange} 
+                    rows={3}
+                  />
+                </div>
+
+                <DialogFooter className="mt-4">
+                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                   <Button type="submit" disabled={isSubmitting}>
+                     {isSubmitting ? (
+                       <>
+                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                         Saving...
+                       </>
+                     ) : 'Save'}
+                   </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Mock Item 1 */}
-        <div className="group relative aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
-          <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors" />
-          <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
-            <PlayCircle className="h-8 w-8" />
-            <span className="font-medium text-sm">Demo Reel 2024</span>
-          </div>
+      {items.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
+           <PlayCircle className="h-10 w-10 mx-auto mb-3 opacity-20" />
+           <p>No portfolio items yet.</p>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {items.map((item) => (
+            <div key={item.id || item._id} className="group relative aspect-video bg-black/5 dark:bg-black/20 rounded-lg overflow-hidden flex flex-col items-center justify-center cursor-pointer border border-border hover:border-primary/50 transition-all">
+              {/* If we had a thumbnail, we'd show it here. For now, showing placeholder with icon */}
+              {item.thumbnailUrl ? (
+                 <img src={item.thumbnailUrl} alt={item.title} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+              ) : (
+                 <div className="absolute inset-0 bg-gradient-to-br from-black/5 to-black/20" />
+              )}
+              
+              <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent text-white z-10 pointer-events-none">
+                <div className="font-semibold text-sm truncate">{item.title}</div>
+                <div className="text-xs text-white/80 flex items-center gap-1.5">
+                   <span>{item.year}</span> • <span>{item.role}</span>
+                   {item.visibility === 'CONNECTIONS' && (
+                     <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] ml-1">Connections</span>
+                   )}
+                </div>
+              </div>
+              
+              <div className="relative z-10 flex flex-col items-center gap-2 text-foreground/70 group-hover:text-primary transition-colors pointer-events-none">
+                {getMediaIcon(item.mediaType)}
+              </div>
 
-        {/* Mock Item 2 */}
-        <div className="group relative aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
-          <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors" />
-          <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
-            <ImageIcon className="h-8 w-8" />
-            <span className="font-medium text-sm">Set Photography</span>
-          </div>
+               {isOwner && (
+                <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                   <button 
+                     onClick={(e) => {
+                       e.stopPropagation()
+                       handleEdit(item)
+                     }}
+                     className="p-1.5 bg-background/80 text-foreground rounded-full hover:bg-background hover:text-primary transition-colors cursor-pointer"
+                   >
+                     <Pencil className="h-3 w-3" />
+                   </button>
+                   <button 
+                     onClick={(e) => {
+                       e.stopPropagation()
+                       handleDelete(item.id || item._id!)
+                     }}
+                     className="p-1.5 bg-destructive/80 text-white rounded-full hover:bg-destructive transition-colors cursor-pointer"
+                   >
+                     <Trash2 className="h-3 w-3" />
+                   </button>
+                </div>
+              )}
+              
+              {/* Click to open behavior */}
+              <a href={item.mediaUrl} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0" />
+            </div>
+          ))}
         </div>
-      </div>
-       
-      <div className="mt-6 pt-4 border-t border-dashed border-border text-xs text-muted-foreground text-center italic">
-        * Portfolio showcase is coming soon.
-      </div>
+      )}
     </div>
   )
 }

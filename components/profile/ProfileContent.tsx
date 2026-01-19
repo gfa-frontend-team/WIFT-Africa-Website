@@ -77,7 +77,8 @@ export default function ProfileContent({
     linkedinUrl: data.linkedinUrl,
     instagramHandle: data.instagramHandle,
     twitterHandle: data.twitterHandle,
-    isMultihyphenate: data.isMultihyphenate
+    isMultihyphenate: data.isMultihyphenate,
+    bannerUrl: data.bannerUrl // Added bannerUrl
   }
 
   const handleEdit = () => {
