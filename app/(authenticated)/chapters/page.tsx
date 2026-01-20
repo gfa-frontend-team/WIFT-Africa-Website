@@ -3,12 +3,9 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { chaptersApi } from '@/lib/api/chapters'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Loader2, Search, MapPin, Users, Globe, ExternalLink, ArrowRight, Crown, User } from 'lucide-react'
-import Link from 'next/link'
-import Image from 'next/image'
+import { Loader2 } from 'lucide-react'
+import ChapterCard from '@/components/shared/ChapterCard'
 
 export default function ChaptersPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -67,62 +64,21 @@ export default function ChaptersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredChapters.map((chapter: any) => ( // Use 'any' or 'Chapter' if available in scope
-              <Card key={chapter.id} className="flex flex-col hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start mb-2">
-                    <CardTitle className="text-xl">{chapter.name}</CardTitle>
-                    {chapter.isActive ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
-                        Inactive
-                      </span>
-                    )}
-                  </div>
-                  <CardDescription className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    {chapter.city ? `${chapter.city}, ` : ''}{chapter.country}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <div className="space-y-1 mb-3">
-                    {chapter.currentPresident && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Crown className="h-4 w-4 text-primary" />
-                        <span>President: {chapter.currentPresident}</span>
-                      </div>
-                    )}
-                    {chapter.adminName && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <User className="h-4 w-4 text-primary" />
-                        <span>Admin: {chapter.adminName}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-muted-foreground line-clamp-3 mb-4 text-sm">
-                    {chapter.description || "Join this chapter to connect with women in film and television in this region."}
-                  </p>
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <Users className="h-4 w-4" />
-                      <span>{chapter.fixedMemberCount || 0} Members</span>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-4 border-t border-border mt-auto">
-                  <Button asChild className="w-full group">
-                    <Link href={`/chapters/${chapter.id}`}>
-                      View Chapter 
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+            {filteredChapters.map((chapter: any) => (
+              <ChapterCard
+                key={chapter.id}
+                id={chapter.id}
+                name={chapter.name}
+                code={chapter.code}
+                country={chapter.country}
+                city={chapter.city}
+                description={chapter.description || "Join this chapter to connect with women in film and television in this region."}
+                memberCount={chapter.fixedMemberCount || 0}
+                president={chapter.presidentName}
+                admin={chapter.adminName}
+                actionLink={`/chapters/${chapter.id}`}
+                actionLabel="View Chapter"
+              />
             ))}
           </div>
         )}

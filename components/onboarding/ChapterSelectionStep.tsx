@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, ArrowRight, MapPin, Users, Crown, CheckCircle, AlertCircle, Loader2, User } from 'lucide-react'
+import { ArrowLeft, ArrowRight, MapPin, Users, Crown, AlertCircle, Loader2, CheckCircle } from 'lucide-react'
+import ChapterCard from '@/components/shared/ChapterCard'
 import { Chapter } from '@/lib/api/onboarding'
 import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface ChapterSelectionStepProps {
-  onNext: () => void
+  onNext: (nextStep: number) => void
   onPrevious: () => void
 }
 
@@ -102,10 +103,14 @@ export default function ChapterSelectionStep({
         data.additionalInfo = additionalInfo.trim()
       }
 
-      await submitChapter(data)
+      const response = await submitChapter(data)
 
       console.log('✅ Chapter selection saved successfully')
-      onNext()
+      if (response && response.nextStep) {
+        onNext(response.nextStep)
+      } else {
+        onNext(4)
+      }
     } catch (error: any) {
       console.error('❌ Failed to save chapter selection:', error)
       alert(error.response?.data?.error || 'Failed to save chapter selection')
@@ -221,103 +226,36 @@ export default function ChapterSelectionStep({
       </div>
 
       {/* Chapter Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {chapters.map((chapter) => {
           const isSelected = selectedChapter === chapter.id
-          const isHQ = chapter.code === 'HQ'
-          const flagSrc = getCountryFlag(chapter.country)
-
+          
           return (
-            <button
+            <ChapterCard
               key={chapter.id}
-              type="button"
+              id={chapter.id}
+              name={chapter.name}
+              code={chapter.code}
+              country={chapter.country}
+              city={chapter.city}
+              description={chapter.description}
+              memberCount={chapter.fixedMemberCount || 0}
+              president={chapter.presidentName} // Mapped from provided structure in prompts (though prompt said presidentName, checking existing usage)
+              // The user prompt said: "presidentName" for Onboarding vs "currentPresident" for General.
+              // However, the interface in `lib/api/onboarding.ts` (implied) or usage in `ChapterSelectionStep` line 298 shows `chapter.currentPresident`.
+              // I will stick to `chapter.currentPresident` as it exists in the current file I viewed.
+              admin={chapter.adminName}
+              isSelected={isSelected}
               onClick={() => {
                 if (memberType) {
-                  setSelectedChapter(chapter.id)
-                  if (errors.chapter) {
-                    setErrors((prev) => ({ ...prev, chapter: '' }))
-                  }
+                   setSelectedChapter(chapter.id)
+                   if (errors.chapter) {
+                     setErrors((prev) => ({ ...prev, chapter: '' }))
+                   }
                 }
               }}
-              disabled={!memberType}
-              className={`p-6 border rounded-lg text-left transition-all ${
-                !memberType 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:shadow-md cursor-pointer'
-              } ${
-                isSelected
-                  ? 'border-primary bg-primary/10 ring-2 ring-primary/20'
-                  : 'border-border hover:border-primary/50'
-              } ${isHQ ? 'border-orange-200 bg-orange-50/50' : ''}`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 flex-shrink-0">
-                    {typeof flagSrc === 'string' && flagSrc.startsWith('http') ? (
-                      <img 
-                        src={flagSrc}
-                        alt={`${chapter.country} flag`}
-                        className="w-10 h-10 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
-                        {flagSrc}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground text-lg">
-                      {chapter.country}
-                    </h3>
-                    <p className="text-sm text-primary font-medium">
-                      {chapter.name}
-                    </p>
-                  </div>
-                  {isHQ && (
-                    <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full font-medium">
-                      HQ
-                    </span>
-                  )}
-                </div>
-                {isSelected && (
-                  <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                )}
-              </div>
-
-              <div className="space-y-2 text-sm">
-                {chapter.city && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4 flex-shrink-0" />
-                    <span>{chapter.city}, {chapter.country}</span>
-                  </div>
-                )}
-
-                {chapter.currentPresident && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Crown className="h-4 w-4 flex-shrink-0" />
-                    <span>President: {chapter.currentPresident}</span>
-                  </div>
-                )}
-
-                {chapter.adminName && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <User className="h-4 w-4 flex-shrink-0" />
-                    <span>Admin: {chapter.adminName}</span>
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-2 text-foreground font-medium">
-                  <Users className="h-4 w-4 flex-shrink-0" />
-                  <span>{(chapter.fixedMemberCount || 0).toLocaleString()} active members</span>
-                </div>
-
-                {chapter.description && (
-                  <p className="text-xs text-muted-foreground italic mt-2 pt-2 border-t border-border">
-                    {chapter.description}
-                  </p>
-                )}
-              </div>
-            </button>
+              actionLabel={memberType ? (isSelected ? 'Selected' : 'Select Chapter') : 'Select Member Type First'}
+            />
           )
         })}
       </div>

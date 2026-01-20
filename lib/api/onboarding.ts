@@ -66,6 +66,7 @@ export interface Chapter {
   fixedMemberCount: number
   requiresApproval: boolean
   currentPresident?: string
+  presidentName?: string
   adminName?: string
 }
 

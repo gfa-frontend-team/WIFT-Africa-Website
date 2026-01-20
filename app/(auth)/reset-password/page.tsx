@@ -100,11 +100,14 @@ function ResetPasswordContent() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
-          {/* Logo */}
-          <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
-            <span className="text-xl font-bold text-foreground">WIFT Africa</span>
-          </Link>
+            {/* Header */}
+            <div className="text-center">
+              <Link href="/" className="inline-block mb-6">
+                <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+              </Link>
+              <h1 className="text-3xl font-bold text-foreground">Reset Password</h1>
+              <p className="mt-2 text-muted-foreground">Enter your new password below</p>
+            </div>
 
           {/* Success Card */}
           <div className="bg-card border border-border rounded-2xl p-8 text-center">

@@ -10,7 +10,7 @@ interface SpecializationsStepProps {
   onWriterSpecChange: (spec: string) => void
   onCrewSpecsChange: (specs: string[]) => void
   onBusinessSpecsChange: (specs: string[]) => void
-  onNext: () => void
+  onNext: (nextStep: number) => void
   onPrevious: () => void
 }
 
@@ -120,10 +120,20 @@ export default function SpecializationsStep({
         data.businessSpecializations = businessSpecializations
       }
 
-      await submitSpecializations(data)
+      const response = await submitSpecializations(data)
+// The hook 'submitSpecializations' returns the response directly in this codebase (unlike standard react-query which might return data), 
+// but let's double check. `submitSpecializationsMutation.mutateAsync` returns data.
+// In `useOnboarding.ts`: `mutationFn: (data) => onboardingApi.submitSpecializations(data)`.
+// `onboardingApi` returns response.
+// So yes, we get response.
 
       console.log('✅ Specializations saved successfully')
-      onNext()
+      
+      if (response && response.nextStep) {
+        onNext(response.nextStep)
+      } else {
+        onNext(3) // Fallback
+      }
     } catch (error: any) {
       console.error('❌ Failed to save specializations:', error)
       alert(error.response?.data?.error || 'Failed to save specializations')

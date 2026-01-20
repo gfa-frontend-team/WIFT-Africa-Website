@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Link as LinkIcon, Film, Globe, MapPin, Upload } 
 import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface ProfileSetupStepProps {
-  onNext: () => void
+  onNext: (nextStep: number) => void
   onPrevious: () => void
 }
 
@@ -27,9 +27,15 @@ export default function ProfileSetupStep({
   const validateAndSubmit = () => {
     const newErrors: { [key: string]: string } = {}
 
-    // Headline validation (optional but has max length)
-    if (headline && headline.length > 255) {
+    // Required fields validation
+    if (!headline.trim()) {
+      newErrors.headline = 'Professional headline is required'
+    } else if (headline.length > 255) {
       newErrors.headline = 'Headline must be 255 characters or less'
+    }
+
+    if (!location.trim()) {
+      newErrors.location = 'Location is required'
     }
 
     // Bio validation (optional but has max length)
@@ -37,7 +43,20 @@ export default function ProfileSetupStep({
       newErrors.bio = 'Bio must be 1000 characters or less'
     }
 
-    // URL validation (basic)
+    // Professional Links Validation (At least one required)
+    const hasProfessionalLink = [
+      linkedinUrl,
+      imdbUrl,
+      website,
+      instagramHandle,
+      twitterHandle
+    ].some(link => link.trim() !== '')
+
+    if (!hasProfessionalLink) {
+      newErrors.professionalLinks = 'Please provide at least one professional link or social media handle'
+    }
+
+    // URL validation
     const urlPattern = /^https?:\/\/.+/
     if (website && !urlPattern.test(website)) {
       newErrors.website = 'Please enter a valid URL starting with http:// or https://'
@@ -65,6 +84,8 @@ export default function ProfileSetupStep({
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
+      // Scroll to top to show errors if needed
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       return false
     }
 
@@ -77,6 +98,8 @@ export default function ProfileSetupStep({
     }
 
     try {
+      let response;
+
       // Use FormData if CV file is present, otherwise use JSON
       if (cvFile) {
         const formData = new FormData()
@@ -95,26 +118,32 @@ export default function ProfileSetupStep({
         // Add CV file
         formData.append('cv', cvFile)
 
-        await submitProfile(formData)
+        response = await submitProfile(formData)
       } else {
         // No CV file, use regular JSON
         const data: any = {
           availabilityStatus,
+          headline: headline.trim(), // Required
+          location: location.trim(), // Required
         }
 
-        if (headline.trim()) data.headline = headline.trim()
         if (bio.trim()) data.bio = bio.trim()
-        if (location.trim()) data.location = location.trim()
         if (website.trim()) data.website = website.trim()
         if (imdbUrl.trim()) data.imdbUrl = imdbUrl.trim()
         if (linkedinUrl.trim()) data.linkedinUrl = linkedinUrl.trim()
         if (instagramHandle.trim()) data.instagramHandle = instagramHandle.trim()
         if (twitterHandle.trim()) data.twitterHandle = twitterHandle.trim()
 
-        await submitProfile(data)
+        response = await submitProfile(data)
       }
 
-      onNext()
+      console.log('✅ Profile setup saved successfully')
+      
+      if (response && response.nextStep) {
+         onNext(response.nextStep)
+      } else {
+         onNext(5)
+      }
     } catch (error: any) {
       console.error('❌ Failed to save profile setup:', error)
       alert(error.response?.data?.error || 'Failed to save profile setup')
@@ -129,9 +158,21 @@ export default function ProfileSetupStep({
           Complete Your Professional Profile
         </h2>
         <p className="text-muted-foreground">
-          Tell us about yourself and your work (all fields are optional)
+          Tell us about yourself and your work
         </p>
       </div>
+
+      {/* Global Error Message */}
+      {errors.professionalLinks && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center text-red-800">
+            <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span className="text-sm font-medium">{errors.professionalLinks}</span>
+          </div>
+        </div>
+      )}
 
       {/* Professional Info */}
       <div className="space-y-4">
@@ -139,7 +180,7 @@ export default function ProfileSetupStep({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Professional Headline
+            Professional Headline <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -151,7 +192,9 @@ export default function ProfileSetupStep({
               }
             }}
             maxLength={255}
-            className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            className={`w-full p-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
+              errors.headline ? 'border-destructive' : 'border-border'
+            }`}
             placeholder="e.g., Award-winning Film Producer | Storyteller"
           />
           <div className="flex justify-between mt-1">
@@ -199,18 +242,28 @@ export default function ProfileSetupStep({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Location
+            Location <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+              onChange={(e) => {
+                  setLocation(e.target.value)
+                  if (errors.location) {
+                    setErrors((prev) => ({ ...prev, location: '' }))
+                  }
+              }}
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
+                errors.location ? 'border-destructive' : 'border-border'
+              }`}
               placeholder="e.g., Lagos, Nigeria"
             />
           </div>
+          {errors.location && (
+            <p className="mt-1 text-sm text-destructive">{errors.location}</p>
+          )}
         </div>
 
         <div>
@@ -231,9 +284,11 @@ export default function ProfileSetupStep({
 
       {/* Professional Links */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-foreground">Professional Links</h3>
+        <h3 className="font-semibold text-foreground">
+            Professional Links <span className="text-red-500">*</span>
+        </h3>
         <p className="text-sm text-muted-foreground">
-          Add your professional profiles to showcase your work
+          Provide at least one link to your professional profiles to showcase your work
         </p>
 
         <div>

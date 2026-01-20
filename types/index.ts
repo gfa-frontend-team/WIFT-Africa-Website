@@ -223,6 +223,7 @@ export interface Chapter {
   
   // Leadership & Contact (Optional)
   currentPresident?: string
+  presidentName?: string
   presidentEmail?: string
   presidentPhone?: string
   email?: string

@@ -7,7 +7,7 @@ interface RoleSelectionStepProps {
   primaryRole: string
   onRolesChange: (roles: string[]) => void
   onPrimaryRoleChange: (role: string) => void
-  onNext: () => void
+  onNext: (nextStep: number) => void
 }
 
 const ROLE_OPTIONS = [
@@ -106,13 +106,20 @@ export default function RoleSelectionStep({
     }
 
     try {
-      await submitRoles({
+      const response = await submitRoles({
         roles: selectedRoles,
         primaryRole: selectedRoles.length === 1 ? selectedRoles[0] : primaryRole,
       })
 
       console.log('✅ Roles saved successfully')
-      onNext()
+      
+      // Navigate to the next step returned by backend (handles skipping logic)
+      if (response && response.nextStep) {
+        onNext(response.nextStep)
+      } else {
+        // Fallback if no nextStep returned (shouldn't happen with current API)
+        onNext(2) 
+      }
     } catch (error: any) {
       console.error('❌ Failed to save roles:', error)
       const message = error.response?.data?.error || 'Failed to save roles'

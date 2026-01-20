@@ -40,7 +40,7 @@ export function useOnboarding() {
       return data.chapters
     },
     staleTime: 1000 * 60 * 60, // Chapters list rarely changes, cache for 1 hour
-    enabled: false // Lazy load, or enable when in Step 3
+    enabled: true // Always valid to have chapters available
   })
 
   // Helper to update progress cache optimisticly or after success

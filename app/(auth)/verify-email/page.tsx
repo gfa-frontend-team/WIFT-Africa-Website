@@ -152,14 +152,19 @@ function VerifyEmailContent() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-          <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
-          <span className="text-xl font-bold text-foreground">WIFT Africa</span>
-        </Link>
+        {/* Header */}
+        <div className="text-center">
+            <Link href="/" className="inline-block mb-6">
+            <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+            </Link>
+            <h1 className="text-3xl font-bold text-foreground">Verify your email</h1>
+            <p className="mt-2 text-muted-foreground">
+            We sent a verification link to your email address.
+            </p>
+        </div>
 
         {/* Verification Card */}
-        <div className="bg-card border border-border rounded-2xl p-8">
+        <div className="bg-card border border-border rounded-2xl p-8 mt-8">
           <div className="text-center">
             <div className={`w-16 h-16 ${error ? 'bg-destructive/10' : 'bg-primary/10'} rounded-full flex items-center justify-center mx-auto mb-6`}>
               {error ? (
