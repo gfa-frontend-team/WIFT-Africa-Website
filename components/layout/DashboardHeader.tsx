@@ -1,4 +1,5 @@
-'use client';
+
+import { useTranslation } from 'react-i18next';
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -28,6 +29,7 @@ import {
   Globe
 } from 'lucide-react';
 import { useNotifications } from '@/lib/hooks/useNotifications';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 import { useEffect } from 'react';
 
 interface DashboardHeaderProps {
@@ -35,16 +37,17 @@ interface DashboardHeaderProps {
 }
 
 const navigationItems = [
-  { name: 'Home', href: '/feed', icon: Home, requiredFeature: 'canViewFeed' as const },
-  { name: 'Messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
-  { name: 'Opportunities', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
-  { name: 'Resources', href: '/resources', icon: BookOpen, requiredFeature: 'canViewResources' as const },
-  { name: 'Chapters', href: '/chapters', icon: Globe, requiredFeature: 'canViewDirectory' as const },
-  { name: 'Directory', href: '/members', icon: Users, requiredFeature: 'canViewDirectory' as const },
-  { name: 'Events', href: '/events', icon: Calendar, requiredFeature: 'canViewEvents' as const },
+  { name: 'nav.home', href: '/feed', icon: Home, requiredFeature: 'canViewFeed' as const },
+  { name: 'nav.messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
+  { name: 'nav.opportunities', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
+  { name: 'nav.resources', href: '/resources', icon: BookOpen, requiredFeature: 'canViewResources' as const },
+  { name: 'nav.chapters', href: '/chapters', icon: Globe, requiredFeature: 'canViewDirectory' as const },
+  { name: 'nav.directory', href: '/members', icon: Users, requiredFeature: 'canViewDirectory' as const },
+  { name: 'nav.events', href: '/events', icon: Calendar, requiredFeature: 'canViewEvents' as const },
 ];
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const { logout } = useAuth();
@@ -84,13 +87,13 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const getVerificationStatusText = () => {
     switch (user.membershipStatus) {
       case MembershipStatus.PENDING:
-        return 'Verification Pending';
+        return t('dashboard.header.status.pending');
       case MembershipStatus.APPROVED:
-        return 'Verified Member';
+        return t('dashboard.header.status.verified');
       case MembershipStatus.REJECTED:
-        return 'Application Declined';
+        return t('dashboard.header.status.declined');
       case MembershipStatus.SUSPENDED:
-        return 'Membership Suspended';
+        return t('dashboard.header.status.suspended');
       default:
         return '';
     }
@@ -133,10 +136,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                           ? 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                           : 'text-muted-foreground/40 cursor-help'
                     }`}
-                    title={!hasAccess ? 'Complete membership verification to access this feature' : undefined}
+                    title={!hasAccess ? t('dashboard.header.verification_tooltip') : undefined}
                   >
                     <Icon className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${!hasAccess ? 'opacity-50' : ''}`} />
-                    <span className={!hasAccess ? 'opacity-50' : ''}>{item.name}</span>
+                    <span className={!hasAccess ? 'opacity-50' : ''}>{t(item.name)}</span>
                     {!hasAccess && <Lock className="h-3 w-3 ml-1 opacity-50" />}
                   </Link>
                 );
@@ -151,7 +154,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <input
                     type="text"
-                    placeholder="Search..."
+                    placeholder={t('dashboard.header.search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -185,6 +188,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                     <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
                   )}
                 </Link>
+              </div>
+
+              <div className="relative">
+                <LanguageSwitcher />
               </div>
 
               {/* User Menu - Hidden on Mobile (in bottom nav) */}
@@ -237,7 +244,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <UserIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span>My Profile</span>
+                          <span>{t('dashboard.header.menu.profile')}</span>
                         </Link>
                         <Link
                           href="/connections"
@@ -245,7 +252,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <UserPlus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span>Connections</span>
+                          <span>{t('dashboard.header.menu.connections')}</span>
                         </Link>
                         <Link
                           href="/settings"
@@ -253,7 +260,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <Settings className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span>Settings</span>
+                          <span>{t('dashboard.header.menu.settings')}</span>
                         </Link>
                       </div>
                       <div className="border-t border-border/50 p-2 bg-accent/10">
@@ -262,7 +269,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                           className="flex items-center space-x-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg w-full text-left transition-colors"
                         >
                           <LogOut className="h-4 w-4" />
-                          <span>Sign out</span>
+                          <span>{t('dashboard.header.menu.signout')}</span>
                         </button>
                       </div>
                     </div>

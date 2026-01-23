@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
 
@@ -12,6 +15,7 @@ export default function OnboardingLayout({
   totalSteps,
   children,
 }: OnboardingLayoutProps) {
+  const { t } = useTranslation()
   const progress = (currentStep / totalSteps) * 100
 
   return (
@@ -24,7 +28,7 @@ export default function OnboardingLayout({
               <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
             </Link>
             <div className="text-sm text-muted-foreground">
-              Step {currentStep} of {totalSteps}
+              {t('onboarding.common.step_count', { current: currentStep, total: totalSteps })}
             </div>
           </div>
         </div>
@@ -53,11 +57,11 @@ export default function OnboardingLayout({
                     )}
                   </div>
                   <div className="mt-2 text-xs text-center hidden sm:block">
-                    {step === 1 && 'Roles'}
-                    {step === 2 && 'Specialization'}
-                    {step === 3 && 'Chapter'}
-                    {step === 4 && 'Profile'}
-                    {step === 5 && 'Terms'}
+                    {step === 1 && t('onboarding.steps.roles')}
+                    {step === 2 && t('onboarding.steps.specialization')}
+                    {step === 3 && t('onboarding.steps.chapter')}
+                    {step === 4 && t('onboarding.steps.profile')}
+                    {step === 5 && t('onboarding.steps.terms')}
                   </div>
                 </div>
                 {step < totalSteps && (

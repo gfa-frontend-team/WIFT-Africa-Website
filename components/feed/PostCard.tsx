@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { useState } from 'react'
 import Link from 'next/link'
 import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Pin, Flag } from 'lucide-react'
@@ -26,6 +28,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, initialShowComments = false }: PostCardProps) {
+  const { t } = useTranslation()
   const [showComments, setShowComments] = useState(initialShowComments)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
@@ -47,11 +50,11 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
   const handleSave = async () => {
     try {
       const { saved } = await savePost(post.id)
-      const message = saved ? 'Post saved to your collection' : 'Post removed from saved'
+      const message = saved ? t('feed.post_card.saved_success') : t('feed.post_card.saved_removed')
       toast.success(message)
     } catch (error: any) {
       console.error('Failed to save post:', error)
-      toast.error(error.message || 'Failed to update saved status')
+      toast.error(error.message || t('feed.post_card.save_error'))
     }
   }
 
@@ -67,19 +70,19 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
+    if (diffMins < 1) return t('feed.post_card.time.just_now')
+    if (diffMins < 60) return t('feed.post_card.time.mins_ago', { count: diffMins })
+    if (diffHours < 24) return t('feed.post_card.time.hours_ago', { count: diffHours })
+    if (diffDays < 7) return t('feed.post_card.time.days_ago', { count: diffDays })
     return date.toLocaleDateString()
   }
 
   const getPrivacyLabel = (visibility: string) => {
     switch (visibility) {
       case 'CHAPTER_ONLY':
-        return '👥 Chapter'
+        return t('feed.post_card.privacy_chapter')
       case 'CONNECTIONS_ONLY':
-        return '🔒 Connections'
+        return t('feed.post_card.privacy_connections')
       default:
         return null
     }
@@ -110,7 +113,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
               </Link>
               {post.isAdminPost && (
                 <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                  Admin
+                  {t('feed.post_card.admin_badge')}
                 </span>
               )}
               {post.isPinned && (
@@ -145,7 +148,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
                 onClick={() => setIsReportModalOpen(true)}
               >
                 <Flag className="mr-2 h-4 w-4" />
-                Report Post
+                {t('feed.post_card.report_btn')}
               </DropdownMenuItem>
             )}
             {/* TODO: Add more options like delete/edit for own posts */}
@@ -208,7 +211,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
       {/* Interaction Stats */}
       <div className="px-4 py-2 flex items-center justify-between text-sm text-muted-foreground border-t border-border">
         <button className="hover:underline">
-          {post.likesCount > 0 && `${post.likesCount} ${post.likesCount === 1 ? 'like' : 'likes'}`}
+          {post.likesCount > 0 && t('feed.post_card.stats.likes_plural', { count: post.likesCount })}
         </button>
         <div className="flex items-center gap-3">
           {post.commentsCount > 0 && (
@@ -216,12 +219,12 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
               onClick={() => setShowComments(!showComments)}
               className="hover:underline"
             >
-              {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
+              {t('feed.post_card.stats.comments_plural', { count: post.commentsCount })}
             </button>
           )}
           {post.sharesCount > 0 && (
             <button className="hover:underline">
-              {post.sharesCount} {post.sharesCount === 1 ? 'share' : 'shares'}
+              {t('feed.post_card.stats.shares_plural', { count: post.sharesCount })}
             </button>
           )}
         </div>
@@ -244,7 +247,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
             }`}
           />
           <span className="text-sm font-medium hidden sm:inline">
-            {isLiked ? 'Liked' : 'Like'}
+            {isLiked ? t('feed.post_card.liked_btn') : t('feed.post_card.like_btn')}
           </span>
         </button>
 
@@ -257,7 +260,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           }`}
         >
           <MessageCircle className="h-5 w-5" />
-          <span className="text-sm font-medium hidden sm:inline">Comment</span>
+          <span className="text-sm font-medium hidden sm:inline">{t('feed.post_card.comment_btn')}</span>
         </button>
 
         <button
@@ -265,7 +268,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted-foreground hover:bg-accent transition-all duration-200 hover:scale-105 active:scale-95"
         >
           <Share2 className="h-5 w-5" />
-          <span className="text-sm font-medium hidden sm:inline">Share</span>
+          <span className="text-sm font-medium hidden sm:inline">{t('feed.post_card.share_btn')}</span>
         </button>
 
         <button

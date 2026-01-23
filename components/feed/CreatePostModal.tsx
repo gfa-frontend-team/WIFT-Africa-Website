@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { useState, useEffect } from 'react'
 import { X, Image as ImageIcon, Video, Globe, Users, Lock } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
@@ -16,7 +18,29 @@ interface CreatePostModalProps {
 }
 
 export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
+  const { t } = useTranslation()
   const { user } = useAuth()
+  
+  const visibilityOptions = [
+    { 
+      value: 'PUBLIC' as const, 
+      label: t('feed.create_post.visibility.public'), 
+      icon: Globe, 
+      description: t('feed.create_post.visibility.public_desc')
+    },
+    { 
+      value: 'CONNECTIONS_ONLY' as const, 
+      label: t('feed.create_post.visibility.connections'), 
+      icon: Users, 
+      description: t('feed.create_post.visibility.connections_desc') 
+    },
+    { 
+      value: 'CHAPTER_ONLY' as const, 
+      label: t('feed.create_post.visibility.chapter'), 
+      icon: Lock, 
+      description: t('feed.create_post.visibility.chapter_desc') 
+    },
+  ]
   const { draft, saveDraft, clearDraft } = usePostStore()
   const { createPost, isCreating } = usePostMutations()
   const [content, setContent] = useState(draft?.content || '')
@@ -65,12 +89,12 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
       const maxSize = type === 'image' ? 5 * 1024 * 1024 : 100 * 1024 * 1024 // 5MB for images, 100MB for videos
       
       if (!isValidType) {
-        alert(`Please select valid ${type} files.`)
+        alert(t('feed.create_post.error_invalid_type', { type }))
         return false
       }
       
       if (file.size > maxSize) {
-        alert(`${file.name} is too large. Max size is ${type === 'image' ? '5MB' : '100MB'}.`)
+        alert(t('feed.create_post.error_file_size', { file: file.name, size: type === 'image' ? '5MB' : '100MB' }))
         return false
       }
       
@@ -90,7 +114,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
     } else if (type === 'image') {
       // Allow multiple images but check total count
       if (mediaFiles.length + validFiles.length > 10) {
-        alert('You can only upload up to 10 images.')
+        alert(t('feed.create_post.error_max_images'))
         return
       }
 
@@ -153,7 +177,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
       onClose()
     } catch (error) {
       console.error('Failed to create post:', error)
-      alert('Failed to create post. Please try again.')
+      alert(t('feed.create_post.error_create'))
     } finally {
       setIsUploading(false)
     }
@@ -174,29 +198,10 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
     onClose()
   }
 
-  const visibilityOptions = [
-    { 
-      value: 'PUBLIC' as const, 
-      label: 'Public', 
-      icon: Globe, 
-      description: 'Anyone can see this post' 
-    },
-    { 
-      value: 'CONNECTIONS_ONLY' as const, 
-      label: 'Connections', 
-      icon: Users, 
-      description: 'Only your connections' 
-    },
-    { 
-      value: 'CHAPTER_ONLY' as const, 
-      label: 'Chapter', 
-      icon: Lock, 
-      description: 'Only your chapter members' 
-    },
-  ]
+
 
   const selectedVisibility = visibilityOptions.find((opt) => opt.value === visibility)
-
+  
   if (!isOpen || !user) return null
 
   const footerContent = (
@@ -205,7 +210,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
       <div className="flex items-center gap-2">
         <label className="flex items-center gap-2 px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors">
           <ImageIcon className="h-5 w-5 text-green-600" />
-          <span className="text-sm font-medium text-foreground">Photo</span>
+          <span className="text-sm font-medium text-foreground">{t('feed.create_post.photo_btn')}</span>
           <input
             type="file"
             accept="image/*"
@@ -218,7 +223,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
 
         <label className="flex items-center gap-2 px-4 py-2 hover:bg-accent rounded-lg cursor-pointer transition-colors">
           <Video className="h-5 w-5 text-red-600" />
-          <span className="text-sm font-medium text-foreground">Video</span>
+          <span className="text-sm font-medium text-foreground">{t('feed.create_post.video_btn')}</span>
           <input
             type="file"
             accept="video/*"
@@ -241,7 +246,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
           disabled={!content.trim() || isOverLimit || isCreating || isUploading}
           className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isCreating || isUploading ? 'Posting...' : 'Post'}
+          {isCreating || isUploading ? t('feed.create_post.posting_btn') : t('feed.create_post.post_btn')}
         </button>
       </div>
     </div>
@@ -252,7 +257,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
-        title="Create Post"
+        title={t('feed.create_post.modal_title')}
         contentClassName="max-w-2xl h-[600px]"
         footer={footerContent}
       >
@@ -306,7 +311,7 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={`What's on your mind, ${user.firstName}?`}
+            placeholder={t('feed.create_post.placeholder', { name: user.firstName })}
             className="w-full min-h-[150px] p-3 bg-transparent border-none focus:outline-none resize-none text-foreground placeholder:text-muted-foreground"
             autoFocus
           />
@@ -347,9 +352,9 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
         isOpen={showDiscardDialog}
         onClose={() => setShowDiscardDialog(false)}
         onConfirm={handleDiscard}
-        title="Discard Post?"
-        message="You have unsaved changes. Are you sure you want to discard them?"
-        confirmText="Discard"
+        title={t('feed.create_post.discard_title')}
+        message={t('feed.create_post.discard_msg')}
+        confirmText={t('feed.create_post.discard_btn')}
         variant="danger"
       />
     </>

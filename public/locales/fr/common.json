@@ -1,0 +1,375 @@
+{
+  "welcome": "Bienvenue",
+  "settings": "Paramètres",
+  "nav": {
+    "home": "Accueil",
+    "directory": "Annuaire",
+    "messages": "Messages",
+    "events": "Événements",
+    "chapters": "Chapitres",
+    "opportunities": "Opportunités",
+    "opportunities_short": "Oppts",
+    "resources": "Ressources",
+    "profile": "Profil"
+  },
+  "coming_soon": "Bientôt disponible",
+  "sidebar": {
+    "profile_views": "Vues du profil",
+    "connections": "Connexions",
+    "posts": "Publications",
+    "verified_member": "Membre vérifié",
+    "membership_pending": "Adhésion en attente",
+    "saved_items": "Éléments enregistrés",
+    "quick_links": "Liens rapides",
+    "my_profile": "Mon profil",
+    "settings": "Paramètres",
+    "my_applications": "Mes candidatures",
+    "my_events": "Mes événements",
+    "suggested_connections": "Connexions suggérées",
+    "latest_news": "Dernières actualités",
+    "upcoming_events": "Événements à venir",
+    "trending_topics": "Sujets tendance",
+    "latest_opportunities": "Dernières opportunités",
+    "recent_activity": "Activité récente",
+    "welcome_msg": "Bienvenue dans la communauté WIFT Africa !",
+    "first_post_msg": "Commencez par créer votre première publication pour vous connecter avec d'autres membres.",
+    "explore_msg": "Explorez les profils et développez votre réseau.",
+    "member_title": "Membre WIFT Africa",
+    "footer": {
+      "about": "À propos",
+      "help": "Aide",
+      "privacy": "Confidentialité",
+      "terms": "Conditions"
+    }
+  },
+  "onboarding": {
+    "common": {
+      "continue": "Continuer",
+      "back": "Retour",
+      "saving": "Enregistrement...",
+      "loading": "Chargement...",
+      "step_count": "Étape {{current}} sur {{total}}",
+      "required": "*"
+    },
+    "steps": {
+      "roles": "Rôles",
+      "specialization": "Spécialisation",
+      "chapter": "Chapitre",
+      "profile": "Profil",
+      "terms": "Conditions"
+    },
+    "roles": {
+      "title": "Quel est votre rôle dans l'industrie ?",
+      "subtitle": "Sélectionnez tout ce qui s'applique à votre travail professionnel",
+      "multihyphenate_title": "Professionnelle polyvalente",
+      "multihyphenate_msg": "Vous avez sélectionné plusieurs rôles ! Cela fait de vous une professionnelle polyvalente. Veuillez sélectionner votre rôle principal pour la priorisation de la recherche.",
+      "primary_role_label": "Rôle principal (pour la priorisation de la recherche)",
+      "select_primary_placeholder": "Sélectionnez le rôle principal...",
+      "error_required": "Veuillez sélectionner au moins un rôle",
+      "error_primary_required": "Veuillez sélectionner un rôle principal pour la priorisation de la recherche",
+      "options": {
+        "producer": "Productrice",
+        "producer_desc": "Développer, financer et superviser des projets de film/TV",
+        "director": "Réalisatrice",
+        "director_desc": "Diriger la vision créative et guider la production",
+        "writer": "Scénariste",
+        "writer_desc": "Créer des scripts pour la TV, le cinéma ou les deux",
+        "actress": "Actrice",
+        "actress_desc": "Jouer dans des films, des émissions de télévision et des productions",
+        "crew": "Équipe technique",
+        "crew_desc": "Rôles de soutien technique et créatif",
+        "business": "Affaires du divertissement",
+        "business_desc": "Juridique, finance, marketing et représentation"
+      }
+    },
+    "specialization": {
+      "title": "Dites-nous en plus sur votre spécialisation",
+      "subtitle": "Cela nous aide à vous connecter avec des opportunités pertinentes",
+      "writer_title": "Spécialisation en écriture",
+      "crew_title": "Spécialisations de l'équipe technique",
+      "crew_subtitle": "Sélectionnez tout ce qui s'applique - vous pouvez choisir plusieurs spécialisations",
+      "business_title": "Spécialisations en affaires",
+      "business_subtitle": "Sélectionnez tout ce qui s'applique - vous pouvez choisir plusieurs spécialisations",
+      "selected_count": "{{count}} spécialisation sélectionnée",
+      "selected_count_plural": "{{count}} spécialisations sélectionnées",
+      "error_writer": "Veuillez sélectionner votre spécialisation en écriture",
+      "error_crew": "Veuillez sélectionner au moins une spécialisation technique",
+      "error_business": "Veuillez sélectionner au moins une spécialisation en affaires"
+    },
+    "chapter": {
+      "title": "Choisissez votre chapitre WIFT",
+      "subtitle": "WIFT Africa est un réseau croissant de femmes qui façonnent l'avenir du cinéma, de la télévision et de la narration numérique à travers le continent. Connectez-vous à votre chapitre WIFT local ou rejoignez le siège WIFT Africa.",
+      "member_status_title": "Êtes-vous un membre actif d'un chapitre ?",
+      "btn_existing": "Je suis déjà membre inscrit",
+      "btn_new": "Je suis nouvelle ici",
+      "note_existing": "Je veux m'inscrire et me connecter avec mon chapitre",
+      "note_new": "Je veux créer mon profil et trouver un chapitre",
+      "note_new_warning": "Remarque : L'inscription est destinée aux membres actifs du chapitre. Les utilisateurs sans chapitre affilié peuvent connaître une période de vérification plus longue.",
+      "intro_text": "Choisissez le chapitre le plus proche de votre lieu de résidence ou de travail. S'il n'y en a pas encore, vous pouvez rejoindre notre réseau WIFT Africa HQ pendant que de nouveaux chapitres se forment.",
+      "no_chapter_title": "Pas encore de chapitre ?",
+      "no_chapter_msg": "Rejoignez WIFT Africa HQ pour vous connecter avec des membres de toutes les régions.",
+      "member_id_label": "Numéro de membre",
+      "member_id_placeholder": "Entrez votre numéro de membre",
+      "phone_label": "Numéro de téléphone (facultatif)",
+      "phone_placeholder": "+234 XXX XXX XXXX",
+      "additional_info_label": "Informations supplémentaires (facultatif)",
+      "additional_info_placeholder": "Toute information supplémentaire pour la vérification...",
+      "important_info_title": "Informations importantes :",
+      "verification_title": "Processus de vérification :",
+      "verification_text": "L'adhésion au chapitre nécessite une vérification par les administrateurs locaux. Vous recevrez une confirmation dans les 24-48 heures.",
+      "hq_title": "Inscription à WIFT Africa HQ :",
+      "hq_text": "L'inscription au siège social fournit un accès en attendant la validation. Envisagez de rejoindre un chapitre local pour un accès complet immédiat.",
+      "welcome_modal": {
+        "title": "Bienvenue à WIFT Africa !",
+        "subtitle": "Nous sommes ravis de vous compter parmi notre communauté grandissante.",
+        "p1": "En tant que nouveau membre, vous serez intégré via un processus géré par votre administrateur de chapitre. Toutes les adhésions nécessitent une vérification par votre équipe de chapitre locale.",
+        "p2": "Vous pouvez vous attendre à recevoir un message d'intégration de votre administrateur de chapitre dans les 48 heures, et votre adhésion sur la plateforme WIFT Africa sera confirmée dans les 24 heures suivant la vérification.",
+        "p3": "Nous avons hâte de vous accueillir dans le réseau !",
+        "btn": "Continuer"
+      }
+    },
+    "profile": {
+      "title": "Complétez votre profil professionnel",
+      "subtitle": "Parlez-nous de vous et de votre travail",
+      "professional_info_title": "Informations professionnelles",
+      "headline_label": "Titre professionnel",
+      "headline_placeholder": "ex : Productrice de films primée | Storyteller",
+      "headline_hint": "Une brève phrase d'accroche professionnelle",
+      "bio_label": "Bio",
+      "bio_placeholder": "Parlez-nous de votre expérience, de vos réalisations et de ce qui vous passionne...",
+      "bio_hint": "Partagez votre histoire et votre parcours professionnel",
+      "location_label": "Lieu",
+      "location_placeholder": "ex : Lagos, Nigeria",
+      "availability_label": "Statut de disponibilité",
+      "availability_options": {
+        "available": "Disponible pour des opportunités",
+        "busy": "Actuellement occupée",
+        "not_looking": "Ne cherche pas"
+      },
+      "social_title": "Liens professionnels",
+      "social_subtitle": "Fournissez au moins un lien vers vos profils professionnels pour présenter votre travail",
+      "linkedin_label": "Profil LinkedIn",
+      "imdb_label": "Profil IMDb",
+      "website_label": "Site web / Portfolio",
+      "social_media_title": "Réseaux sociaux",
+      "instagram_label": "Identifiant Instagram",
+      "twitter_label": "Identifiant Twitter",
+      "cv_title": "CV / Résumé (facultatif)",
+      "cv_subtitle": "Téléchargez votre CV pour présenter votre expérience et vos qualifications",
+      "cv_label": "Télécharger CV / Résumé",
+      "cv_hint": "Formats acceptés : PDF, DOC, DOCX (Max 10 Mo)",
+      "note_update": "Remarque : Vous pourrez toujours mettre à jour vos informations de profil et votre CV plus tard dans les paramètres de votre compte.",
+      "errors": {
+        "headline_required": "Le titre professionnel est requis",
+        "location_required": "Le lieu est requis",
+        "links_required": "Veuillez fournir au moins un lien professionnel ou un identifiant de réseau social",
+        "invalid_url": "Veuillez entrer une URL valide commençant par http:// ou https://"
+      }
+    },
+    "terms": {
+      "title": "Conditions, règles et directives",
+      "subtitle": "Veuillez examiner et accepter nos directives communautaires",
+      "sections": {
+        "verification": "Processus de vérification",
+        "jobs": "Directives de publication d'opportunités",
+        "community": "Normes communautaires",
+        "timeline": "Que se passe-t-il ensuite"
+      },
+      "checkbox_label": "J'ai lu et j'accepte les conditions d'utilisation, la politique de confidentialité et les directives communautaires. Je comprends le processus de vérification et le délai d'approbation des publications d'opportunités.",
+      "final_note": "Presque terminé ! Une fois que vous aurez accepté les conditions, votre profil sera soumis pour examen. Vous pourrez accéder à la plateforme avec des fonctionnalités limitées pendant que votre adhésion est vérifiée.",
+      "complete_btn": "Terminer l'inscription",
+      "completing_btn": "Finalisation..."
+    }
+  },
+  "feed": {
+    "create_post": {
+      "trigger_placeholder": "À quoi pensez-vous, {{name}} ?",
+      "modal_title": "Créer une publication",
+      "placeholder": "À quoi pensez-vous, {{name}} ?",
+      "photo_btn": "Photo",
+      "video_btn": "Vidéo",
+      "post_btn": "Publier",
+      "posting_btn": "Publication...",
+      "discard_title": "Annuler la publication ?",
+      "discard_msg": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir les annuler ?",
+      "discard_btn": "Annuler",
+      "error_create": "Échec de la création de la publication. Veuillez réessayer.",
+      "error_invalid_type": "Veuillez sélectionner des fichiers {{type}} valides.",
+      "error_file_size": "{{file}} est trop volumineux. La taille maximale est de {{size}}.",
+      "error_max_images": "Vous ne pouvez télécharger que jusqu'à 10 images.",
+      "visibility": {
+        "public": "Public",
+        "public_desc": "Tout le monde peut voir cette publication",
+        "connections": "Connexions",
+        "connections_desc": "Seulement vos connexions",
+        "chapter": "Chapitre",
+        "chapter_desc": "Seulement les membres de votre chapitre"
+      }
+    },
+    "post_card": {
+      "admin_badge": "Admin",
+      "like_btn": "J'aime",
+      "liked_btn": "Aimé",
+      "comment_btn": "Commenter",
+      "share_btn": "Partager",
+      "report_btn": "Signaler la publication",
+      "saved_success": "Publication enregistrée dans votre collection",
+      "saved_removed": "Publication retirée des éléments enregistrés",
+      "save_error": "Échec de la mise à jour du statut d'enregistrement",
+      "privacy_chapter": "👥 Chapitre",
+      "privacy_connections": "🔒 Connexions",
+      "time": {
+        "just_now": "À l'instant",
+        "mins_ago": "il y a {{count}} min",
+        "hours_ago": "il y a {{count}} h",
+        "days_ago": "il y a {{count}} j"
+      },
+      "stats": {
+        "likes": "{{count}} j'aime",
+        "likes_plural": "{{count}} j'aime",
+        "comments": "{{count}} commentaire",
+        "comments_plural": "{{count}} commentaires",
+        "shares": "{{count}} partage",
+        "shares_plural": "{{count}} partages"
+      }
+    },
+    "filters": {
+      "all": "Tout",
+      "posts": "Publications",
+      "announcements": "Annonces"
+    }
+  },
+  "profile": {
+    "header": {
+      "edit_profile": "Modifier le profil",
+      "message": "Message",
+      "pending": "Demande en attente",
+      "accept": "Accepter la demande",
+      "decline": "Refuser",
+      "connect": "Se connecter",
+      "connecting": "Connexion...",
+      "update_cover": "Mettre à jour la photo de couverture",
+      "update_photo": "Mettre à jour la photo de profil",
+      "member": "Membre",
+      "upload_error_type": "Type de fichier invalide",
+      "upload_error_type_desc": "Veuillez télécharger une image JPG, PNG ou WebP.",
+      "upload_error_size": "Fichier trop volumineux",
+      "upload_error_size_desc": "L'image doit être inférieure à 5 Mo.",
+      "upload_success": "Succès",
+      "upload_success_desc": "Photo de couverture mise à jour avec succès.",
+      "upload_error": "Erreur",
+      "upload_error_desc": "Échec du téléchargement de la photo de couverture. Veuillez réessayer."
+    },
+    "about": {
+      "title": "À propos",
+      "edit_title": "Modifier la bio",
+      "placeholder_owner": "Ajoutez une bio pour parler de vous aux autres...",
+      "placeholder_visitor": "Aucune bio disponible."
+    },
+    "experience": {
+      "title": "Expérience",
+      "add_btn": "Ajouter une expérience",
+      "edit_title": "Modifier l'expérience",
+      "add_title": "Ajouter une expérience",
+      "edit_desc": "Mettez à jour les détails de votre parcours professionnel.",
+      "add_desc": "Ajoutez votre historique professionnel.",
+      "role_label": "Intitulé du poste",
+      "role_placeholder": "ex : Réalisatrice",
+      "org_label": "Entreprise / Organisation",
+      "org_placeholder": "ex : Indépendant",
+      "type_label": "Type d'emploi",
+      "types": {
+        "full_time": "Temps plein",
+        "part_time": "Temps partiel",
+        "contract": "Contrat",
+        "freelance": "Freelance",
+        "internship": "Stage"
+      },
+      "start_date": "Date de début",
+      "end_date": "Date de fin",
+      "current_work": "Je travaille actuellement ici",
+      "desc_label": "Description (facultatif)",
+      "desc_placeholder": "Décrivez votre rôle et vos réalisations...",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "empty": "Aucune expérience ajoutée pour le moment.",
+      "present": "Aujourd'hui",
+      "default_role": "Rôle",
+      "error_missing": "Champs manquants",
+      "error_missing_desc": "Veuillez remplir tous les champs obligatoires.",
+      "success_update": "Expérience mise à jour",
+      "success_add": "Expérience ajoutée",
+      "success_delete": "Expérience supprimée",
+      "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette expérience ?"
+    },
+    "portfolio": {
+      "title": "Portfolio",
+      "add_btn": "Ajouter un travail",
+      "edit_title": "Modifier le travail",
+      "add_title": "Ajouter au portfolio",
+      "edit_desc": "Mettre à jour les détails du projet.",
+      "add_desc": "Présentez vos meilleurs travaux.",
+      "project_title": "Titre du projet",
+      "project_placeholder": "ex : L'histoire inédite",
+      "year": "Année",
+      "role_label": "Mon rôle",
+      "role_placeholder": "ex : Réalisatrice",
+      "media_type": "Type de média",
+      "types": {
+        "video": "Lien vidéo",
+        "image": "Lien image",
+        "external": "Lien externe"
+      },
+      "visibility": "Visibilité",
+      "vis_options": {
+        "public": "Public",
+        "connections": "Connexions uniquement"
+      },
+      "media_url": "URL du média",
+      "desc_label": "Description (facultatif)",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "empty": "Aucun élément de portfolio pour le moment.",
+      "connections_badge": "Connexions",
+      "confirm_delete": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+      "success_delete": "Élément supprimé",
+      "error_missing": "Champs manquants",
+      "error_missing_desc": "Veuillez remplir tous les champs obligatoires.",
+      "success_update": "Élément de portfolio mis à jour",
+      "success_add": "Travail ajouté au portfolio",
+      "error_save": "Échec de l'enregistrement du travail.",
+      "error_delete": "Échec de la suppression de l'élément."
+    },
+    "contact": {
+      "title": "Contact",
+      "linkedin": "LinkedIn",
+      "imdb": "IMDb"
+    },
+    "specializations": {
+      "title": "Spécialisations",
+      "writer": "Scénariste",
+      "crew": "Équipe technique",
+      "business": "Affaires"
+    }
+  },
+  "dashboard": {
+    "header": {
+      "search_placeholder": "Rechercher...",
+      "verification_tooltip": "Complétez la vérification de l'adhésion pour accéder à cette fonctionnalité",
+      "status": {
+        "pending": "Vérification en attente",
+        "verified": "Membre vérifié",
+        "declined": "Candidature refusée",
+        "suspended": "Adhésion suspendue"
+      },
+      "menu": {
+        "profile": "Mon profil",
+        "connections": "Connexions",
+        "settings": "Paramètres",
+        "signout": "Se déconnecter"
+      }
+    }
+  }
+}

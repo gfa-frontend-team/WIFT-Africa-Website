@@ -1,5 +1,7 @@
 import { Mail, Globe, Link as LinkIcon, Edit3 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Profile } from '@/types'
+
 
 interface ContactSectionProps {
   userEmail: string
@@ -9,12 +11,13 @@ interface ContactSectionProps {
 }
 
 export default function ContactSection({ userEmail, profile, isOwner, onEdit }: ContactSectionProps) {
+  const { t } = useTranslation()
   const hasLinks = profile.website || profile.linkedinUrl || profile.instagramHandle || profile.twitterHandle || profile.imdbUrl
 
   return (
     <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Contact</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t('profile.contact.title')}</h2>
         {isOwner && (
           <button 
             onClick={onEdit}
@@ -48,13 +51,13 @@ export default function ContactSection({ userEmail, profile, isOwner, onEdit }: 
              {profile.linkedinUrl && (
                <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors">
                   <LinkIcon className="h-4 w-4" />
-                  <span>LinkedIn</span>
+                  <span>{t('profile.contact.linkedin')}</span>
                </a>
              )}
              {profile.imdbUrl && (
                <a href={profile.imdbUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors">
                   <LinkIcon className="h-4 w-4" />
-                  <span>IMDb</span>
+                  <span>{t('profile.contact.imdb')}</span>
                </a>
              )}
           </div>

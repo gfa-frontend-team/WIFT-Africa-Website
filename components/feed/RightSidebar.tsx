@@ -4,16 +4,19 @@ import Link from 'next/link'
 import { TrendingUp, Calendar, Briefcase, UserPlus, Newspaper, Clock } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 
+import { useTranslation } from 'react-i18next'
+
 export default function RightSidebar() {
+  const { t } = useTranslation()
   return (
     <aside className="space-y-4">
       {/* Coming Soon - Suggested Connections */}
       <div className="bg-card border border-border rounded-lg p-4 opacity-75">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-foreground text-sm">
-            Suggested Connections
+            {t('sidebar.suggested_connections')}
           </h3>
-          <span className="text-xs text-muted-foreground">Coming Soon</span>
+          <span className="text-xs text-muted-foreground">{t('coming_soon')}</span>
         </div>
 
         <div className="space-y-3">
@@ -36,10 +39,10 @@ export default function RightSidebar() {
           <div className="flex items-center gap-2">
             <Newspaper className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-semibold text-foreground text-sm">
-              Latest News
+              {t('sidebar.latest_news')}
             </h3>
           </div>
-          <span className="text-xs text-muted-foreground">Coming Soon</span>
+          <span className="text-xs text-muted-foreground">{t('coming_soon')}</span>
         </div>
 
         <div className="space-y-3">
@@ -59,10 +62,10 @@ export default function RightSidebar() {
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-semibold text-foreground text-sm">
-              Upcoming Events
+              {t('sidebar.upcoming_events')}
             </h3>
           </div>
-          <span className="text-xs text-muted-foreground">Coming Soon</span>
+          <span className="text-xs text-muted-foreground">{t('coming_soon')}</span>
         </div>
 
         <div className="space-y-3">
@@ -84,9 +87,9 @@ export default function RightSidebar() {
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
           <h3 className="font-semibold text-foreground text-sm">
-            Trending Topics
+            {t('sidebar.trending_topics')}
           </h3>
-          <span className="text-xs text-muted-foreground ml-auto">Coming Soon</span>
+          <span className="text-xs text-muted-foreground ml-auto">{t('coming_soon')}</span>
         </div>
 
         <div className="space-y-2">
@@ -116,10 +119,10 @@ export default function RightSidebar() {
           <div className="flex items-center gap-2">
             <Briefcase className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-semibold text-foreground text-sm">
-              Latest Opportunities
+              {t('sidebar.latest_opportunities')}
             </h3>
           </div>
-          <span className="text-xs text-muted-foreground">Coming Soon</span>
+          <span className="text-xs text-muted-foreground">{t('coming_soon')}</span>
         </div>
 
         <div className="space-y-3">
@@ -141,27 +144,27 @@ export default function RightSidebar() {
         <div className="flex items-center gap-2 mb-4">
           <Clock className="h-4 w-4 text-muted-foreground" />
           <h3 className="font-semibold text-foreground text-sm">
-            Recent Activity
+            {t('sidebar.recent_activity')}
           </h3>
         </div>
 
         <div className="space-y-2 text-sm text-muted-foreground">
-          <p>Welcome to the WIFT Africa community!</p>
-          <p>Start by creating your first post to connect with other members.</p>
-          <p>Explore profiles and build your network.</p>
+          <p>{t('sidebar.welcome_msg')}</p>
+          <p>{t('sidebar.first_post_msg')}</p>
+          <p>{t('sidebar.explore_msg')}</p>
         </div>
       </div>
 
       {/* Footer Links */}
       <div className="bg-card border border-border rounded-lg p-4">
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <a href="/about" className="hover:text-primary">About</a>
+          <a href="/about" className="hover:text-primary">{t('sidebar.footer.about')}</a>
           <span>•</span>
-          <a href="/help" className="hover:text-primary">Help</a>
+          <a href="/help" className="hover:text-primary">{t('sidebar.footer.help')}</a>
           <span>•</span>
-          <a href="/privacy" className="hover:text-primary">Privacy</a>
+          <a href="/privacy" className="hover:text-primary">{t('sidebar.footer.privacy')}</a>
           <span>•</span>
-          <a href="/terms" className="hover:text-primary">Terms</a>
+          <a href="/terms" className="hover:text-primary">{t('sidebar.footer.terms')}</a>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
           © 2025 WIFT Africa

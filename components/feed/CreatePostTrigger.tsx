@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Avatar from '@/components/ui/Avatar'
 
@@ -8,6 +9,7 @@ interface CreatePostTriggerProps {
 }
 
 export const CreatePostTrigger = ({ onOpenModal }: CreatePostTriggerProps) => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   
   if (!user) return null
@@ -24,7 +26,7 @@ export const CreatePostTrigger = ({ onOpenModal }: CreatePostTriggerProps) => {
           onClick={onOpenModal}
           className="flex-1 text-left px-4 py-3 bg-muted hover:bg-muted/80 rounded-full text-muted-foreground transition-colors"
         >
-          What&apos;s on your mind, {user.firstName}?
+          {t('feed.create_post.trigger_placeholder', { name: user.firstName })}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { Camera, MapPin, Users, CheckCircle, Edit3, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { usersApi } from '@/lib/api/users'
 // import { User, Profile } from '@/types' // usage replaced by local interfaces
 import BadgeDisplay from './BadgeDisplay'
@@ -58,6 +59,7 @@ export default function ProfileHeader({
   onMessage,
   onEdit
 }: ProfileHeaderProps) {
+  const { t } = useTranslation()
   const [user, setUser] = useState(initialUser)
   const [profile, setProfile] = useState(initialProfile)
   const [isUploadingBanner, setIsUploadingBanner] = useState(false)
@@ -71,7 +73,7 @@ export default function ProfileHeader({
   
   // Helper for roles
   const roles = profile.roles || []
-  const primaryRole = profile.primaryRole || roles[0] || 'Member'
+  const primaryRole = profile.primaryRole || roles[0] || t('profile.header.member')
 
   const handleBannerClick = () => {
     bannerInputRef.current?.click()
@@ -84,15 +86,15 @@ export default function ProfileHeader({
     // Validation
     const validTypes = ['image/jpeg', 'image/png', 'image/webp']
     if (!validTypes.includes(file.type)) {
-      toast.error("Invalid file type", {
-        description: "Please upload a JPG, PNG, or WebP image."
+      toast.error(t('profile.header.upload_error_type'), {
+        description: t('profile.header.upload_error_type_desc')
       })
       return
     }
 
     if (file.size > 5 * 1024 * 1024) { // 5MB
-      toast.error("File too large", {
-        description: "Image must be less than 5MB."
+      toast.error(t('profile.header.upload_error_size'), {
+        description: t('profile.header.upload_error_size_desc')
       })
       return
     }
@@ -105,13 +107,13 @@ export default function ProfileHeader({
       // Also update user state just in case of fallback usage
       setUser(prev => ({ ...prev, bannerUrl: response.photoUrl }))
       
-      toast.success("Success", {
-        description: "Cover photo updated successfully."
+      toast.success(t('profile.header.upload_success'), {
+        description: t('profile.header.upload_success_desc')
       })
     } catch (error) {
       console.error('Failed to upload banner:', error)
-      toast.error("Error", {
-        description: "Failed to upload cover photo. Please try again."
+      toast.error(t('profile.header.upload_error'), {
+        description: t('profile.header.upload_error_desc')
       })
     } finally {
       setIsUploadingBanner(false)
@@ -151,7 +153,7 @@ export default function ProfileHeader({
             onClick={handleBannerClick}
             disabled={isUploadingBanner}
             className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full transition-colors backdrop-blur-sm shadow-sm md:opacity-0 md:group-hover:opacity-100"
-            title="Update Cover Photo"
+            title={t('profile.header.update_cover')}
           >
             {isUploadingBanner ? (
               <Loader2 className="h-5 w-5 text-primary animate-spin" />
@@ -186,7 +188,7 @@ export default function ProfileHeader({
                 <button 
                   onClick={onEdit} // In real app, might trigger photo upload modal directly
                   className="absolute bottom-2 right-2 p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors shadow-md"
-                  title="Update Profile Photo"
+                  title={t('profile.header.update_photo')}
                 >
                   <Camera className="h-4 w-4" />
                 </button>
@@ -230,7 +232,7 @@ export default function ProfileHeader({
                       className="flex items-center gap-2 px-4 py-2 bg-background border border-border rounded-lg hover:bg-accent transition-colors font-medium text-sm"
                     >
                       <Edit3 className="h-4 w-4" />
-                      <span>Edit Profile</span>
+                      <span>{t('profile.header.edit_profile')}</span>
                     </button>
                   ) : (
                     <>
@@ -239,14 +241,14 @@ export default function ProfileHeader({
                           onClick={onMessage}
                           className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
                         >
-                          Message
+                          {t('profile.header.message')}
                         </button>
                       ) : connectionStatus === 'PENDING' ? (
                         <button 
                           disabled
                           className="px-4 py-2 bg-muted text-muted-foreground rounded-lg font-medium text-sm cursor-not-allowed"
                         >
-                          Request Pending
+                          {t('profile.header.pending')}
                         </button>
                       ) : connectionStatus === 'INCOMING' ? (
                         <div className="flex items-center gap-2">
@@ -255,14 +257,14 @@ export default function ProfileHeader({
                             disabled={isConnecting}
                             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
                           >
-                            Accept Request
+                            {t('profile.header.accept')}
                           </button>
                           <button 
                             onClick={() => onDecline?.()}
                             disabled={isConnecting}
                             className="px-4 py-2 bg-background border border-border text-foreground rounded-lg hover:bg-accent transition-colors font-medium text-sm"
                           >
-                            Decline
+                            {t('profile.header.decline')}
                           </button>
                         </div>
                       ) : (
@@ -274,10 +276,10 @@ export default function ProfileHeader({
                           {isConnecting ? (
                             <>
                               <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                              <span>Connecting...</span>
+                              <span>{t('profile.header.connecting')}</span>
                             </>
                           ) : (
-                            <span>Connect</span>
+                            <span>{t('profile.header.connect')}</span>
                           )}
                         </button>
                       )}

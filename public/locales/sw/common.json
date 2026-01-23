@@ -1,0 +1,13 @@
+{
+  "welcome": "Karibu",
+  "settings": "Mipangilio",
+  "nav": {
+    "home": "Nyumbani",
+    "messages": "Jumbe",
+    "opportunities": "Fursa",
+    "resources": "Nyenzo",
+    "chapters": "Matawi",
+    "directory": "Orodha",
+    "events": "Matukio"
+  }
+}

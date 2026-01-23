@@ -1,14 +1,17 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 import { useFeedStore } from '@/lib/stores/feedStore'
 
 export const FeedFilters = () => {
+  const { t } = useTranslation()
   const { filters, setFilters } = useFeedStore()
   
   const filterOptions = [
-    { value: 'all' as const, label: 'All' },
-    { value: 'posts' as const, label: 'Posts' },
-    { value: 'admin' as const, label: 'Announcements' },
+    { value: 'all' as const, labelKey: 'feed.filters.all' },
+    { value: 'posts' as const, labelKey: 'feed.filters.posts' },
+    { value: 'admin' as const, labelKey: 'feed.filters.announcements' },
   ]
 
   return (
@@ -24,7 +27,7 @@ export const FeedFilters = () => {
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
           >
-            {option.label}
+            {t(option.labelKey)}
           </button>
         ))}
       </div>
