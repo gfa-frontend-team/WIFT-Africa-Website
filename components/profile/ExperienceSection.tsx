@@ -29,9 +29,10 @@ import {
 
 interface ExperienceSectionProps {
   isOwner?: boolean
+  userId?: string
 }
 
-export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
+export default function ExperienceSection({ isOwner, userId }: ExperienceSectionProps) {
   const { t } = useTranslation()
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -53,7 +54,7 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
 
   useEffect(() => {
     fetchExperience()
-  }, [])
+  }, [userId])
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
 
   const fetchExperience = async () => {
     try {
-      const response = await profilesApi.getExperience()
+      const response = await profilesApi.getExperience(userId)
       // Backend returns { message: string, data: Experience[] }
       // or sometimes just the array depending on the endpoint wrapper
       let data: any = response

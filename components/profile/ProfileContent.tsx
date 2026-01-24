@@ -110,7 +110,7 @@ export default function ProfileContent({
         onDecline={onDecline}
         isConnecting={isConnecting}
         onMessage={onMessage}
-        onEdit={() => {}} // Handle edit in parent/header
+        onEdit={handleEdit}
       />
 
       {isOwnProfile && isAuthenticated && (
@@ -136,9 +136,9 @@ export default function ProfileContent({
             onEdit={handleEdit}
           />
           
-          <ExperienceSection isOwner={isOwnProfile} />
+          <ExperienceSection isOwner={isOwnProfile} userId={userObj.id} />
           
-          <PortfolioSection isOwner={isOwnProfile} />
+          <PortfolioSection isOwner={isOwnProfile} userId={userObj.id} />
         </div>
 
         {/* Sidebar (Right) */}

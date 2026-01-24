@@ -44,6 +44,10 @@ export function useAuth() {
     isSuperAdmin,
     isAdmin,
     
+    // Status
+    membershipStatus: currentUser?.membershipStatus,
+    isSuspended: currentUser?.membershipStatus === 'SUSPENDED',
+    
     // Actions - wrapping mutations to match original interface promise return
     login: (email: string, password: string) => loginMutation.mutateAsync({ email, password }),
     register: (data: { email: string; password: string; firstName: string; lastName: string }) => registerMutation.mutateAsync(data),

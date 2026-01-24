@@ -18,7 +18,7 @@ export const portfolioApi = {
    * List user portfolio
    */
   getPortfolio: async (userId: string): Promise<{ items: PortfolioItem[], count: number }> => {
-    return await apiClient.get<{ items: PortfolioItem[], count: number }>(`/portfolios/${userId}`)
+    return await apiClient.get<{ items: PortfolioItem[], count: number }>(`/portfolios/user/${userId}`)
   },
 
   /**
@@ -40,5 +40,20 @@ export const portfolioApi = {
    */
   deletePortfolioItem: async (id: string): Promise<{ message: string }> => {
     return await apiClient.delete<{ message: string }>(`/portfolios/${id}`)
+  },
+
+  /**
+   * Upload media file for portfolio
+   */
+  uploadMedia: async (file: File): Promise<{ url: string }> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    // Assumed endpoint based on plan. If backend uses different structure, this needs update.
+    return await apiClient.post<{ url: string }>('/portfolios/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
   }
 }

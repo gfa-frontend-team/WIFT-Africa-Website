@@ -124,12 +124,56 @@ export default function ProfileHeader({
     }
   }
 
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  const photoInputRef = useRef<HTMLInputElement>(null)
+
+  const handlePhotoClick = () => {
+    photoInputRef.current?.click()
+  }
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validation
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      toast.error(t('profile.header.upload_error_type'))
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      toast.error(t('profile.header.upload_error_size'))
+      return
+    }
+
+    setIsUploadingPhoto(true)
+    try {
+      const response = await usersApi.uploadProfilePhoto(file)
+      setUser(prev => ({ ...prev, profilePhoto: response.photoUrl }))
+      toast.success(t('profile.header.upload_success'))
+    } catch (error) {
+      console.error('Failed to upload photo:', error)
+      toast.error(t('profile.header.upload_error'))
+    } finally {
+      setIsUploadingPhoto(false)
+      if (photoInputRef.current) photoInputRef.current.value = ''
+    }
+  }
+
   return (
     <div className="mb-6">
       <input 
         type="file" 
         ref={bannerInputRef}
         onChange={handleBannerUpload}
+        className="hidden" 
+        accept="image/jpeg,image/png,image/webp"
+      />
+      <input 
+        type="file" 
+        ref={photoInputRef}
+        onChange={handlePhotoUpload}
         className="hidden" 
         accept="image/jpeg,image/png,image/webp"
       />
@@ -168,9 +212,9 @@ export default function ProfileHeader({
       <div className="bg-card border border-border rounded-b-2xl -mt-6 relative shadow-sm">
         <div className="p-8">
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Profile Photo - Overlapping */}
-            <div className="relative -mt-16 md:-mt-20 flex-shrink-0">
-              <div className="border-4 border-card rounded-full bg-background h-32 w-32 overflow-hidden relative">
+            {/* Profile Photo Wrapper - Explicit sizing for absolute positioning context */}
+            <div className="relative -mt-16 md:-mt-20 flex-shrink-0 h-32 w-32">
+              <div className="h-full w-full rounded-full bg-background overflow-hidden border-4 border-card relative z-0">
                  {user.profilePhoto ? (
                     <Image 
                       src={user.profilePhoto} 
@@ -184,13 +228,19 @@ export default function ProfileHeader({
                     </div>
                  )}
               </div>
+              
               {isOwner && (
                 <button 
-                  onClick={onEdit} // In real app, might trigger photo upload modal directly
-                  className="absolute bottom-2 right-2 p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors shadow-md"
+                  onClick={handlePhotoClick}
+                  disabled={isUploadingPhoto}
+                  className="absolute bottom-1 right-1 p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all shadow-lg border-[3px] border-card z-10 flex items-center justify-center"
                   title={t('profile.header.update_photo')}
                 >
-                  <Camera className="h-4 w-4" />
+                  {isUploadingPhoto ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </button>
               )}
             </div>

@@ -83,9 +83,14 @@ export const profilesApi = {
   /**
    * Get experience list
    */
-  getExperience: async (): Promise<any[]> => {
+  /**
+   * Get experience list
+   * @param userId - Optional user ID to fetch experience for. If omitted, fetches current user's experience.
+   */
+  getExperience: async (userId?: string): Promise<any[]> => {
     // Note: The backend returns an array of experience objects
-    return await apiClient.get<any[]>('/profiles/experience')
+    const endpoint = userId ? `/profiles/${userId}/experience` : '/profiles/experience'
+    return await apiClient.get<any[]>(endpoint)
   },
 
   /**

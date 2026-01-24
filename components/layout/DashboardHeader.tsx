@@ -1,7 +1,7 @@
 
 import { useTranslation } from 'react-i18next';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -60,7 +60,30 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const { data: unreadData } = useUnreadCount();
   const unreadCount = unreadData?.count || 0;
   
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+        setIsSearchOpen(false);
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -195,7 +218,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               </div>
 
               {/* User Menu - Hidden on Mobile (in bottom nav) */}
-              <div className="relative hidden md:block">
+              <div className="relative hidden md:block" ref={dropdownRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-2 pl-2 pr-1 py-1 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-full transition-all duration-200 border border-transparent hover:border-border"
@@ -218,62 +241,56 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
                 {/* User Dropdown */}
                 {isUserMenuOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-10" 
-                      onClick={() => setIsUserMenuOpen(false)}
-                    />
-                    <div className="absolute right-0 mt-2 w-64 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl z-20 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden">
-                      <div className="p-4 bg-accent/20 border-b border-border/50">
-                        <p className="text-sm font-semibold text-foreground">
-                          {user.firstName} {user.lastName}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                        {/* Verification Status */}
-                        <div className="flex items-center gap-1.5 mt-2 bg-background/50 py-1 px-2 rounded-full w-fit">
-                          {getVerificationStatusIcon()}
-                          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                            {getVerificationStatusText()}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-2 space-y-0.5">
-                        <Link
-                          href={`/in/${user.username || user.id}`}
-                          className="flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <UserIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span>{t('dashboard.header.menu.profile')}</span>
-                        </Link>
-                        <Link
-                          href="/connections"
-                          className="flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <UserPlus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span>{t('dashboard.header.menu.connections')}</span>
-                        </Link>
-                        <Link
-                          href="/settings"
-                          className="flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <Settings className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span>{t('dashboard.header.menu.settings')}</span>
-                        </Link>
-                      </div>
-                      <div className="border-t border-border/50 p-2 bg-accent/10">
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center space-x-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg w-full text-left transition-colors"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          <span>{t('dashboard.header.menu.signout')}</span>
-                        </button>
+                  <div className="absolute right-0 mt-2 w-64 bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl z-20 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden">
+                    <div className="p-4 bg-accent/20 border-b border-border/50">
+                      <p className="text-sm font-semibold text-foreground">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      {/* Verification Status */}
+                      <div className="flex items-center gap-1.5 mt-2 bg-background/50 py-1 px-2 rounded-full w-fit">
+                        {getVerificationStatusIcon()}
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                          {getVerificationStatusText()}
+                        </span>
                       </div>
                     </div>
-                  </>
+                    <div className="p-2 space-y-0.5">
+                      <Link
+                        href={`/in/${user.username || user.id}`}
+                        className="flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <UserIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span>{t('dashboard.header.menu.profile')}</span>
+                      </Link>
+                      <Link
+                        href="/connections"
+                        className="flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <UserPlus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span>{t('dashboard.header.menu.connections')}</span>
+                      </Link>
+                      <Link
+                        href="/settings"
+                        className="flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <Settings className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span>{t('dashboard.header.menu.settings')}</span>
+                      </Link>
+                    </div>
+                    <div className="border-t border-border/50 p-2 bg-accent/10">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center space-x-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg w-full text-left transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>{t('dashboard.header.menu.signout')}</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

@@ -10,10 +10,10 @@ interface ApplicationCardProps {
 }
 
 const statusColors: Record<ApplicationStatus, string> = {
-  [ApplicationStatus.RECEIVED]: 'bg-blue-100 text-blue-800',
-  [ApplicationStatus.SHORTLISTED]: 'bg-purple-100 text-purple-800',
-  [ApplicationStatus.REJECTED]: 'bg-red-100 text-red-800',
-  [ApplicationStatus.HIRED]: 'bg-green-100 text-green-800',
+  received: 'bg-blue-100 text-blue-800',
+  shortlisted: 'bg-purple-100 text-purple-800',
+  rejected: 'bg-red-100 text-red-800',
+  hired: 'bg-green-100 text-green-800',
 }
 
 export function ApplicationCard({ application }: ApplicationCardProps) {
