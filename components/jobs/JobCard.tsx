@@ -38,11 +38,11 @@ export function JobCard({ job }: JobCardProps) {
               </div>
               <div className="flex items-center">
                 <Briefcase className="w-4 h-4 mr-1" />
-                {(job.employmentType || job.type || '').replace('_', ' ')}
+                {(job.employmentType || '').replace('_', ' ')}
               </div>
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-1" />
-                Posted {new Date(job.createdAt || job.postedAt || new Date().toISOString()).toLocaleDateString()}
+                Posted {new Date(job.createdAt || new Date().toISOString()).toLocaleDateString()}
               </div>
             </div>
           </div>

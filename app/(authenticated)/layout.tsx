@@ -38,6 +38,13 @@ export default function AuthenticatedLayout({
         return
       }
 
+      // Check suspension status BEFORE onboarding check
+      // This prevents suspended users from even seeing onboarding if they got banned early
+      if (user?.membershipStatus === 'SUSPENDED') {
+        router.push('/suspended')
+        return
+      }
+
       if (!onboardingComplete) {
         router.push('/onboarding')
         return
@@ -62,7 +69,8 @@ export default function AuthenticatedLayout({
   }
 
   // Don't render if not authenticated (will redirect)
-  if (!isAuthenticated || !isEmailVerified || !onboardingComplete || !user) {
+  // Also block render if suspended to prevent flash of content
+  if (!isAuthenticated || !isEmailVerified || !onboardingComplete || !user || user.membershipStatus === 'SUSPENDED') {
     return null
   }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, PlayCircle, Image as ImageIcon, Link as LinkIcon, Calendar, Info, Loader2, Trash2, Pencil } from 'lucide-react'
+import { Plus, PlayCircle, Image as ImageIcon, Link as LinkIcon, Calendar, Info, Loader2, Trash2, Pencil, CheckCircle } from 'lucide-react'
 import { portfolioApi, PortfolioItem } from '@/lib/api/portfolio'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -51,6 +51,9 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
     description: '',
     visibility: 'PUBLIC' as const
   }
+  const [uploadMode, setUploadMode] = useState<'LINK' | 'FILE'>('LINK')
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false)
+
   const [formData, setFormData] = useState<{
     title: string
     year: string
@@ -72,6 +75,8 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
     if (!isDialogOpen) {
       setFormData(initialFormState)
       setEditingId(null)
+      setUploadMode('LINK')
+      setIsUploadingMedia(false)
     }
   }, [isDialogOpen])
 
@@ -109,6 +114,36 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Basic validation
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast.error("File too large. Max 10MB.")
+      return
+    }
+
+    setIsUploadingMedia(true)
+    try {
+      const response = await portfolioApi.uploadMedia(file)
+      // Auto-detect type
+      const type = file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO'
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        mediaUrl: response.url,
+        mediaType: type as any
+      }))
+      toast.success("File uploaded")
+    } catch (error) {
+      console.error("Upload failed", error)
+      toast.error("Upload failed. Please try again.")
+    } finally {
+      setIsUploadingMedia(false)
+    }
   }
 
   const handleEdit = (item: PortfolioItem) => {
@@ -275,16 +310,61 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="mediaUrl">{t('profile.portfolio.media_url')} *</Label>
-                  <Input 
-                    id="mediaUrl" 
-                    name="mediaUrl" 
-                    value={formData.mediaUrl} 
-                    onChange={handleInputChange} 
-                    placeholder="https://..."
-                    required 
-                  />
+                  <div className="space-y-4">
+                  <div className="flex items-center gap-4 mb-2">
+                    <Label className="text-sm font-medium">{t('profile.portfolio.media_source')}</Label>
+                    <div className="flex bg-muted rounded-lg p-1">
+                      <button
+                        type="button"
+                        onClick={() => setUploadMode('LINK')}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${uploadMode === 'LINK' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      >
+                        Link
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setUploadMode('FILE')}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${uploadMode === 'FILE' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      >
+                        Upload
+                      </button>
+                    </div>
+                  </div>
+
+                  {uploadMode === 'LINK' ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="mediaUrl">{t('profile.portfolio.media_url')} *</Label>
+                      <Input 
+                        id="mediaUrl" 
+                        name="mediaUrl" 
+                        value={formData.mediaUrl} 
+                        onChange={handleInputChange} 
+                        placeholder="https://..."
+                        required={uploadMode === 'LINK'}
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="fileUpload">{t('profile.portfolio.upload_file')} *</Label>
+                      <div className="flex items-center gap-3">
+                        <Input 
+                          id="fileUpload" 
+                          type="file"
+                          accept="image/*,video/*"
+                          onChange={handleFileUpload}
+                          disabled={isUploadingMedia}
+                          className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                        />
+                        {isUploadingMedia && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                      </div>
+                      {formData.mediaUrl && uploadMode === 'FILE' && (
+                         <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                           <CheckCircle className="h-3 w-3" /> File uploaded successfully
+                         </p>
+                      )}
+                      <p className="text-xs text-muted-foreground">Max 10MB. Images or Videos.</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">

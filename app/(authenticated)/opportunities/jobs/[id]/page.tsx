@@ -2,12 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { jobsApi } from '@/lib/api/jobs'
+import { applicationApi } from '@/lib/api/application'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, MapPin, Building2, Clock, Briefcase, ChevronLeft, Calendar } from 'lucide-react'
+import { Loader2, MapPin, Building2, Briefcase, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { JobApplicationModal } from '@/components/jobs/JobApplicationModal'
 
 export default function JobDetailPage() {
@@ -16,14 +17,37 @@ export default function JobDetailPage() {
   const id = params.id as string
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const { data, isLoading, isError } = useQuery({
+  // Fetch Job Data
+  const { data: jobResponse, isLoading: isJobLoading, isError } = useQuery({
     queryKey: ['job', id],
     queryFn: () => jobsApi.getJob(id),
     enabled: !!id,
   })
 
-  // To fix typing, we access the nested data object
-  const job = data?.data
+  // Fetch User Applications to check if already applied
+  // This is a robust check in case 'hasApplied' flag is missing from job details
+  const { data: applicationsResponse, isLoading: isAppsLoading } = useQuery({
+    queryKey: ['my-applications'],
+    queryFn: () => applicationApi.getMyApplications(1, 100), // Fetch enough to likely find it
+  })
+
+  const job = jobResponse?.data
+
+  // Determine if user has applied
+  const hasApplied = useMemo(() => {
+    if (job?.hasApplied) return true;
+    
+    if (applicationsResponse?.applications) {
+      return applicationsResponse.applications.some(app => 
+        // app.job can be populated object or ID string. 
+        // If populated, use _id. If string, compare directly.
+        (typeof app.job === 'string' ? app.job : app.job._id) === id
+      );
+    }
+    return false;
+  }, [job, applicationsResponse, id]);
+
+  const isLoading = isJobLoading || isAppsLoading
 
   if (isLoading) {
     return (
@@ -75,11 +99,11 @@ export default function JobDetailPage() {
             </div>
             
             <div className="flex flex-col items-end gap-2">
-               <Button size="lg" onClick={() => setIsModalOpen(true)} disabled={job.hasApplied}>
-                {job.hasApplied ? 'Applied' : 'Apply Now'}
+               <Button size="lg" onClick={() => setIsModalOpen(true)} disabled={hasApplied}>
+                {hasApplied ? 'Applied' : 'Apply Now'}
                </Button>
                <span className="text-sm text-gray-500">
-                Posted {new Date(job.createdAt || job.postedAt || new Date().toISOString()).toLocaleDateString()}
+                Posted {new Date(job.createdAt || new Date().toISOString()).toLocaleDateString()}
                </span>
             </div>
           </div>
@@ -87,7 +111,7 @@ export default function JobDetailPage() {
           <div className="flex flex-wrap gap-3 mt-4">
              <Badge variant="outline" className="px-3 py-1">
                 <Briefcase className="w-3 h-3 mr-2" />
-                {(job.employmentType || job.type || '').replace('_', ' ')}
+                {(job.employmentType || '').replace('_', ' ')}
              </Badge>
              {job.salaryRange && (
                <Badge variant="outline" className="px-3 py-1">

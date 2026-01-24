@@ -1,35 +1,34 @@
 import { Job } from './jobs'
 import { User } from './index'
 
-export enum ApplicationStatus {
-  RECEIVED = 'RECEIVED',
-  SHORTLISTED = 'SHORTLISTED',
-  REJECTED = 'REJECTED',
-  HIRED = 'HIRED',
-}
+export type ApplicationStatus = 'received' | 'shortlisted' | 'rejected' | 'hired';
 
-export interface Application {
-  id: string
-  _id?: string
+export interface JobApplication {
+  _id: string
+  id?: string // alias for frontend helpers
   job: Job
-  user: User | string // string if just ID
-  status: ApplicationStatus | string // string because backend sends lowercase
-  coverLetter: string
-  resume?: string // URL to resume (mapped from resumeUrl)
-  resumeUrl?: string
-  resumeId?: string
-  resumeName?: string
-  jobTitleSnapshot?: string
+  applicant: string | User // User ID or populated user
+  user?: User | string // alias for backward compat if code uses .user instead of .applicant
+  jobTitleSnapshot: string
   companyNameSnapshot?: string
+  resumeUrl?: string
+  resume?: string // alias
+  coverLetter?: string
+  status: ApplicationStatus
+  isWithdrawn: boolean
+  joinedAt: string
+  createdAt: string
+  
+  // Legacy fields
   appliedAt?: string
-  createdAt?: string // Usually present if appliedAt is missing
-  updatedAt: string
+  updatedAt?: string
 }
 
-export interface ApplicationsResponse {
-  applications: Application[]
+export interface MyApplicationsResponse {
+  applications: JobApplication[]
   total: number
   pages: number
-  page: number
-  limit: number
 }
+
+export type ApplicationsResponse = MyApplicationsResponse; // Alias
+export type Application = JobApplication;

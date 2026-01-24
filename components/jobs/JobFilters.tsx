@@ -56,8 +56,8 @@ export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
         <div className="flex items-center space-x-2">
           <Switch 
             id="remote-mode" 
-            checked={filters.isRemote || false}
-            onCheckedChange={(checked) => handleChange('isRemote', checked)}
+            checked={filters.remote || false}
+            onCheckedChange={(checked) => handleChange('remote', checked)}
           />
           <Label htmlFor="remote-mode" className="text-sm font-medium text-gray-700">Remote Only</Label>
         </div>
