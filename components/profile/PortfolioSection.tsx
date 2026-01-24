@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, PlayCircle, Image as ImageIcon, Link as LinkIcon, Calendar, Info, Loader2, Trash2, Pencil } from 'lucide-react'
 import { portfolioApi, PortfolioItem } from '@/lib/api/portfolio'
 import { toast } from 'sonner'
@@ -30,6 +31,7 @@ interface PortfolioSectionProps {
 }
 
 export default function PortfolioSection({ isOwner, userId }: PortfolioSectionProps) {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [items, setItems] = useState<PortfolioItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -129,7 +131,7 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
 
     try {
       if (!formData.title || !formData.role || !formData.mediaUrl) {
-        toast.error("Missing fields", { description: "Please fill in all required fields." })
+        toast.error(t('profile.portfolio.error_missing'), { description: t('profile.portfolio.error_missing_desc') })
         setIsSubmitting(false)
         return
       }
@@ -141,10 +143,10 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
 
       if (editingId) {
         await portfolioApi.updatePortfolioItem(editingId, payload)
-        toast.success("Portfolio item updated")
+        toast.success(t('profile.portfolio.success_update'))
       } else {
         await portfolioApi.addPortfolioItem(payload)
-        toast.success("Work added to portfolio")
+        toast.success(t('profile.portfolio.success_add'))
       }
       
       setIsDialogOpen(false)
@@ -158,7 +160,7 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this item?")) return
+    if (!confirm(t('profile.portfolio.confirm_delete'))) return
 
     try {
       await portfolioApi.deletePortfolioItem(id)
@@ -190,39 +192,39 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
            <PlayCircle className="h-5 w-5 text-primary" />
-           Portfolio
+           {t('profile.portfolio.title')}
         </h2>
         {isOwner && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2 text-primary hover:text-primary hover:bg-primary/10 border-primary/20">
                 <Plus className="h-4 w-4" />
-                <span>Add Work</span>
+                <span>{t('profile.portfolio.add_btn')}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>{editingId ? 'Edit Work' : 'Add to Portfolio'}</DialogTitle>
+                <DialogTitle>{editingId ? t('profile.portfolio.edit_title') : t('profile.portfolio.add_title')}</DialogTitle>
                 <DialogDescription>
-                  {editingId ? 'Update project details.' : 'Showcase your best work.'}
+                  {editingId ? t('profile.portfolio.edit_desc') : t('profile.portfolio.add_desc')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 py-2">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Project Title *</Label>
+                  <Label htmlFor="title">{t('profile.portfolio.project_title')} *</Label>
                   <Input 
                     id="title" 
                     name="title" 
                     value={formData.title} 
                     onChange={handleInputChange} 
-                    placeholder="e.g. The Untold Story" 
+                    placeholder={t('profile.portfolio.project_placeholder')}
                     required 
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="year">Year *</Label>
+                    <Label htmlFor="year">{t('profile.portfolio.year')} *</Label>
                     <Input 
                       id="year" 
                       name="year" 
@@ -233,13 +235,13 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="role">My Role *</Label>
+                    <Label htmlFor="role">{t('profile.portfolio.role_label')} *</Label>
                     <Input 
                       id="role" 
                       name="role" 
                       value={formData.role} 
                       onChange={handleInputChange} 
-                      placeholder="e.g. Director"
+                      placeholder={t('profile.portfolio.role_placeholder')}
                       required 
                     />
                   </div>
@@ -247,34 +249,34 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="mediaType">Media Type</Label>
+                    <Label htmlFor="mediaType">{t('profile.portfolio.media_type')}</Label>
                     <Select value={formData.mediaType} onValueChange={(val) => handleSelectChange('mediaType', val)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="VIDEO">Video Link</SelectItem>
-                        <SelectItem value="IMAGE">Image Link</SelectItem>
-                        <SelectItem value="EXTERNAL">External Link</SelectItem>
+                        <SelectItem value="VIDEO">{t('profile.portfolio.types.video')}</SelectItem>
+                        <SelectItem value="IMAGE">{t('profile.portfolio.types.image')}</SelectItem>
+                        <SelectItem value="EXTERNAL">{t('profile.portfolio.types.external')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="visibility">Visibility</Label>
+                    <Label htmlFor="visibility">{t('profile.portfolio.visibility')}</Label>
                     <Select value={formData.visibility} onValueChange={(val) => handleSelectChange('visibility', val)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select visibility" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="PUBLIC">Public</SelectItem>
-                        <SelectItem value="CONNECTIONS">Connections Only</SelectItem>
+                        <SelectItem value="PUBLIC">{t('profile.portfolio.vis_options.public')}</SelectItem>
+                        <SelectItem value="CONNECTIONS">{t('profile.portfolio.vis_options.connections')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="mediaUrl">Media URL *</Label>
+                  <Label htmlFor="mediaUrl">{t('profile.portfolio.media_url')} *</Label>
                   <Input 
                     id="mediaUrl" 
                     name="mediaUrl" 
@@ -286,7 +288,7 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Label htmlFor="description">{t('profile.portfolio.desc_label')}</Label>
                   <Textarea 
                     id="description" 
                     name="description" 
@@ -297,14 +299,14 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
                 </div>
 
                 <DialogFooter className="mt-4">
-                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('profile.portfolio.cancel')}</Button>
                    <Button type="submit" disabled={isSubmitting}>
                      {isSubmitting ? (
                        <>
                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                         Saving...
+                         {t('profile.portfolio.saving')}
                        </>
-                     ) : 'Save'}
+                     ) : t('profile.portfolio.save')}
                    </Button>
                 </DialogFooter>
               </form>
@@ -316,7 +318,7 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
       {items.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
            <PlayCircle className="h-10 w-10 mx-auto mb-3 opacity-20" />
-           <p>No portfolio items yet.</p>
+           <p>{t('profile.portfolio.empty')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -334,7 +336,7 @@ export default function PortfolioSection({ isOwner, userId }: PortfolioSectionPr
                 <div className="text-xs text-white/80 flex items-center gap-1.5">
                    <span>{item.year}</span> • <span>{item.role}</span>
                    {item.visibility === 'CONNECTIONS' && (
-                     <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] ml-1">Connections</span>
+                     <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] ml-1">{t('profile.portfolio.connections_badge')}</span>
                    )}
                 </div>
               </div>

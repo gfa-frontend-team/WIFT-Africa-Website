@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ArrowRight, MapPin, Users, Crown, AlertCircle, Loader2, CheckCircle } from 'lucide-react'
 import ChapterCard from '@/components/shared/ChapterCard'
 import { Chapter } from '@/lib/api/onboarding'
@@ -13,6 +14,7 @@ export default function ChapterSelectionStep({
   onNext,
   onPrevious,
 }: ChapterSelectionStepProps) {
+  const { t } = useTranslation()
   const { chapters: dataChapters, isLoadingChapters, submitChapter, isSubmittingChapter: isSaving } = useOnboarding()
   const [chapters, setChapters] = useState<Chapter[]>([])
   
@@ -124,7 +126,7 @@ export default function ChapterSelectionStep({
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading chapters...</p>
+          <p className="text-muted-foreground">{t('onboarding.common.loading')}</p>
         </div>
       </div>
     )
@@ -135,18 +137,17 @@ export default function ChapterSelectionStep({
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-foreground mb-2">
-          Choose your WIFT Chapter
+          {t('onboarding.chapter.title')}
         </h2>
         <p className="text-muted-foreground max-w-3xl mx-auto">
-          WIFT Africa is a growing network of women shaping the future of film, television, and digital storytelling across the continent. 
-          Connect to your local WIFT chapter or join WIFT Africa HQ.
+          {t('onboarding.chapter.subtitle')}
         </p>
       </div>
 
       {/* Member Status Prompt */}
       <div className="p-6 border border-border rounded-lg bg-card">
         <h3 className="font-semibold text-foreground mb-4 text-center">
-          Are you an active member of a chapter?
+          {t('onboarding.chapter.member_status_title')}
           <span className="text-red-500 ml-1">*</span>
         </h3>
         <div className="flex flex-col md:flex-row gap-4 justify-center">
@@ -164,7 +165,7 @@ export default function ChapterSelectionStep({
                 : 'border border-border hover:bg-accent'
             }`}
           >
-            <div className="font-semibold">I'm already a registered member</div>
+            <div className="font-semibold">{t('onboarding.chapter.btn_existing')}</div>
           </button>
           <button
             type="button"
@@ -181,7 +182,7 @@ export default function ChapterSelectionStep({
                 : 'border border-border hover:bg-accent'
             }`}
           >
-            <div className="font-semibold">I'm new here</div>
+            <div className="font-semibold">{t('onboarding.chapter.btn_new')}</div>
           </button>
         </div>
         
@@ -192,7 +193,7 @@ export default function ChapterSelectionStep({
         {memberType === 'EXISTING' && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
-              I want to sign up and connect with my chapter
+              {t('onboarding.chapter.note_existing')}
             </p>
           </div>
         )}
@@ -200,11 +201,10 @@ export default function ChapterSelectionStep({
         {memberType === 'NEW' && (
           <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
-              I want to create my profile and find a chapter
+              {t('onboarding.chapter.note_new')}
             </p>
             <p className="text-sm text-yellow-800 mt-2">
-              <strong>Note:</strong> Registration is intended for active chapter members. 
-              Users without an affiliated chapter may experience a longer verification period.
+              {t('onboarding.chapter.note_new_warning')}
             </p>
           </div>
         )}
@@ -213,14 +213,14 @@ export default function ChapterSelectionStep({
       {/* Chapter Selection Intro */}
       <div className="p-6 bg-muted/30 border border-border rounded-lg space-y-3">
         <p className="text-sm text-muted-foreground">
-          Choose the chapter closest to where you live or work. If there isn't one yet, you can join our WIFT Africa HQ network while new chapters form.
+          {t('onboarding.chapter.intro_text')}
         </p>
         <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm font-medium text-foreground">
-            <strong>No chapter yet?</strong>
+            <strong>{t('onboarding.chapter.no_chapter_title')}</strong>
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Join WIFT Africa HQ to connect with members across regions.
+            {t('onboarding.chapter.no_chapter_msg')}
           </p>
         </div>
       </div>
@@ -269,7 +269,7 @@ export default function ChapterSelectionStep({
         <div className="p-6 border border-border rounded-lg bg-card space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Membership ID
+              {t('onboarding.chapter.member_id_label')}
               <span className="text-red-500 ml-1">*</span>
             </label>
             <input
@@ -282,7 +282,7 @@ export default function ChapterSelectionStep({
                 }
               }}
               className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Enter your membership ID"
+              placeholder={t('onboarding.chapter.member_id_placeholder') as string}
             />
             {errors.membershipId && (
               <p className="mt-1 text-sm text-destructive">{errors.membershipId}</p>
@@ -291,27 +291,27 @@ export default function ChapterSelectionStep({
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Phone Number (Optional)
+              {t('onboarding.chapter.phone_label')}
             </label>
             <input
               type="tel"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="+234 XXX XXX XXXX"
+              placeholder={t('onboarding.chapter.phone_placeholder') as string}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Additional Information (Optional)
+              {t('onboarding.chapter.additional_info_label')}
             </label>
             <textarea
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
               rows={3}
               className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              placeholder="Any additional information for verification..."
+              placeholder={t('onboarding.chapter.additional_info_placeholder') as string}
             />
           </div>
         </div>
@@ -321,21 +321,21 @@ export default function ChapterSelectionStep({
       <div className="p-6 bg-muted/50 border border-border rounded-lg space-y-4">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           <AlertCircle className="h-5 w-5 text-primary" />
-          Important information:
+          {t('onboarding.chapter.important_info_title')}
         </h3>
         
         <div className="space-y-4 text-sm">
           <div>
-            <h4 className="font-medium text-foreground mb-2">Verification Process:</h4>
+            <h4 className="font-medium text-foreground mb-2">{t('onboarding.chapter.verification_title')}</h4>
             <p className="text-muted-foreground">
-              Chapter membership requires verification by local administrators. You'll receive confirmation within 24-48 hours.
+              {t('onboarding.chapter.verification_text')}
             </p>
           </div>
 
           <div>
-            <h4 className="font-medium text-foreground mb-2">WIFT Africa HQ Registration:</h4>
+            <h4 className="font-medium text-foreground mb-2">{t('onboarding.chapter.hq_title')}</h4>
             <p className="text-muted-foreground">
-              HQ registration provides access while verification is complete. Consider joining a local chapter for immediate full access.
+              {t('onboarding.chapter.hq_text')}
             </p>
           </div>
         </div>
@@ -349,14 +349,14 @@ export default function ChapterSelectionStep({
           className="px-6 py-3 border border-border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
           <ArrowLeft className="h-5 w-5" />
-          Back
+          {t('onboarding.common.back')}
         </button>
         <button
           onClick={handleSubmit}
           disabled={isSaving}
           className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
-          {isSaving ? 'Saving...' : 'Continue'}
+          {isSaving ? t('onboarding.common.saving') : t('onboarding.common.continue')}
           {!isSaving && <ArrowRight className="h-5 w-5" />}
         </button>
       </div>
@@ -371,25 +371,22 @@ export default function ChapterSelectionStep({
                   <CheckCircle className="h-8 w-8 text-primary" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  Welcome to WIFT Africa!
+                  {t('onboarding.chapter.welcome_modal.title')}
                 </h2>
                 <p className="text-muted-foreground">
-                  We're excited to have you join our growing community.
+                  {t('onboarding.chapter.welcome_modal.subtitle')}
                 </p>
               </div>
 
               <div className="space-y-4 mb-6 text-sm text-muted-foreground">
                 <p>
-                  As a new member, you will be onboarded through a process managed by your chapter administrator. 
-                  All memberships require verification by your local chapter team.
+                  {t('onboarding.chapter.welcome_modal.p1')}
                 </p>
                 <p>
-                  You can expect to receive an onboarding message from your chapter administrator within{' '}
-                  <strong className="text-foreground">48 hours</strong>, and your membership will be confirmed on the 
-                  WIFT Africa platform within <strong className="text-foreground">24 hours</strong> thereafter.
+                  {t('onboarding.chapter.welcome_modal.p2')}
                 </p>
                 <p className="text-foreground font-medium">
-                  We look forward to welcoming you into the network!
+                  {t('onboarding.chapter.welcome_modal.p3')}
                 </p>
               </div>
 
@@ -398,7 +395,7 @@ export default function ChapterSelectionStep({
                   onClick={() => setShowWelcomeModal(false)}
                   className="px-8 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-colors"
                 >
-                  Continue
+                  {t('onboarding.chapter.welcome_modal.btn')}
                 </button>
               </div>
             </div>

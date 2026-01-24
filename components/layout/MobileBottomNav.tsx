@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -14,14 +15,15 @@ import {
 } from 'lucide-react';
 
 const mobileNavItems = [
-  { name: 'Home', href: '/feed', icon: Home, requiredFeature: 'canViewFeed' as const },
-  { name: 'Chapters', href: '/chapters', icon: Globe, requiredFeature: 'canViewDirectory' as const },
-  { name: 'Opps', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
-  { name: 'Messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
-  { name: 'Profile', href: '/me', icon: User, isProfile: true, requiredFeature: 'canEditProfile' as const },
+  { name: 'Home', labelKey: 'nav.home', href: '/feed', icon: Home, requiredFeature: 'canViewFeed' as const },
+  { name: 'Chapters', labelKey: 'nav.chapters', href: '/chapters', icon: Globe, requiredFeature: 'canViewDirectory' as const },
+  { name: 'Opps', labelKey: 'nav.opportunities_short', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
+  { name: 'Messages', labelKey: 'nav.messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
+  { name: 'Profile', labelKey: 'nav.profile', href: '/me', icon: User, isProfile: true, requiredFeature: 'canEditProfile' as const },
 ];
 
 export default function MobileBottomNav() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { user } = useAuth();
   const { access } = useFeatureAccess();
@@ -82,7 +84,7 @@ export default function MobileBottomNav() {
                     ? 'text-muted-foreground/40'
                     : 'text-muted-foreground'
               }`}>
-                {item.name}
+                {t(item.labelKey)}
               </span>
             </Link>
           );

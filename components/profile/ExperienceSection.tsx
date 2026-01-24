@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, Award, Briefcase, Calendar, Loader2, Trash2, Pencil } from 'lucide-react'
 import { profilesApi } from '@/lib/api/profiles'
 import { Experience } from '@/types'
@@ -31,6 +32,7 @@ interface ExperienceSectionProps {
 }
 
 export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
+  const { t } = useTranslation()
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -117,19 +119,19 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
     setIsSubmitting(true)
 
     try {
-      // Basic validation
+       // Basic validation
       if (!formData.roleTitle || !formData.organizationName || !formData.startDate || !formData.employmentType) {
-        toast.error("Missing fields", { description: "Please fill in all required fields." })
+        toast.error(t('profile.experience.error_missing'), { description: t('profile.experience.error_missing_desc') })
         setIsSubmitting(false)
         return
       }
 
-      if (editingId) {
+        if (editingId) {
         await profilesApi.updateExperience(editingId, formData)
-        toast.success("Experience updated")
+        toast.success(t('profile.experience.success_update'))
       } else {
         await profilesApi.addExperience(formData)
-        toast.success("Experience added")
+        toast.success(t('profile.experience.success_add'))
       }
       
       setIsDialogOpen(false)
@@ -143,7 +145,7 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this experience?")) return
+    if (!confirm(t('profile.experience.confirm_delete'))) return
 
     try {
       await profilesApi.deleteExperience(id)
@@ -167,7 +169,7 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
           <Briefcase className="h-5 w-5 text-primary" />
-          Experience
+          {t('profile.experience.title')}
         </h2>
         
         {isOwner && (
@@ -175,57 +177,57 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2 text-primary hover:text-primary hover:bg-primary/10 border-primary/20">
                 <Plus className="h-4 w-4" />
-                <span>Add Experience</span>
+                <span>{t('profile.experience.add_btn')}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>{editingId ? 'Edit Experience' : 'Add Experience'}</DialogTitle>
+                <DialogTitle>{editingId ? t('profile.experience.edit_title') : t('profile.experience.add_title')}</DialogTitle>
                 <DialogDescription>
-                  {editingId ? 'Update your professional history details.' : 'Add your professional work history.'}
+                  {editingId ? t('profile.experience.edit_desc') : t('profile.experience.add_desc')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 py-2">
                 <div className="space-y-2">
-                  <Label htmlFor="roleTitle">Job Title *</Label>
+                  <Label htmlFor="roleTitle">{t('profile.experience.role_label')} *</Label>
                   <Input 
                     id="roleTitle" 
                     name="roleTitle" 
                     value={formData.roleTitle} 
                     onChange={handleInputChange} 
-                    placeholder="e.g. Director" 
+                    placeholder={t('profile.experience.role_placeholder')}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="organizationName">Company / Organization *</Label>
+                  <Label htmlFor="organizationName">{t('profile.experience.org_label')} *</Label>
                   <Input 
                     id="organizationName" 
                     name="organizationName" 
                     value={formData.organizationName} 
                     onChange={handleInputChange} 
-                    placeholder="e.g. Independent" 
+                    placeholder={t('profile.experience.org_placeholder')}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="employmentType">Employment Type *</Label>
+                  <Label htmlFor="employmentType">{t('profile.experience.type_label')} *</Label>
                   <Select value={formData.employmentType} onValueChange={handleSelectChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
+                      <SelectValue placeholder={t('profile.experience.type_label')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="FULL_TIME">Full-time</SelectItem>
-                      <SelectItem value="PART_TIME">Part-time</SelectItem>
-                      <SelectItem value="CONTRACT">Contract</SelectItem>
-                      <SelectItem value="FREELANCE">Freelance</SelectItem>
-                      <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                      <SelectItem value="FULL_TIME">{t('profile.experience.types.full_time')}</SelectItem>
+                      <SelectItem value="PART_TIME">{t('profile.experience.types.part_time')}</SelectItem>
+                      <SelectItem value="CONTRACT">{t('profile.experience.types.contract')}</SelectItem>
+                      <SelectItem value="FREELANCE">{t('profile.experience.types.freelance')}</SelectItem>
+                      <SelectItem value="INTERNSHIP">{t('profile.experience.types.internship')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="startDate">Start Date *</Label>
+                    <Label htmlFor="startDate">{t('profile.experience.start_date')} *</Label>
                     <Input 
                       id="startDate" 
                       name="startDate" 
@@ -236,7 +238,7 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="endDate" className={formData.isPresent ? "text-muted-foreground" : ""}>End Date</Label>
+                    <Label htmlFor="endDate" className={formData.isPresent ? "text-muted-foreground" : ""}>{t('profile.experience.end_date')}</Label>
                     <Input 
                       id="endDate" 
                       name="endDate" 
@@ -254,29 +256,29 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
                     checked={formData.isPresent}
                     onCheckedChange={handleSwitchChange}
                   />
-                  <Label htmlFor="isPresent">I currently work here</Label>
+                  <Label htmlFor="isPresent">{t('profile.experience.current_work')}</Label>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Label htmlFor="description">{t('profile.experience.desc_label')}</Label>
                   <Textarea 
                     id="description" 
                     name="description" 
                     value={formData.description} 
                     onChange={handleInputChange} 
-                    placeholder="Describe your role and achievements..."
+                    placeholder={t('profile.experience.desc_placeholder')}
                   />
                 </div>
 
                 <DialogFooter className="mt-4">
-                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('profile.experience.cancel')}</Button>
                    <Button type="submit" disabled={isSubmitting}>
                      {isSubmitting ? (
                        <>
                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                         Saving...
+                         {t('profile.experience.saving')}
                        </>
-                     ) : 'Save'}
+                     ) : t('profile.experience.save')}
                    </Button>
                 </DialogFooter>
               </form>
@@ -288,7 +290,7 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
       {experiences.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
            <Award className="h-10 w-10 mx-auto mb-3 opacity-20" />
-           <p>No experience added yet.</p>
+           <p>{t('profile.experience.empty')}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -304,7 +306,7 @@ export default function ExperienceSection({ isOwner }: ExperienceSectionProps) {
                      <div className="text-foreground/80 font-medium mb-1 flex items-center gap-1.5">
                        <span>{exp.organizationName}</span>
                        <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
-                        {exp.employmentType ? exp.employmentType.replace('_', ' ') : 'Role'}
+                         {exp.employmentType ? t(`profile.experience.types.${exp.employmentType.toLowerCase()}`) : t('profile.experience.default_role')}
                        </span>
                      </div>
                      <div className="text-sm text-muted-foreground flex items-center gap-1.5 mb-2">
