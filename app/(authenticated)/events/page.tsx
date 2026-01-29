@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useEvents } from '@/lib/hooks/useEvents'
+import { useOnboarding } from '@/lib/hooks/useOnboarding' // Reusing to fetch chapters
 import { EventCard } from '@/components/events/EventCard'
 import { EventsGridSkeleton } from '@/components/events/EventSkeleton'
 import { CalendarView } from '@/components/events/CalendarView'
@@ -20,7 +21,10 @@ import { Event } from '@/types'
 export default function EventsPage() {
   const [page, setPage] = useState(1)
   const [view, setView] = useState<'list' | 'calendar'>('list')
-  const [selectedMonth, setSelectedMonth] = useState<Date>(new Date())
+
+  // Filtering
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(new Date()) // Current month by default
+  const [selectedChapterId, setSelectedChapterId] = useState<string>('all')
 
   // Generate next 12 months for the filter
   const monthOptions = eachMonthOfInterval({
@@ -28,16 +32,20 @@ export default function EventsPage() {
     end: addMonths(new Date(), 11)
   })
 
-  // Calculate month and year for filter
-  const month = selectedMonth.getMonth() + 1
-  const year = selectedMonth.getFullYear()
+  // Calculate month and year for filter (if not ALL)
+  const month = selectedMonth ? selectedMonth.getMonth() + 1 : undefined
+  const year = selectedMonth ? selectedMonth.getFullYear() : undefined
+
+  // Get filter chapters
+  const { chapters } = useOnboarding() // Using this existing hook to get chapter list
 
   const { events, pagination, isLoading, isError, error } = useEvents({
     page,
-    limit: 100, // Increase limit to show more events per chapter for the selected month
+    limit: 100, // Increase limit to show more events
     status: 'PUBLISHED',
     month,
-    year
+    year,
+    chapterId: selectedChapterId !== 'all' ? selectedChapterId : undefined
   })
 
   const handlePrevious = () => {
@@ -49,7 +57,11 @@ export default function EventsPage() {
   }
 
   const handleMonthChange = (value: string) => {
-    setSelectedMonth(new Date(value))
+    if (value === 'all') {
+      setSelectedMonth(null)
+    } else {
+      setSelectedMonth(new Date(value))
+    }
     setPage(1) // Reset to first page on month change
   }
 
@@ -84,16 +96,37 @@ export default function EventsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          {/* Chapter Filter */}
+          <div className="w-full sm:w-[200px]">
+            <Select
+              value={selectedChapterId}
+              onValueChange={setSelectedChapterId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All Chapters" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Chapters</SelectItem>
+                {chapters?.map((chapter) => (
+                  <SelectItem key={chapter.id} value={chapter.id}>
+                    {chapter.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Month Filter */}
           <div className="w-full sm:w-[200px]">
             <Select
-              value={selectedMonth.toISOString()}
+              value={selectedMonth ? selectedMonth.toISOString() : 'all'}
               onValueChange={handleMonthChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Upcoming</SelectItem>
                 {monthOptions.map((date) => (
                   <SelectItem key={date.toISOString()} value={date.toISOString()}>
                     {format(date, 'MMMM yyyy')}
@@ -120,11 +153,6 @@ export default function EventsPage() {
               </>
             )}
           </Button>
-
-          <Button variant="outline" className="flex-1 sm:flex-none">
-            <Filter className="mr-2 h-4 w-4" />
-            Filter
-          </Button>
         </div>
       </div>
 
@@ -145,13 +173,17 @@ export default function EventsPage() {
       ) : events.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg bg-muted/20">
           <CalendarIcon className="h-12 w-12 text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-semibold">No events found for {format(selectedMonth, 'MMMM yyyy')}</h3>
+          <h3 className="text-lg font-semibold">
+            {selectedMonth
+              ? `No events found for ${format(selectedMonth, 'MMMM yyyy')}`
+              : 'No upcoming events found'}
+          </h3>
           <p className="text-muted-foreground mt-1">
             There are currently no upcoming events scheduled for this month.
           </p>
         </div>
       ) : view === 'calendar' ? (
-        <CalendarView events={events as Event[]} currentMonth={selectedMonth} />
+        <CalendarView events={events as Event[]} currentMonth={selectedMonth || new Date()} />
       ) : (
         <div className="space-y-12">
           {sortedChapterNames.map((chapterName) => (
