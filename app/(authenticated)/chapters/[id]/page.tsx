@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { chaptersApi } from '@/lib/api/chapters'
-import { 
-  ArrowLeft, Users, MapPin, Mail, Calendar, Briefcase, Crown, 
-  Loader2, Globe 
+import {
+  ArrowLeft, Users, MapPin, Mail, Calendar, Briefcase, Crown,
+  Loader2, Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -52,7 +52,7 @@ export default function ChapterDetailsPage() {
     // We already have code in chapter.code (e.g. NG, GH)
     // If code is strictly 2 chars, use it. Else try name mapping?
     // Using simple fallback for now.
-    const code = chapter.code?.length === 2 ? chapter.code : 'UNKNOWN'; 
+    const code = chapter.code?.length === 2 ? chapter.code : 'UNKNOWN';
     return `https://flagsapi.com/${code}/flat/64.png`
   }
 
@@ -81,23 +81,23 @@ export default function ChapterDetailsPage() {
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <div className="w-20 h-20 rounded bg-white shadow-sm flex items-center justify-center overflow-hidden">
-                        <img 
-                            src={`https://flagsapi.com/${chapter.code}/flat/64.png`}
-                            alt={`${chapter.country} flag`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                                // Fallback if image fails
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.parentElement!.innerHTML = '📍';
-                                e.currentTarget.parentElement!.classList.add('text-3xl');
-                            }}
-                        />
+                      <img
+                        src={`https://flagsapi.com/${chapter.code}/flat/64.png`}
+                        alt={`${chapter.country} flag`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback if image fails
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.parentElement!.innerHTML = '📍';
+                          e.currentTarget.parentElement!.classList.add('text-3xl');
+                        }}
+                      />
                     </div>
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-3xl font-bold text-foreground">
+                    <h1 className="text-3xl font-bold text-foreground capitalize">
                       {chapter.name}
                     </h1>
                     {chapter.code === 'HQ' && (
@@ -133,31 +133,28 @@ export default function ChapterDetailsPage() {
             <div className="flex gap-8 px-8 overflow-x-auto">
               <button
                 onClick={() => setActiveTab("about")}
-                className={`py-4 border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === "about"
+                className={`py-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === "about"
                     ? "border-primary text-primary font-medium"
                     : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 About
               </button>
               <button
                 onClick={() => setActiveTab("events")}
-                className={`py-4 border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === "events"
+                className={`py-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === "events"
                     ? "border-primary text-primary font-medium"
                     : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 Events
               </button>
               <button
                 onClick={() => setActiveTab("opportunities")}
-                className={`py-4 border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === "opportunities"
+                className={`py-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === "opportunities"
                     ? "border-primary text-primary font-medium"
                     : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 Opportunities
               </button>
@@ -185,55 +182,55 @@ export default function ChapterDetailsPage() {
 
                   <div className="space-y-4">
                     {(chapter.currentPresident || chapter.presidentName) && (
-                        <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
                         <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-primary font-semibold text-lg">
+                          <span className="text-primary font-semibold text-lg">
                             {(chapter.currentPresident || chapter.presidentName || '').charAt(0)}
-                            </span>
+                          </span>
                         </div>
                         <div className="flex-1">
-                            <p className="font-medium text-foreground mb-1">
+                          <p className="font-medium text-foreground mb-1">
                             {chapter.currentPresident || chapter.presidentName}
-                            </p>
-                            <p className="text-sm text-muted-foreground mb-2">
+                          </p>
+                          <p className="text-sm text-muted-foreground mb-2">
                             Chapter President
-                            </p>
-                            {chapter.presidentEmail && (
-                                <a
-                                href={`mailto:${chapter.presidentEmail}`}
-                                className="text-sm text-primary hover:underline flex items-center gap-1"
-                                >
-                                <Mail className="h-3 w-3" />
-                                {chapter.presidentEmail}
-                                </a>
-                            )}
+                          </p>
+                          {chapter.presidentEmail && (
+                            <a
+                              href={`mailto:${chapter.presidentEmail}`}
+                              className="text-sm text-primary hover:underline flex items-center gap-1"
+                            >
+                              <Mail className="h-3 w-3" />
+                              {chapter.presidentEmail}
+                            </a>
+                          )}
                         </div>
-                        </div>
+                      </div>
                     )}
 
                     {chapter.adminName && (
-                        <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
                         <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-primary font-semibold text-lg">
+                          <span className="text-primary font-semibold text-lg">
                             {chapter.adminName.charAt(0)}
-                            </span>
+                          </span>
                         </div>
                         <div className="flex-1">
-                            <p className="font-medium text-foreground mb-1">
+                          <p className="font-medium text-foreground mb-1">
                             {chapter.adminName}
-                            </p>
-                            <p className="text-sm text-muted-foreground mb-2">
+                          </p>
+                          <p className="text-sm text-muted-foreground mb-2">
                             Chapter Admin
-                            </p>
-                             {/* Admin email not strictly available on Chapter type yet, using placeholder or check adminIds if needed. 
+                          </p>
+                          {/* Admin email not strictly available on Chapter type yet, using placeholder or check adminIds if needed. 
                                  For now leaving email out if not in top level flat props. 
                              */}
                         </div>
-                        </div>
+                      </div>
                     )}
-                    
+
                     {!chapter.currentPresident && !chapter.presidentName && !chapter.adminName && (
-                        <p className="text-muted-foreground italic">Leadership information not available.</p>
+                      <p className="text-muted-foreground italic">Leadership information not available.</p>
                     )}
                   </div>
                 </div>
@@ -242,23 +239,23 @@ export default function ChapterDetailsPage() {
 
             {activeTab === "events" && (
               <div className="space-y-4">
-                  <div className="bg-card border border-border rounded-lg p-12 text-center">
-                    <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      No upcoming events for this chapter.
-                    </p>
-                  </div>
+                <div className="bg-card border border-border rounded-lg p-12 text-center">
+                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    No upcoming events for this chapter.
+                  </p>
+                </div>
               </div>
             )}
 
             {activeTab === "opportunities" && (
               <div className="space-y-4">
-                  <div className="bg-card border border-border rounded-lg p-12 text-center">
-                    <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      No opportunities available for this chapter.
-                    </p>
-                  </div>
+                <div className="bg-card border border-border rounded-lg p-12 text-center">
+                  <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    No opportunities available for this chapter.
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -292,7 +289,7 @@ export default function ChapterDetailsPage() {
                     Open Opportunities
                   </span>
                   <span className="font-semibold text-foreground">
-                   0
+                    0
                   </span>
                 </div>
               </div>
@@ -313,15 +310,15 @@ export default function ChapterDetailsPage() {
                   Adding just a text link or verifying if any contact info is available.
               */}
               {chapter.presidentEmail || chapter.email ? (
-                   <a
-                    href={`mailto:${chapter.presidentEmail || chapter.email}`}
-                    className="text-primary hover:underline font-medium flex items-center justify-center gap-2"
-                  >
-                    <Mail className="h-4 w-4" />
-                    Email Chapter
-                  </a>
+                <a
+                  href={`mailto:${chapter.presidentEmail || chapter.email}`}
+                  className="text-primary hover:underline font-medium flex items-center justify-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  Email Chapter
+                </a>
               ) : (
-                  <p className="text-sm text-muted-foreground italic">No contact email available.</p>
+                <p className="text-sm text-muted-foreground italic">No contact email available.</p>
               )}
             </div>
           </div>

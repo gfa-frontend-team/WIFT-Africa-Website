@@ -1,10 +1,10 @@
 import { apiClient } from './client'
-import type { 
-  Event, 
-  EventsListResponse, 
-  EventType, 
-  EventRSVP, 
-  RSVPStatus 
+import type {
+  Event,
+  EventsListResponse,
+  EventType,
+  EventRSVP,
+  RSVPStatus
 } from '@/types'
 
 export interface EventFilters {
@@ -13,8 +13,8 @@ export interface EventFilters {
   status?: string // 'PUBLISHED' | 'DRAFT' | 'CANCELLED'
   chapterId?: string
   type?: EventType
-  startDate?: string
-  endDate?: string
+  month?: number
+  year?: number
 }
 
 export const eventsApi = {
@@ -24,7 +24,7 @@ export const eventsApi = {
     const params = Object.fromEntries(
       Object.entries(filters).filter(([_, v]) => v !== undefined && v !== '')
     )
-    
+
     return apiClient.get<EventsListResponse>('/events', { params })
   },
 

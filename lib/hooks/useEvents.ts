@@ -29,12 +29,21 @@ export function useEvents(filters: EventFilters = {}) {
     placeholderData: (prev) => prev, // Keep previous data while fetching new page
   })
 
+  // Handle potential nested data structure from API response
+  // structure: { data: { events: [], total: number } }
+  const responseData = (data as any)?.data || data
+
+  const events = responseData?.events ?? []
+  const total = responseData?.total ?? 0
+  const limit = filters.limit ?? 12
+  const totalPages = Math.ceil(total / limit) || responseData?.pages || 0
+
   return {
-    events: data?.events ?? [],
+    events,
     pagination: {
       page: filters.page ?? 1,
-      total: data?.total ?? 0,
-      pages: data?.pages ?? 0,
+      total,
+      pages: totalPages,
     },
     isLoading,
     isError,
