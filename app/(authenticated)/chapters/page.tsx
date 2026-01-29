@@ -19,7 +19,7 @@ export default function ChaptersPage() {
 
   // Client-side filtering for now until API search param is confirmed/implemented robustly
   const chapters = chaptersData?.data?.chapters || []
-  const filteredChapters = chapters.filter(chapter => 
+  const filteredChapters = chapters.filter(chapter =>
     chapter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chapter.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chapter.city?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -34,7 +34,7 @@ export default function ChaptersPage() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto ">
             Connect with our network of chapters across the continent. Find a chapter near you and join the community.
           </p>
-          
+
           {/* <div className="max-w-md mx-auto relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
@@ -74,7 +74,7 @@ export default function ChaptersPage() {
                 city={chapter.city}
                 description={chapter.description || "Join this chapter to connect with women in film and television in this region."}
                 memberCount={chapter.fixedMemberCount || 0}
-                president={chapter.presidentName}
+                president={chapter.presidentName || chapter.currentPresident}
                 admin={chapter.adminName}
                 actionLink={`/chapters/${chapter.id}`}
                 actionLabel="View Chapter"
