@@ -76,34 +76,31 @@ export default function LandingPage() {
 
   const featuredMembers = [
     {
-      name: "Asha Mandela",
-      role: "Award-Winning Director",
-      chapter: "WIFT South Africa",
-      location: "Cape Town, South Africa",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=asha&backgroundColor=b6e3f4&clothesColor=262e33",
-      achievement: "AMAA Best Director 2024",
-      verified: true,
-      quote: "WIFT Africa connected me with producers in 8 countries. My visibility grew more than 400% in just six months."
+      name: 'Asha Mandela',
+      role: 'Award-Winning Director',
+      chapter: 'WIFT South Africa',
+      image: 'https://images.unsplash.com/photo-1531123414780-f74242c2b052?q=80&w=2574&auto=format&fit=crop',
+      quote: "WIFT Africa connected me with producers in 8 countries. My visibility grew more than 400% in just six months.",
+      achievement: 'AMAA BEST DIRECTOR 2024',
+      verified: true
     },
     {
-      name: "Kemi Adetiba",
-      role: "Producer & Screenwriter",
-      chapter: "WIFT Nigeria",
-      location: "Lagos, Nigeria",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=kemi&backgroundColor=c0aede&clothesColor=3c4f5c",
-      achievement: "Producer, Netflix Originals",
-      verified: true,
-      quote: "My profile reach skyrocketed. The platform opened professional doors I once thought were out of reach."
+      name: 'Kemi Adetiba',
+      role: 'Producer & Screenwriter',
+      chapter: 'WIFT Nigeria',
+      image: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?q=80&w=2568&auto=format&fit=crop',
+      quote: "My profile reach skyrocketed. The platform opened professional doors I once thought were out of reach.",
+      achievement: 'PRODUCER, NETFLIX ORIGINALS',
+      verified: true
     },
     {
-      name: "Wanuri Kahiu",
-      role: "Cinematographer",
-      chapter: "WIFT Kenya",
-      location: "Nairobi, Kenya",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=wanuri&backgroundColor=ffd5dc&clothesColor=929598",
-      achievement: "Cannes Film Festival Selection",
-      verified: true,
-      quote: "Three major collaborations started through my WIFT profile. The visibility is real — and it&apos;s global."
+      name: 'Wanuri Kahiu',
+      role: 'Cinematographer',
+      chapter: 'WIFT Kenya',
+      image: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=2574&auto=format&fit=crop',
+      quote: "Three major collaborations started through my WIFT profile. The visibility is real — and it's global.",
+      achievement: 'CANNES FILM FESTIVAL SELECTION',
+      verified: true
     }
   ];
 
@@ -247,7 +244,7 @@ export default function LandingPage() {
 
               {/* Image Right */}
               <div className="lg:w-1/2 order-1 lg:order-2 flex justify-center lg:justify-end">
-                <div className="relative w-full max-w-lg">
+                <div className="relative w-full max-w-sm">
                   {/* Decorative elements */}
                   <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
                   <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-secondary/10 rounded-full blur-2xl" />
@@ -255,8 +252,8 @@ export default function LandingPage() {
                   <Image
                     src="/aboutImg.png"
                     alt="WIFT Africa Members"
-                    width={600}
-                    height={800}
+                    width={400}
+                    height={533}
                     className="w-full h-auto rounded-3xl shadow-xl relative z-10"
                     priority
                   />
@@ -319,61 +316,78 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Featured Member Success Stories */}
-        <section id="success-stories" className="py-10 lg:py-12">
+        {/* Featured Members Section - Redesigned */}
+        <section id="success-stories" className="py-20 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-                Real Community. Real Opportunities. Real Growth.
+            <div className="max-w-7xl mx-auto text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-extrabold text-primary mb-6 uppercase tracking-tight leading-tight">
+                Real Community. Real Opportunities.<br />Real Growth.
               </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 See how WIFT Africa members have expanded their networks, increased their visibility, and unlocked new creative opportunities.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
               {featuredMembers.map((member, index) => (
-                <div
-                  key={index}
-                  className="bg-card border border-border rounded-3xl p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden"
-                >
-                  {/* Background Pattern */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-full -translate-y-16 translate-x-16" />
+                <div key={index} className="relative group hover:-translate-y-1 transition-all duration-300 h-full">
+                  {/* Card Container */}
+                  <div className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-gray-100 flex flex-col h-full relative z-10">
 
-                  <div className="relative">
-                    {/* Member Photo & Verification */}
-                    <div className="flex items-start gap-4 mb-6">
-                      <div className="relative">
-                        <Image
-                          src={member.image}
-                          alt={member.name}
-                          width={64}
-                          height={64}
-                          className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
-                        />
-                        {member.verified && (
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                            <Shield className="h-3 w-3 text-white" />
+                    {/* Top Red Shape */}
+                    <div className="absolute top-0 left-0 right-0 h-24 w-full z-0">
+                      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full fill-primary">
+                        {/* Start top-left(0,0), go top-right(100,0), go down-right(100,60), curve to down-left(0,25) */}
+                        <path d="M0 0 H100 V60 Q50 35 0 25 Z" />
+                      </svg>
+                    </div>
+
+                    <div className="pt-28 pb-24 px-6 flex-grow flex flex-col items-center relative z-10">
+
+                      {/* Header: Avatar + Info */}
+                      <div className="flex flex-row items-center gap-4 w-full mb-8">
+                        {/* Avatar */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-20 h-20 rounded-full border-[3px] border-red-500 shadow-md overflow-hidden relative p-0.5 bg-white">
+                            <div className="w-full h-full rounded-full overflow-hidden relative">
+                              <Image
+                                src={member.image}
+                                alt={member.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
                           </div>
-                        )}
+                          {/* Red dot badge */}
+                          <div className="absolute bottom-0 right-0 w-6 h-6 bg-red-600 rounded-full border-2 border-white z-30 shadow-sm" />
+                        </div>
+
+                        {/* Text Info */}
+                        <div className="flex flex-col text-left">
+                          <h3 className="text-sm font-bold text-black leading-tight">{member.name}</h3>
+                          <p className="text-lg font-bold text-red-600 leading-tight my-0.5 uppercase">{member.chapter}</p>
+                          <p className="text-sm font-bold text-black leading-tight">{member.role}</p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-muted-foreground mb-1">{member.name}</div>
-                        <h3 className="font-bold text-primary text-lg mb-1">{member.chapter}</h3>
-                        <p className="text-foreground font-medium text-sm">{member.role}</p>
+
+                      {/* Achievement - Emphasized */}
+                      <div className="text-red-600 font-bold uppercase text-base mb-4 tracking-tight leading-tight text-center w-full">
+                        {member.achievement}
                       </div>
+
+                      {/* Quote */}
+                      <blockquote className="text-gray-600 text-sm leading-relaxed px-2 text-center">
+                        &ldquo;{member.quote}&rdquo;
+                      </blockquote>
                     </div>
 
-                    {/* Achievement Badge */}
-                    <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4 inline-block">
-                      <Award className="h-3 w-3 inline mr-1" />
-                      {member.achievement}
+                    {/* Bottom Red Shape */}
+                    <div className="absolute bottom-0 left-0 right-0 h-24 w-full z-0">
+                      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full fill-primary">
+                        {/* Start bottom-left(0,100), go bottom-right(100,100), go up-right(100,75), curve to up-left(0,40) */}
+                        <path d="M0 100 H100 V75 Q50 85 0 40 Z" />
+                      </svg>
                     </div>
-
-                    {/* Quote */}
-                    <blockquote className="text-muted-foreground text-sm italic leading-relaxed">
-                      &ldquo;{member.quote}&rdquo;
-                    </blockquote>
                   </div>
                 </div>
               ))}
