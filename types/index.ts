@@ -37,13 +37,13 @@ export interface User {
   lastName: string
   profilePhoto?: string
   bannerUrl?: string
-  
-  
+
+
   // CV/Resume fields
   cvFileName?: string
   cvFileUrl?: string
   cvUploadedAt?: Date
-  
+
   username?: string
   profileSlug: string
   authProvider: AuthProvider
@@ -202,17 +202,17 @@ export interface Chapter {
   name: string
   code: string
   country: string
-  
+
   // Optional Location & Details
   city?: string
   description?: string
   missionStatement?: string
-  
+
   // Counts & Status
   memberCount: number
   fixedMemberCount: number
   isActive: boolean
-  
+
   // Populated Admin Data
   adminIds: Array<{
     _id: string
@@ -220,7 +220,7 @@ export interface Chapter {
     lastName: string
     email?: string
   }>
-  
+
   // Leadership & Contact (Optional)
   currentPresident?: string
   presidentName?: string
@@ -230,18 +230,18 @@ export interface Chapter {
   phone?: string
   address?: string;
   website?: string
-  
+
   // Social Media (Optional)
   facebookUrl?: string
   twitterHandle?: string
   instagramHandle?: string
   linkedinUrl?: string
-  
+
   // Metadata
   foundedDate?: string
   createdAt: string | Date // Keeping flexible
   updatedAt: string | Date
-  
+
   // Computed Field
   adminName: string
 }
@@ -371,6 +371,108 @@ export interface PaginatedResponse<T> {
     totalPages: number
   }
 }
+
+// ============================================
+// RESOURCES
+// ============================================
+
+export enum ResourceType {
+  PDF = 'PDF',
+  VIDEO = 'VIDEO',
+}
+
+export interface Resource {
+  id?: string
+  _id?: string
+  title: string
+  description: string
+  resourceType: ResourceType
+  fileUrl: string
+  status: 'PUBLISHED' | 'DRAFT' | 'ARCHIVED'
+  thumbnailUrl?: string // Optional thumbnail for videos/PDFs
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface ResourceListResponse {
+  data: Resource[]
+}
+
+export interface ResourceDetailResponse {
+  data: Resource
+}
+
+// ============================================
+// MENTORSHIP
+// ============================================
+
+export enum MentorshipFormat {
+  VIRTUAL = 'Virtual',
+  PHYSICAL = 'Physical',
+  HYBRID = 'Hybrid',
+}
+
+export enum MentorshipStatus {
+  OPEN = 'Open',
+  CLOSED = 'Closed',
+}
+
+export interface Mentorship {
+  id?: string
+  _id?: string
+  mentorName: string
+  mentorRole: string
+  areasOfExpertise: string[]
+  mentorshipFormat: MentorshipFormat
+  availability: string
+  duration: string
+  description: string
+  eligibility: string
+  status: MentorshipStatus
+  chapterId?: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface MentorshipListResponse {
+  data: Mentorship[]
+}
+
+export interface MentorshipDetailResponse {
+  data: Mentorship
+}
+
+// ============================================
+// FUNDING & GRANTS
+// ============================================
+
+export interface FundingOpportunity {
+  id?: string
+  _id?: string
+  name: string
+  fundingType: string // e.g., 'Grant', 'Residency'
+  applicationType: 'Direct' | 'Redirect'
+  deadline: string
+  description?: string
+  amount?: string
+  currency?: string
+  applicationLink?: string
+  eligibility?: string
+  criteria?: string
+  status: 'Open' | 'Closed' | 'Coming Soon'
+  chapterId?: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface FundingListResponse {
+  data: FundingOpportunity[]
+}
+
+export interface FundingDetailResponse {
+  data: FundingOpportunity
+}
+
 export * from './jobs'
 export * from './reports'
 export * from './application'

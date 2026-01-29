@@ -167,3 +167,30 @@
     - **Posts**: Aggregated summary, detailed post analytics, demographic breakdown.
     - **Connections**: Platform-wide connection stats, inter-chapter/region flows (Super Admin).
 
+### Mentorship Module
+- **Purpose**: Managing mentorship programs and offers.
+- **Entry Point**: `/api/v1/mentorships` (controller: `mentorship.controller.ts`)
+- **Key Features**:
+    - **Offers**: Create, List, Update, Delete mentorship offers.
+    - **Formats**: Virtual, Physical, Hybrid mentorships.
+
+### Funding Opportunities Module
+- **Purpose**: Managing grants and funding opportunities.
+- **Entry Point**: `/api/v1/funding-opportunities` (controller: `fundingOpportunity.controller.ts`)
+- **Key Features**:
+    - **Management**: Admin Create/Update/Delete funding opportunities.
+    - **Listing**: Public listing of opportunities.
+
+### Resources Module
+- **Purpose**: Managing learning resources (PDFs, Videos).
+- **Entry Point**: `/api/v1/resources` (controller: `resource.controller.ts`)
+- **Key Features**:
+    - **Management**: Super Admin Create/Update/Delete resources.
+    - **Access**: Video and PDF resource access.
+
+### Recommendations Module
+- **Purpose**: User and content recommendations.
+- **Entry Point**: `/api/v1/recommendations` (controller: `search.controller.ts`)
+- **Key Features**:
+    - **Users**: Get recommended users to connect with.
+
