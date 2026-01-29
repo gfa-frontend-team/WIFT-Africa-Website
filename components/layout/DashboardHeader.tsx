@@ -8,13 +8,13 @@ import Image from 'next/image';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
 import { MembershipStatus, type User } from '@/types';
-import { 
-  Home, 
-  User as UserIcon, 
-  MessageCircle, 
-  Briefcase, 
-  BookOpen, 
-  Users, 
+import {
+  Home,
+  User as UserIcon,
+  MessageCircle,
+  Briefcase,
+  BookOpen,
+  Users,
   Calendar,
   Search,
   Bell,
@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
+import { ModeToggle } from '@/components/shared/ModeToggle';
 import { useEffect } from 'react';
 
 interface DashboardHeaderProps {
@@ -59,7 +60,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const { useUnreadCount } = useNotifications();
   const { data: unreadData } = useUnreadCount();
   const unreadCount = unreadData?.count || 0;
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('mousedown', handleClickOutside);
-    
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleClickOutside);
@@ -131,9 +132,9 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             <Link href="/feed" className="flex items-center shrink-0 group mr-4">
               <div className="relative h-10 w-10">
                 <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Image 
-                  src="/fav.png" 
-                  alt="WIFT Africa" 
+                <Image
+                  src="/fav.png"
+                  alt="WIFT Africa"
                   fill
                   className="object-contain relative z-10 transition-transform duration-300 group-hover:scale-105"
                   priority
@@ -147,18 +148,17 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 const Icon = item.icon;
                 const isActive = isActiveRoute(item.href);
                 const hasAccess = access[item.requiredFeature];
-                
+
                 return (
                   <Link
                     key={item.name}
                     href={hasAccess ? item.href : '/verification'}
-                    className={`relative flex items-center space-x-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 group ${
-                      isActive && hasAccess
-                        ? 'bg-primary/10 text-primary'
-                        : hasAccess
-                          ? 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                          : 'text-muted-foreground/40 cursor-help'
-                    }`}
+                    className={`relative flex items-center space-x-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 group ${isActive && hasAccess
+                      ? 'bg-primary/10 text-primary'
+                      : hasAccess
+                        ? 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        : 'text-muted-foreground/40 cursor-help'
+                      }`}
                     title={!hasAccess ? t('dashboard.header.verification_tooltip') : undefined}
                   >
                     <Icon className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${!hasAccess ? 'opacity-50' : ''}`} />
@@ -182,8 +182,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                          e.preventDefault()
-                          router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
+                        e.preventDefault()
+                        router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
                       }
                     }}
                     className="pl-10 pr-4 py-2 w-64 bg-accent/30 border border-transparent hover:border-border/50 focus:border-primary/30 focus:bg-background rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
@@ -213,7 +213,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 </Link>
               </div>
 
-              <div className="relative">
+              <div className="relative flex items-center gap-2">
+                <ModeToggle />
                 <LanguageSwitcher />
               </div>
 
@@ -225,8 +226,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 >
                   <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
                     {user.profilePhoto ? (
-                      <img 
-                        src={user.profilePhoto} 
+                      <img
+                        src={user.profilePhoto}
                         alt={user.firstName}
                         className="h-full w-full object-cover"
                       />
@@ -296,7 +297,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             </div>
           </div>
         </div>
-        
+
         {/* Mobile Search Overlay */}
         {isSearchOpen && (
           <div className="md:hidden border-t border-border bg-card/95 backdrop-blur-xl px-4 py-4 animate-in slide-in-from-top-2 duration-200 absolute w-full shadow-lg">
@@ -309,9 +310,9 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                      e.preventDefault()
-                      router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
-                      setIsSearchOpen(false)
+                    e.preventDefault()
+                    router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
+                    setIsSearchOpen(false)
                   }
                 }}
                 autoFocus

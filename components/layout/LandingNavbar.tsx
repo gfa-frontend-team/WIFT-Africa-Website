@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Linkedin, Facebook, Instagram, Youtube } from "lucide-react";
+import { ModeToggle } from "@/components/shared/ModeToggle";
 
 export default function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -26,7 +27,7 @@ export default function LandingNavbar() {
     e.preventDefault();
     const targetId = path.replace('#', '');
     const element = document.getElementById(targetId);
-    
+
     if (element) {
       const offset = 80; // Account for fixed navbar height
       const elementPosition = element.getBoundingClientRect().top;
@@ -37,7 +38,7 @@ export default function LandingNavbar() {
         behavior: 'smooth'
       });
     }
-    
+
     setIsMobileMenuOpen(false);
   };
 
@@ -56,7 +57,7 @@ export default function LandingNavbar() {
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => {
               const isHashLink = item.path.startsWith('#');
-              
+
               if (isHashLink && isHome) {
                 return (
                   <a
@@ -69,7 +70,7 @@ export default function LandingNavbar() {
                   </a>
                 );
               }
-              
+
               if (isHashLink && !isHome) {
                 return (
                   <Link
@@ -97,38 +98,38 @@ export default function LandingNavbar() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {/* Social Icons - Desktop */}
             <div className="hidden lg:flex items-center space-x-2 mr-2">
-              <a 
-                href="https://www.linkedin.com/company/wift-africa" 
-                target="_blank" 
+              <ModeToggle />
+              <a
+                href="https://www.linkedin.com/company/wift-africa"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="h-4 w-4" />
               </a>
-              <a 
-                href="https://www.facebook.com/wiftafrica" 
-                target="_blank" 
+              <a
+                href="https://www.facebook.com/wiftafrica"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4" />
               </a>
-              <a 
-                href="https://www.instagram.com/wiftafrica" 
-                target="_blank" 
+              <a
+                href="https://www.instagram.com/wiftafrica"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
               </a>
-              <a 
-                href="https://www.youtube.com/@wiftafrica" 
-                target="_blank" 
+              <a
+                href="https://www.youtube.com/@wiftafrica"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                 aria-label="YouTube"
@@ -169,7 +170,7 @@ export default function LandingNavbar() {
             <div className="space-y-2">
               {navItems.map((item) => {
                 const isHashLink = item.path.startsWith('#');
-                
+
                 if (isHashLink && isHome) {
                   return (
                     <a
@@ -182,7 +183,7 @@ export default function LandingNavbar() {
                     </a>
                   );
                 }
-                
+
                 if (isHashLink && !isHome) {
                   return (
                     <Link
@@ -208,7 +209,7 @@ export default function LandingNavbar() {
                   </Link>
                 );
               })}
-              
+
               {/* Mobile Auth Links */}
               <div className="border-t border-border pt-4 mt-4 space-y-2">
                 <Link
@@ -231,36 +232,36 @@ export default function LandingNavbar() {
               <div className="border-t border-border pt-4 mt-4">
                 <p className="text-xs font-medium text-muted-foreground mb-3 px-4">Follow Us</p>
                 <div className="flex items-center justify-center space-x-3 px-4">
-                  <a 
-                    href="https://www.linkedin.com/company/wift-africa" 
-                    target="_blank" 
+                  <a
+                    href="https://www.linkedin.com/company/wift-africa"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
                     aria-label="LinkedIn"
                   >
                     <Linkedin className="h-5 w-5 text-primary" />
                   </a>
-                  <a 
-                    href="https://www.facebook.com/wiftafrica" 
-                    target="_blank" 
+                  <a
+                    href="https://www.facebook.com/wiftafrica"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
                     aria-label="Facebook"
                   >
                     <Facebook className="h-5 w-5 text-primary" />
                   </a>
-                  <a 
-                    href="https://www.instagram.com/wiftafrica" 
-                    target="_blank" 
+                  <a
+                    href="https://www.instagram.com/wiftafrica"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
                     aria-label="Instagram"
                   >
                     <Instagram className="h-5 w-5 text-primary" />
                   </a>
-                  <a 
-                    href="https://www.youtube.com/@wiftafrica" 
-                    target="_blank" 
+                  <a
+                    href="https://www.youtube.com/@wiftafrica"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
                     aria-label="YouTube"
