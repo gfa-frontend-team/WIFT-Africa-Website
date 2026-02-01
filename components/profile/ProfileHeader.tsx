@@ -79,50 +79,9 @@ export default function ProfileHeader({
     bannerInputRef.current?.click()
   }
 
-  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    // Validation
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!validTypes.includes(file.type)) {
-      toast.error(t('profile.header.upload_error_type'), {
-        description: t('profile.header.upload_error_type_desc')
-      })
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      toast.error(t('profile.header.upload_error_size'), {
-        description: t('profile.header.upload_error_size_desc')
-      })
-      return
-    }
-
-    setIsUploadingBanner(true)
-    try {
-      const response = await usersApi.uploadProfileBanner(file)
-      // Update local state - assuming backend updates the PROFILE bannerUrl
-      setProfile(prev => ({ ...prev, bannerUrl: response.photoUrl }))
-      // Also update user state just in case of fallback usage
-      setUser(prev => ({ ...prev, bannerUrl: response.photoUrl }))
-
-      toast.success(t('profile.header.upload_success'), {
-        description: t('profile.header.upload_success_desc')
-      })
-    } catch (error) {
-      console.error('Failed to upload banner:', error)
-      toast.error(t('profile.header.upload_error'), {
-        description: t('profile.header.upload_error_desc')
-      })
-    } finally {
-      setIsUploadingBanner(false)
-      // Reset input
-      if (bannerInputRef.current) {
-        bannerInputRef.current.value = ''
-      }
-    }
-  }
+  /* 
+   * Improved File Upload Handlers with Specific Error Handling
+   */
 
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -131,33 +90,106 @@ export default function ProfileHeader({
     photoInputRef.current?.click()
   }
 
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Clear input value to allow re-selecting same file if needed
+    if (bannerInputRef.current) bannerInputRef.current.value = ''
+
+    // 1. Validate File Type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      toast.error(t('profile.header.upload_error_type'), {
+        description: "Please upload a valid image file (JPEG, PNG, or WebP)."
+      })
+      return
+    }
+
+    // 2. Validate File Size (Max 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+    if (file.size > MAX_SIZE) {
+      toast.error(t('profile.header.upload_error_size'), {
+        description: "Image size must be less than 5MB to ensure fast loading."
+      })
+      return
+    }
+
+    setIsUploadingBanner(true)
+    try {
+      const response = await usersApi.uploadProfileBanner(file)
+
+      // Update local state with new banner URL
+      setProfile(prev => ({ ...prev, bannerUrl: response.photoUrl }))
+      setUser(prev => ({ ...prev, bannerUrl: response.photoUrl }))
+
+      toast.success(t('profile.header.upload_success'), {
+        description: "Your profile banner has been updated successfully."
+      })
+    } catch (error: any) {
+      console.error('Failed to upload banner:', error)
+
+      // Extract specific error message if available
+      const errorMessage = error.response?.data?.message ||
+        error.message ||
+        t('profile.header.upload_error_desc')
+
+      toast.error(t('profile.header.upload_error'), {
+        description: errorMessage
+      })
+    } finally {
+      setIsUploadingBanner(false)
+    }
+  }
+
+
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    // Validation
+    // Clear input value
+    if (photoInputRef.current) photoInputRef.current.value = ''
+
+    // 1. Validate File Type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp']
     if (!validTypes.includes(file.type)) {
-      toast.error(t('profile.header.upload_error_type'))
+      toast.error(t('profile.header.upload_error_type'), {
+        description: "Please upload a valid image file (JPEG, PNG, or WebP)."
+      })
       return
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      toast.error(t('profile.header.upload_error_size'))
+    // 2. Validate File Size (Max 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+    if (file.size > MAX_SIZE) {
+      toast.error(t('profile.header.upload_error_size'), {
+        description: "Image size must be less than 5MB."
+      })
       return
     }
 
     setIsUploadingPhoto(true)
     try {
       const response = await usersApi.uploadProfilePhoto(file)
+
+      // Update local state
       setUser(prev => ({ ...prev, profilePhoto: response.photoUrl }))
-      toast.success(t('profile.header.upload_success'))
-    } catch (error) {
+
+      toast.success(t('profile.header.upload_success'), {
+        description: "Your profile photo has been updated."
+      })
+    } catch (error: any) {
       console.error('Failed to upload photo:', error)
-      toast.error(t('profile.header.upload_error'))
+
+      const errorMessage = error.response?.data?.message ||
+        error.message ||
+        "We couldn't upload your photo. Please try again."
+
+      toast.error(t('profile.header.upload_error'), {
+        description: errorMessage
+      })
     } finally {
       setIsUploadingPhoto(false)
-      if (photoInputRef.current) photoInputRef.current.value = ''
     }
   }
 
