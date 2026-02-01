@@ -22,6 +22,7 @@ export default function ConversationList({
   isLoading
 }: ConversationListProps) {
   const queryClient = useQueryClient()
+  const currentUser = queryClient.getQueryData<any>(['auth', 'me'])
 
   const archiveMutation = useMutation({
     mutationFn: (conversationId: string) => messagesApi.archiveConversation(conversationId),
@@ -33,6 +34,26 @@ export default function ConversationList({
       toast.error('Failed to archive conversation')
     }
   })
+
+  // User-defined unread logic
+  const isMessageUnread = (msg: any) => {
+    if (!msg || !currentUser) return false;
+
+    // If I sent it, it's read
+    const senderId = msg.sender.id || msg.sender._id;
+    const myId = currentUser.id || currentUser._id;
+    if (senderId === myId) return false;
+
+    // Broadcast logic: check readBy array
+    if (msg.isBroadcast) {
+      if (!msg.readBy) return true; // Default unread if no array? Or assume unread? strictly !includes
+      return !msg.readBy.includes(myId);
+    }
+
+    // Direct logic: check strictly isRead flag
+    // If msg.isRead is false, then I haven't read it (assuming I am receiver)
+    return msg.isRead === false;
+  }
 
   const handleArchive = (e: React.MouseEvent, conversationId: string) => {
     e.stopPropagation()
@@ -70,16 +91,19 @@ export default function ConversationList({
       {conversations.map((conversation) => {
         const otherUser = conversation.otherParticipant
         const isSelected = conversation.id === activeConversationId
-        
+
+        // Determine unread status using both count and last message check
+        // We trust the backend count, OR the last message status for immediate feedback
+        const hasUnreadMessages = conversation.unreadCount > 0 || isMessageUnread(conversation.lastMessage)
+
         return (
           <div
             key={conversation.id}
             onClick={() => onSelectConversation(conversation.id)}
-            className={`group p-4 cursor-pointer hover:bg-muted/50 transition-all duration-200 border-l-4 relative ${
-              isSelected 
-                ? 'bg-primary/5 border-primary' 
+            className={`group p-4 cursor-pointer hover:bg-muted/50 transition-all duration-200 border-l-4 relative ${isSelected
+                ? 'bg-primary/5 border-primary'
                 : 'border-transparent'
-            }`}
+              }`}
           >
             <div className="flex gap-3">
               <div className="relative flex-shrink-0">
@@ -107,24 +131,23 @@ export default function ConversationList({
               <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <div className="flex justify-between items-baseline mb-1">
                   <h4 className={`text-sm font-semibold truncate ${isSelected ? 'text-primary' : 'text-foreground'}`}>
-                    {conversation.type === 'DIRECT' 
+                    {conversation.type === 'DIRECT'
                       ? `${otherUser?.firstName} ${otherUser?.lastName}`
                       : conversation.title}
                   </h4>
                   {conversation.lastMessage && (
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
-                       {formatDistanceToNow(new Date(conversation.lastMessage.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(conversation.lastMessage.createdAt), { addSuffix: true })}
                     </span>
                   )}
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className={`text-xs truncate leading-tight flex-1 ${
-                    conversation.unreadCount > 0 ? 'text-foreground font-semibold' : 'text-muted-foreground'
-                  }`}>
+                  <p className={`text-xs truncate leading-tight flex-1 ${hasUnreadMessages ? 'text-foreground font-bold' : 'text-muted-foreground'
+                    }`}>
                     {conversation.lastMessage?.isMine && <span className="text-primary/70 font-medium">You: </span>}
                     {conversation.lastMessage?.content || 'No messages yet'}
                   </p>
-                  
+
                   <Button
                     variant="ghost"
                     size="icon"

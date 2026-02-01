@@ -10,6 +10,10 @@ export interface Message {
   isMine?: boolean
   media?: any[]
   createdAt: string
+  // New fields for unread logic
+  isRead?: boolean
+  readBy?: string[]
+  isBroadcast?: boolean
 }
 
 export interface Conversation {
@@ -96,5 +100,12 @@ export const messagesApi = {
    */
   deleteMessage: async (messageId: string): Promise<{ message: string }> => {
     return await apiClient.delete<{ message: string }>(`/messages/${messageId}`)
+  },
+
+  /**
+   * Edit a message
+   */
+  editMessage: async (messageId: string, content: string): Promise<{ message: Message }> => {
+    return await apiClient.put<{ message: Message }>(`/messages/${messageId}`, { content })
   },
 }

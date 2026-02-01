@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // @ts-ignore - Experimental feature
+  reactCompiler: true,
   images: {
     remotePatterns: [
       {

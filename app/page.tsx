@@ -22,87 +22,89 @@ import Link from "next/link";
 import Image from "next/image";
 import LandingLayout from '@/components/layout/LandingLayout';
 
-export default function LandingPage() {
-  const memberBenefits = [
-    {
-      icon: Eye,
-      title: "Enhanced Visibility",
-      description:
-        "Increase your profile reach among producers, directors, and collaborators across Africa and the diaspora.",
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-    },
-    {
-      icon: UserCheck,
-      title: "Verified Professional Status",
-      description:
-        "Build trust and credibility with industry partners and employers.",
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-    },
-    {
-      icon: Network,
-      title: "Premium Networking Access",
-      description:
-        "Connect directly with chapter leaders, industry mentors, and emerging talent.",
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-    },
-    {
-      icon: Crown,
-      title: "Chapter Leadership Pathways",
-      description:
-        "Step into industry leadership and shape your local creative ecosystem.",
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
-    },
-    {
-      icon: Briefcase,
-      title: "Access to Job Match & Talent Calls",
-      description:
-        "Get early access to exclusive opportunities and curated career recommendations.",
-      color: "text-red-500",
-      bgColor: "bg-red-500/10",
-    },
-    {
-      icon: Zap,
-      title: "Advanced Profile Toolkit",
-      description:
-        "Showcase reels, credits, achievements, and press — all in one professional profile.",
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-500/10",
-    },
-  ];
+const memberBenefits = [
+  {
+    icon: Eye,
+    title: "Enhanced Visibility",
+    description:
+      "Increase your profile reach among producers, directors, and collaborators across Africa and the diaspora.",
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+  },
+  {
+    icon: UserCheck,
+    title: "Verified Professional Status",
+    description:
+      "Build trust and credibility with industry partners and employers.",
+    color: "text-green-500",
+    bgColor: "bg-green-500/10",
+  },
+  {
+    icon: Network,
+    title: "Premium Networking Access",
+    description:
+      "Connect directly with chapter leaders, industry mentors, and emerging talent.",
+    color: "text-purple-500",
+    bgColor: "bg-purple-500/10",
+  },
+  {
+    icon: Crown,
+    title: "Chapter Leadership Pathways",
+    description:
+      "Step into industry leadership and shape your local creative ecosystem.",
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/10",
+  },
+  {
+    icon: Briefcase,
+    title: "Access to Job Match & Talent Calls",
+    description:
+      "Get early access to exclusive opportunities and curated career recommendations.",
+    color: "text-red-500",
+    bgColor: "bg-red-500/10",
+  },
+  {
+    icon: Zap,
+    title: "Advanced Profile Toolkit",
+    description:
+      "Showcase reels, credits, achievements, and press — all in one professional profile.",
+    color: "text-yellow-500",
+    bgColor: "bg-yellow-500/10",
+  },
+];
 
-  const featuredMembers = [
-    {
-      name: 'Asha Mandela',
-      role: 'Award-Winning Director',
-      chapter: 'WIFT South Africa',
-      image: 'https://images.unsplash.com/photo-1531123414780-f74242c2b052?q=80&w=2574&auto=format&fit=crop',
-      quote: "WIFT Africa connected me with producers in 8 countries. My visibility grew more than 400% in just six months.",
-      achievement: 'AMAA BEST DIRECTOR 2024',
-      verified: true
-    },
-    {
-      name: 'Kemi Adetiba',
-      role: 'Producer & Screenwriter',
-      chapter: 'WIFT Nigeria',
-      image: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?q=80&w=2568&auto=format&fit=crop',
-      quote: "My profile reach skyrocketed. The platform opened professional doors I once thought were out of reach.",
-      achievement: 'PRODUCER, NETFLIX ORIGINALS',
-      verified: true
-    },
-    {
-      name: 'Wanuri Kahiu',
-      role: 'Cinematographer',
-      chapter: 'WIFT Kenya',
-      image: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=2574&auto=format&fit=crop',
-      quote: "Three major collaborations started through my WIFT profile. The visibility is real — and it's global.",
-      achievement: 'CANNES FILM FESTIVAL SELECTION',
-      verified: true
-    }
-  ];
+const featuredMembers = [
+  {
+    name: 'Asha Mandela',
+    role: 'Award-Winning Director',
+    chapter: 'WIFT South Africa',
+    image: 'https://images.unsplash.com/photo-1531123414780-f74242c2b052?q=80&w=2574&auto=format&fit=crop',
+    quote: "WIFT Africa connected me with producers in 8 countries. My visibility grew more than 400% in just six months.",
+    achievement: 'AMAA BEST DIRECTOR 2024',
+    verified: true
+  },
+  {
+    name: 'Kemi Adetiba',
+    role: 'Producer & Screenwriter',
+    chapter: 'WIFT Nigeria',
+    image: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?q=80&w=2568&auto=format&fit=crop',
+    quote: "My profile reach skyrocketed. The platform opened professional doors I once thought were out of reach.",
+    achievement: 'PRODUCER, NETFLIX ORIGINALS',
+    verified: true
+  },
+  {
+    name: 'Wanuri Kahiu',
+    role: 'Cinematographer',
+    chapter: 'WIFT Kenya',
+    image: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=2574&auto=format&fit=crop',
+    quote: "Three major collaborations started through my WIFT profile. The visibility is real — and it's global.",
+    achievement: 'CANNES FILM FESTIVAL SELECTION',
+    verified: true
+  }
+];
+
+export default function LandingPage() {
+
 
   return (
     <LandingLayout>

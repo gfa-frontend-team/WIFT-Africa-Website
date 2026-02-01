@@ -16,7 +16,7 @@ class ApiClient {
   private requestQueue: Array<() => Promise<unknown>> = []
   private isProcessingQueue = false
   private lastRequestTime = 0
-  private minRequestInterval = 50 // Minimum 100ms between requests
+  private minRequestInterval = 0 // Removed artificial bottleneck
 
   // Token refresh queue
   private isRefreshing = false
@@ -55,36 +55,20 @@ class ApiClient {
         const originalRequest = error.config as CustomRequestConfig
 
         // Handle rate limiting (429)
-        if (error.response?.status === 429 && originalRequest && !originalRequest.headers['X-Retry-Count']) {
-          const retryCount = parseInt(originalRequest.headers['X-Retry-Count'] as string || '0')
-          
-          if (retryCount < MAX_RETRIES) {
-            const delay = RETRY_DELAYS[retryCount] || RETRY_DELAYS[RETRY_DELAYS.length - 1]
-            // console.log(`🔄 Rate limited, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`)
-            
-            // Wait before retrying
-            await new Promise(resolve => setTimeout(resolve, delay))
-            
-            // Add retry count header
-            originalRequest.headers['X-Retry-Count'] = (retryCount + 1).toString()
-            
-            return this.client(originalRequest)
-          } else {
-            console.error('❌ Max retries exceeded for rate limited request')
-            // Return a more user-friendly error for rate limiting
-            const rateLimitError = new Error('Server is busy. Please try again in a few moments.')
-            rateLimitError.name = 'RateLimitError'
-            return Promise.reject(rateLimitError)
-          }
+        if (error.response?.status === 429) {
+          // Do not retry 429s automatically to prevent storming
+          console.error('❌ Rate limited (429). Fetch prevented.');
+          return Promise.reject(error);
         }
 
+
         // Check for "No token provided" error (should be treated as 401)
-        const isNoTokenError = error.response?.data?.error === 'No token provided' || 
-                              error.response?.data?.message === 'No token provided'
+        const isNoTokenError = error.response?.data?.error === 'No token provided' ||
+          error.response?.data?.message === 'No token provided'
 
         // If 401 or "No token provided" and we haven't retried yet
         if ((error.response?.status === 401 || isNoTokenError) && originalRequest && !originalRequest._retry) {
-          
+
           if (this.isRefreshing) {
             // If already refreshing, add to queue
             return new Promise((resolve, reject) => {
@@ -104,7 +88,7 @@ class ApiClient {
 
           try {
             const refreshToken = this.getRefreshToken()
-            
+
             if (!refreshToken) {
               throw new Error('No refresh token available')
             }
@@ -119,10 +103,10 @@ class ApiClient {
 
             // Update header for the original request
             originalRequest.headers['Authorization'] = `Bearer ${accessToken}`
-            
+
             // Process queue
             this.processFailedQueue(null, accessToken)
-            
+
             return this.client(originalRequest)
           } catch (refreshError) {
             this.processFailedQueue(refreshError, null)
@@ -147,7 +131,7 @@ class ApiClient {
         prom.resolve(token)
       }
     })
-    
+
     this.failedQueue = []
   }
 
@@ -158,12 +142,12 @@ class ApiClient {
         try {
           const now = Date.now()
           const timeSinceLastRequest = now - this.lastRequestTime
-          
+
           if (timeSinceLastRequest < this.minRequestInterval) {
             const delay = this.minRequestInterval - timeSinceLastRequest
             await new Promise(resolve => setTimeout(resolve, delay))
           }
-          
+
           this.lastRequestTime = Date.now()
           const result = await requestFn()
           resolve(result)
@@ -171,7 +155,7 @@ class ApiClient {
           reject(error)
         }
       })
-      
+
       this.processQueue()
     })
   }
@@ -180,16 +164,17 @@ class ApiClient {
     if (this.isProcessingQueue || this.requestQueue.length === 0) {
       return
     }
-    
+
     this.isProcessingQueue = true
-    
+
     while (this.requestQueue.length > 0) {
       const request = this.requestQueue.shift()
       if (request) {
-        await request()
+        // Execute without awaiting completion, allowing concurrent requests
+        request().catch(console.error)
       }
     }
-    
+
     this.isProcessingQueue = false
   }
 
@@ -218,7 +203,7 @@ class ApiClient {
 
   private forceLogout(): void {
     if (typeof window === 'undefined') return
-    
+
     // Clear tokens immediately explicitly
     this.clearTokens()
 
@@ -227,19 +212,19 @@ class ApiClient {
     import('../stores/userStore').then(({ useUserStore }) => {
       useUserStore.getState().clearUser()
     })
-    
+
     // Redirect to login
     // Use window.location only if we are not already on a public page
     const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/', '/verify-email']
-    
+
     // Check if current path starts with any public path (to cover sub-routes if any)
-    const isPublic = publicPaths.some(path => 
-      window.location.pathname === path || 
+    const isPublic = publicPaths.some(path =>
+      window.location.pathname === path ||
       (path !== '/' && window.location.pathname.startsWith(path + '/'))
     )
 
     if (!isPublic) {
-        window.location.href = '/login'
+      window.location.href = '/login'
     }
   }
 
