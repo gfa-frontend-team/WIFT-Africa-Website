@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [apiError, setApiError] = useState<string | null>(null)
   const [rememberMe, setRememberMe] = useState(false)
   const [isLocalLoading, setIsLocalLoading] = useState(false)
-  
+
   const isLoading = isAuthLoading || isGoogleLoading || isLocalLoading
 
 
@@ -78,9 +78,9 @@ export default function LoginPage() {
       // Navigation handled by useAuth hook
     } catch (error: any) {
       // Extract and display error message
-      const message = error.response?.data?.error || 
-                      error.response?.data?.message || 
-                      'Invalid email or password. Please try again.'
+      const message = error.response?.data?.error ||
+        error.response?.data?.message ||
+        'Invalid email or password. Please try again.'
       setApiError(message)
     } finally {
       setIsLocalLoading(false)
@@ -90,7 +90,7 @@ export default function LoginPage() {
 
 
   return (
-    <>      
+    <>
       <div className="min-h-screen flex">
         {/* Left Side - Form */}
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-background">
@@ -98,7 +98,7 @@ export default function LoginPage() {
             {/* Header */}
             <div className="text-center">
               <Link href="/" className="inline-block mb-6">
-                <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+                <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
               </Link>
               <h1 className="text-3xl font-bold text-foreground">Welcome to WIFT Africa</h1>
               <p className="mt-2 text-muted-foreground">Sign in to your professional account</p>
@@ -261,7 +261,7 @@ export default function LoginPage() {
         {/* Right Side - Image */}
         <div className="hidden lg:block lg:w-1/2 relative">
           <img
-            src="https://images.unsplash.com/photo-1489599162946-648229b4b4b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            src="/WhatsApp Image 2026-02-01 at 4.14.11 PM.jpeg"
             alt="WIFT Africa"
             className="absolute inset-0 w-full h-full object-cover"
           />

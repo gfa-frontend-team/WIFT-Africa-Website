@@ -36,9 +36,9 @@ export default function JobDetailPage() {
   // Determine if user has applied
   const hasApplied = useMemo(() => {
     if (job?.hasApplied) return true;
-    
+
     if (applicationsResponse?.applications) {
-      return applicationsResponse.applications.some(app => 
+      return applicationsResponse.applications.some(app =>
         // app.job can be populated object or ID string. 
         // If populated, use _id. If string, compare directly.
         (typeof app.job === 'string' ? app.job : app.job._id) === id
@@ -60,8 +60,8 @@ export default function JobDetailPage() {
   if (isError || !job) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Job not found</h2>
-        <p className="text-gray-600 mb-6">The job posting you are looking for may have been removed or does not exist.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-4">Job not found</h2>
+        <p className="text-muted-foreground mb-6">The job posting you are looking for may have been removed or does not exist.</p>
         <Button asChild>
           <Link href="/opportunities">Back to Opportunities</Link>
         </Button>
@@ -76,18 +76,18 @@ export default function JobDetailPage() {
         Back to Jobs
       </Button>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-100">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-border">
           <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
-              <div className="flex flex-wrap items-center gap-4 text-gray-600">
+              <h1 className="text-3xl font-bold text-foreground mb-2">{job.title}</h1>
+              <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
                 <div className="flex items-center">
-                  <Building2 className="w-5 h-5 mr-2 text-gray-400" />
+                  <Building2 className="w-5 h-5 mr-2 text-muted-foreground" />
                   <span className="font-medium">{job.companyName}</span>
                 </div>
                 <div className="flex items-center">
-                  <MapPin className="w-5 h-5 mr-2 text-gray-400" />
+                  <MapPin className="w-5 h-5 mr-2 text-muted-foreground" />
                   {job.location}
                 </div>
                 {job.isRemote && (
@@ -97,42 +97,42 @@ export default function JobDetailPage() {
                 )}
               </div>
             </div>
-            
+
             <div className="flex flex-col items-end gap-2">
-               <Button size="lg" onClick={() => setIsModalOpen(true)} disabled={hasApplied}>
+              <Button size="lg" onClick={() => setIsModalOpen(true)} disabled={hasApplied}>
                 {hasApplied ? 'Applied' : 'Apply Now'}
-               </Button>
-               <span className="text-sm text-gray-500">
+              </Button>
+              <span className="text-sm text-muted-foreground">
                 Posted {new Date(job.createdAt || new Date().toISOString()).toLocaleDateString()}
-               </span>
+              </span>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3 mt-4">
-             <Badge variant="outline" className="px-3 py-1">
-                <Briefcase className="w-3 h-3 mr-2" />
-                {(job.employmentType || '').replace('_', ' ')}
-             </Badge>
-             {job.salaryRange && (
-               <Badge variant="outline" className="px-3 py-1">
-                 {job.salaryRange.currency} {job.salaryRange.min.toLocaleString()} - {job.salaryRange.max.toLocaleString()}
-               </Badge>
-             )}
+            <Badge variant="outline" className="px-3 py-1">
+              <Briefcase className="w-3 h-3 mr-2" />
+              {(job.employmentType || '').replace('_', ' ')}
+            </Badge>
+            {job.salaryRange && (
+              <Badge variant="outline" className="px-3 py-1">
+                {job.salaryRange.currency} {job.salaryRange.min.toLocaleString()} - {job.salaryRange.max.toLocaleString()}
+              </Badge>
+            )}
           </div>
         </div>
 
         <div className="p-8 space-y-8">
           <section>
-            <h3 className="text-xl font-bold text-gray-900 mb-4">About the Role</h3>
-            <div className="prose max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
+            <h3 className="text-xl font-bold text-foreground mb-4">About the Role</h3>
+            <div className="prose max-w-none text-muted-foreground leading-relaxed whitespace-pre-line">
               {job.description}
             </div>
           </section>
 
           {job.responsibilities && job.responsibilities.length > 0 && (
             <section>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Responsibilities</h3>
-              <ul className="list-disc pl-5 space-y-2 text-gray-600">
+              <h3 className="text-xl font-bold text-foreground mb-4">Responsibilities</h3>
+              <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                 {job.responsibilities.map((item, index) => (
                   <li key={index}>{item}</li>
                 ))}
@@ -142,8 +142,8 @@ export default function JobDetailPage() {
 
           {job.requirements && job.requirements.length > 0 && (
             <section>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Requirements</h3>
-              <ul className="list-disc pl-5 space-y-2 text-gray-600">
+              <h3 className="text-xl font-bold text-foreground mb-4">Requirements</h3>
+              <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                 {job.requirements.map((item, index) => (
                   <li key={index}>{item}</li>
                 ))}
@@ -153,7 +153,7 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      <JobApplicationModal 
+      <JobApplicationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         jobId={job._id}

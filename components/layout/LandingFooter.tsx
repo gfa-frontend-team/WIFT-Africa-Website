@@ -9,14 +9,14 @@ export default function LandingFooter() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
+              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto" />
             </div>
             <p className="text-muted-foreground text-sm mb-4 max-w-md">
               Empowering women in the African film and television industry. Connect with professionals, discover opportunities, and advance your career.
             </p>
             <div className="flex space-x-3">
-              <a 
-                href="https://www.linkedin.com/company/women-in-film-and-tv-africa/" 
+              <a
+                href="https://www.linkedin.com/company/women-in-film-and-tv-africa/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
@@ -24,8 +24,8 @@ export default function LandingFooter() {
               >
                 <Linkedin className="h-5 w-5 text-primary" />
               </a>
-              <a 
-                href="https://www.facebook.com/wiftafrica" 
+              <a
+                href="https://www.facebook.com/wiftafrica"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
@@ -33,8 +33,8 @@ export default function LandingFooter() {
               >
                 <Facebook className="h-5 w-5 text-primary" />
               </a>
-              <a 
-                href="https://www.instagram.com/wiftafrica" 
+              <a
+                href="https://www.instagram.com/wiftafrica"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"
@@ -42,8 +42,8 @@ export default function LandingFooter() {
               >
                 <Instagram className="h-5 w-5 text-primary" />
               </a>
-              <a 
-                href="http://www.youtube.com/@wiftafrica4002" 
+              <a
+                href="http://www.youtube.com/@wiftafrica4002"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/20 transition-colors"

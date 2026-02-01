@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setEmail(value)
-    
+
     // Clear errors when user starts typing
     if (emailError) setEmailError(null)
     if (error) setError(null)
@@ -62,13 +62,13 @@ export default function ForgotPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
-            {/* Header */}
-            <div className="text-center">
-              <Link href="/" className="inline-block mb-6">
-                <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
-              </Link>
-              <h1 className="text-3xl font-bold text-foreground">Forgot Password?</h1>
-            </div>
+          {/* Header */}
+          <div className="text-center">
+            <Link href="/" className="inline-block mb-6">
+              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
+            </Link>
+            <h1 className="text-3xl font-bold text-foreground">Forgot Password?</h1>
+          </div>
 
           {/* Success Card */}
           <div className="bg-card border border-border rounded-2xl p-8 text-center">
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-          <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
+          <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto" />
           <span className="text-xl font-bold text-foreground">WIFT Africa</span>
         </Link>
 
@@ -182,9 +182,8 @@ export default function ForgotPasswordPage() {
                   type="email"
                   value={email}
                   onChange={handleEmailChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
-                    emailError ? 'border-destructive' : 'border-border'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${emailError ? 'border-destructive' : 'border-border'
+                    }`}
                   placeholder="Enter your email address"
                   disabled={isLoading}
                 />

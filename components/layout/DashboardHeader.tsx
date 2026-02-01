@@ -133,7 +133,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               <div className="relative h-10 w-10">
                 <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Image
-                  src="/fav.png"
+                  src="/WIFTAFRICA HEAD.png"
                   alt="WIFT Africa"
                   fill
                   className="object-contain relative z-10 transition-transform duration-300 group-hover:scale-105"

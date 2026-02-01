@@ -94,16 +94,16 @@ export default function RegisterPage() {
         firstName: formData.firstName,
         lastName: formData.lastName
       })
-      
+
       // Store email for resend verification functionality
       localStorage.setItem('pendingVerificationEmail', formData.email)
-      
+
       // Navigation handled by useAuth hook
     } catch (error: any) {
       // Extract and display error message
-      const message = error.response?.data?.error || 
-                      error.response?.data?.message || 
-                      'Registration failed. Please try again.'
+      const message = error.response?.data?.error ||
+        error.response?.data?.message ||
+        'Registration failed. Please try again.'
       setApiError(message)
     } finally {
       setIsLoading(false)
@@ -113,7 +113,7 @@ export default function RegisterPage() {
 
 
   return (
-    <>      
+    <>
       <div className="min-h-screen flex">
         {/* Left Side - Form */}
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-background">
@@ -121,7 +121,7 @@ export default function RegisterPage() {
             {/* Header */}
             <div className="text-center">
               <Link href="/" className="inline-block mb-6">
-                <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+                <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
               </Link>
               <h1 className="text-3xl font-bold text-foreground">Join WIFT Africa</h1>
               <p className="mt-2 text-muted-foreground">
@@ -363,7 +363,7 @@ export default function RegisterPage() {
         {/* Right Side - Image */}
         <div className="hidden lg:block lg:w-1/2 relative">
           <img
-            src="https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            src="/WhatsApp Image 2026-02-01 at 4.14.11 PM.jpeg"
             alt="WIFT Africa"
             className="absolute inset-0 w-full h-full object-cover"
           />

@@ -80,7 +80,7 @@ export default function ChapterDetailsPage() {
                     </div>
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <div className="w-20 h-20 rounded bg-white shadow-sm flex items-center justify-center overflow-hidden">
+                    <div className="w-20 h-20 rounded bg-card shadow-sm flex items-center justify-center overflow-hidden">
                       <img
                         src={`https://flagsapi.com/${chapter.code}/flat/64.png`}
                         alt={`${chapter.country} flag`}
@@ -134,8 +134,8 @@ export default function ChapterDetailsPage() {
               <button
                 onClick={() => setActiveTab("about")}
                 className={`py-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === "about"
-                    ? "border-primary text-primary font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-primary text-primary font-medium"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
               >
                 About
@@ -143,8 +143,8 @@ export default function ChapterDetailsPage() {
               <button
                 onClick={() => setActiveTab("events")}
                 className={`py-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === "events"
-                    ? "border-primary text-primary font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-primary text-primary font-medium"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
               >
                 Events
@@ -152,8 +152,8 @@ export default function ChapterDetailsPage() {
               <button
                 onClick={() => setActiveTab("opportunities")}
                 className={`py-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === "opportunities"
-                    ? "border-primary text-primary font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-primary text-primary font-medium"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
               >
                 Opportunities

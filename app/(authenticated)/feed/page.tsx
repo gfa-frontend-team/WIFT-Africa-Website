@@ -290,7 +290,7 @@ export default function HomePage() {
           </div>
 
           {/* Main Feed - 6 columns on desktop */}
-          <main className="lg:col-span-6">
+          <main className="lg:col-span-6 max-w-2xl mx-auto lg:max-w-none lg:mx-0 w-full">
             <FeatureGate
               feature="canViewFeed"
               showRestrictionMessage={false}
