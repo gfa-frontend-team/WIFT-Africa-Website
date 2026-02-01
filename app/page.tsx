@@ -75,30 +75,30 @@ const memberBenefits = [
 
 const featuredMembers = [
   {
-    name: 'Asha Mandela',
-    role: 'Award-Winning Director',
+    name: 'Felicia Naiwa Sithebe',
+    role: 'Award Winning Industry Trailblazer',
     chapter: 'WIFT South Africa',
-    image: 'https://images.unsplash.com/photo-1531123414780-f74242c2b052?q=80&w=2574&auto=format&fit=crop',
-    quote: "WIFT Africa connected me with producers in 8 countries. My visibility grew more than 400% in just six months.",
-    achievement: 'AMAA BEST DIRECTOR 2024',
+    image: '/Naiwa Sithibe.jpeg',
+    quote: "WIFT Africa is a response to what we have been yearning, an all inclusive space for women by women, championing ownership of our industry contributions",
+    achievement: 'ACMA Award Recipient 2025',
     verified: true
   },
   {
-    name: 'Kemi Adetiba',
-    role: 'Producer & Screenwriter',
-    chapter: 'WIFT Nigeria',
-    image: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?q=80&w=2568&auto=format&fit=crop',
-    quote: "My profile reach skyrocketed. The platform opened professional doors I once thought were out of reach.",
-    achievement: 'PRODUCER, NETFLIX ORIGINALS',
+    name: 'Fatou Jupiter Touré',
+    role: 'Award-Winning Producer',
+    chapter: 'WIFT Senegal',
+    image: '/Fatou Jupiter Touré.jpeg',
+    quote: "Through WIFT, I was able to expand my professional network and access new opportunities within the film and television industry.",
+    achievement: 'Producer',
     verified: true
   },
   {
-    name: 'Wanuri Kahiu',
-    role: 'Cinematographer',
-    chapter: 'WIFT Kenya',
-    image: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=2574&auto=format&fit=crop',
-    quote: "Three major collaborations started through my WIFT profile. The visibility is real — and it's global.",
-    achievement: 'CANNES FILM FESTIVAL SELECTION',
+    name: 'Tatapong Beyala',
+    role: 'University Film Lecturer',
+    chapter: 'WIFT Cameroon',
+    image: '/Tatapong Bayela.jpeg',
+    quote: "WIFT Africa welcomed me into a community of women sharing the same objectives with one voice, and this has changed everything — empowering us to grow, collaborate, and break barriers I never thought possible",
+    achievement: 'Public Vision Award 2021',
     verified: true
   }
 ];
@@ -218,7 +218,7 @@ export default function LandingPage() {
         </section>
 
         {/* About Us Section */}
-        <section id="about" className="py-16 md:py-24 bg-white relative overflow-hidden">
+        <section id="about" className="py-16 md:py-24 bg-card relative overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
               {/* Content Left */}
@@ -282,15 +282,15 @@ export default function LandingPage() {
               {/* Left: Framed Vision Image */}
               <div className="lg:w-2/5">
                 <div className="relative aspect-[3/4] w-full max-w-md mx-auto rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
-                  <div className="absolute inset-0 border-[8px] border-yellow-400/30 rounded-lg transform translate-x-4 translate-y-4" />
-                  <div className="relative h-full w-full border-[8px] border-white shadow-2xl rounded-lg overflow-hidden bg-white">
-                    <Image
-                      src="/vision.png"
-                      alt="WIFT Africa Vision"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+                  {/* <div className="absolute inset-0 border-[8px] border-yellow-400/30 rounded-lg transform translate-x-4 translate-y-4" /> */}
+                  {/* <div className="÷relative h-full w-full border-[8px] border-white shadow-2xl rounded-lg overflow-hidden bg-white"> */}
+                  <Image
+                    src="/4.png"
+                    alt="WIFT Africa Vision"
+                    fill
+                    className="object-cover"
+                  />
+                  {/* </div> */}
                 </div>
               </div>
 
@@ -334,7 +334,7 @@ export default function LandingPage() {
               {featuredMembers.map((member, index) => (
                 <div key={index} className="relative group hover:-translate-y-1 transition-all duration-300 h-full">
                   {/* Card Container */}
-                  <div className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-gray-100 flex flex-col h-full relative z-10">
+                  <div className="bg-card rounded-[2.5rem] shadow-xl overflow-hidden border border-border flex flex-col h-full relative z-10">
 
                     {/* Top Red Shape */}
                     <div className="absolute top-0 left-0 right-0 h-24 w-full z-0">
@@ -350,7 +350,7 @@ export default function LandingPage() {
                       <div className="flex flex-row items-center gap-4 w-full mb-8">
                         {/* Avatar */}
                         <div className="relative flex-shrink-0">
-                          <div className="w-20 h-20 rounded-full border-[3px] border-red-500 shadow-md overflow-hidden relative p-0.5 bg-white">
+                          <div className="w-20 h-20 rounded-full border-[3px] border-red-500 shadow-md overflow-hidden relative p-0.5 bg-card">
                             <div className="w-full h-full rounded-full overflow-hidden relative">
                               <Image
                                 src={member.image}
@@ -361,14 +361,14 @@ export default function LandingPage() {
                             </div>
                           </div>
                           {/* Red dot badge */}
-                          <div className="absolute bottom-0 right-0 w-6 h-6 bg-red-600 rounded-full border-2 border-white z-30 shadow-sm" />
+                          <div className="absolute bottom-0 right-0 w-6 h-6 bg-red-600 rounded-full border-2 border-background z-30 shadow-sm" />
                         </div>
 
                         {/* Text Info */}
                         <div className="flex flex-col text-left">
-                          <h3 className="text-sm font-bold text-black leading-tight">{member.name}</h3>
+                          <h3 className="text-sm font-bold text-foreground leading-tight">{member.name}</h3>
                           <p className="text-lg font-bold text-red-600 leading-tight my-0.5 uppercase">{member.chapter}</p>
-                          <p className="text-sm font-bold text-black leading-tight">{member.role}</p>
+                          <p className="text-sm font-bold text-foreground leading-tight">{member.role}</p>
                         </div>
                       </div>
 
@@ -378,7 +378,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* Quote */}
-                      <blockquote className="text-gray-600 text-sm leading-relaxed px-2 text-center">
+                      <blockquote className="text-muted-foreground text-sm leading-relaxed px-2 text-center">
                         &ldquo;{member.quote}&rdquo;
                       </blockquote>
                     </div>
@@ -479,7 +479,7 @@ export default function LandingPage() {
                   Trusted by professionals at
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto items-center">
-                  <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
+                  <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                     <div className="relative w-full h-full">
                       <Image
                         src="/WIF LA.jpg"
@@ -489,7 +489,7 @@ export default function LandingPage() {
                       />
                     </div>
                   </div>
-                  <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
+                  <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                     <div className="relative w-full h-full">
                       <Image
                         src="/BMGFoundation_logo_banner.jpg"
@@ -499,7 +499,7 @@ export default function LandingPage() {
                       />
                     </div>
                   </div>
-                  <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
+                  <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                     <div className="relative w-full h-full">
                       <Image
                         src="/Film Independent logo_png.png"
@@ -509,7 +509,7 @@ export default function LandingPage() {
                       />
                     </div>
                   </div>
-                  <div className="bg-white backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
+                  <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                     <div className="relative w-full h-full">
                       <Image
                         src="/multichoice.jpg"

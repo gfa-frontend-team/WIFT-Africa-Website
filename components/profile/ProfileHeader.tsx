@@ -70,7 +70,7 @@ export default function ProfileHeader({
 
   // Helper for chapter display
   const chapterName = user.chapter?.name || 'WIFT Africa'
-  
+
   // Helper for roles
   const roles = profile.roles || []
   const primaryRole = profile.primaryRole || roles[0] || t('profile.header.member')
@@ -106,7 +106,7 @@ export default function ProfileHeader({
       setProfile(prev => ({ ...prev, bannerUrl: response.photoUrl }))
       // Also update user state just in case of fallback usage
       setUser(prev => ({ ...prev, bannerUrl: response.photoUrl }))
-      
+
       toast.success(t('profile.header.upload_success'), {
         description: t('profile.header.upload_success_desc')
       })
@@ -163,46 +163,46 @@ export default function ProfileHeader({
 
   return (
     <div className="mb-6">
-      <input 
-        type="file" 
+      <input
+        type="file"
         ref={bannerInputRef}
         onChange={handleBannerUpload}
-        className="hidden" 
+        className="hidden"
         accept="image/jpeg,image/png,image/webp"
       />
-      <input 
-        type="file" 
+      <input
+        type="file"
         ref={photoInputRef}
         onChange={handlePhotoUpload}
-        className="hidden" 
+        className="hidden"
         accept="image/jpeg,image/png,image/webp"
       />
 
       {/* Header Banner */}
       <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-t-2xl h-48 overflow-hidden group">
         {bannerUrl ? (
-          <Image 
-            src={bannerUrl} 
-            alt="Cover Photo" 
-            fill 
+          <Image
+            src={bannerUrl}
+            alt="Cover Photo"
+            fill
             className="object-cover"
             priority
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-t-2xl" />
         )}
-        
+
         {isOwner && (
-          <button 
+          <button
             onClick={handleBannerClick}
             disabled={isUploadingBanner}
-            className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full transition-colors backdrop-blur-sm shadow-sm md:opacity-0 md:group-hover:opacity-100"
+            className="absolute top-4 right-4 p-2 bg-background/80 hover:bg-background rounded-full transition-colors backdrop-blur-sm shadow-sm md:opacity-0 md:group-hover:opacity-100"
             title={t('profile.header.update_cover')}
           >
             {isUploadingBanner ? (
               <Loader2 className="h-5 w-5 text-primary animate-spin" />
             ) : (
-              <Camera className="h-5 w-5 text-gray-700" />
+              <Camera className="h-5 w-5 text-foreground" />
             )}
           </button>
         )}
@@ -215,22 +215,22 @@ export default function ProfileHeader({
             {/* Profile Photo Wrapper - Explicit sizing for absolute positioning context */}
             <div className="relative -mt-16 md:-mt-20 flex-shrink-0 h-32 w-32">
               <div className="h-full w-full rounded-full bg-background overflow-hidden border-4 border-card relative z-0">
-                 {user.profilePhoto ? (
-                    <Image 
-                      src={user.profilePhoto} 
-                      alt={`${user.firstName} ${user.lastName}`}
-                      fill
-                      className="object-cover"
-                    />
-                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-4xl font-bold">
-                        {user.firstName?.[0]}
-                    </div>
-                 )}
+                {user.profilePhoto ? (
+                  <Image
+                    src={user.profilePhoto}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-4xl font-bold">
+                    {user.firstName?.[0]}
+                  </div>
+                )}
               </div>
-              
+
               {isOwner && (
-                <button 
+                <button
                   onClick={handlePhotoClick}
                   disabled={isUploadingPhoto}
                   className="absolute bottom-1 right-1 p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all shadow-lg border-[3px] border-card z-10 flex items-center justify-center"
@@ -255,7 +255,7 @@ export default function ProfileHeader({
                   <p className="text-xl text-muted-foreground mb-3 font-medium">
                     {profile.headline || primaryRole}
                   </p>
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground mb-4">
                     {profile.location && (
                       <div className="flex items-center gap-1.5">
@@ -263,7 +263,7 @@ export default function ProfileHeader({
                         <span>{profile.location}</span>
                       </div>
                     )}
-                    
+
                     <div className="flex items-center gap-1.5">
                       <Users className="h-4 w-4" />
                       <span>{chapterName}</span>
@@ -277,7 +277,7 @@ export default function ProfileHeader({
                 {/* Actions */}
                 <div className="flex items-center gap-2">
                   {isOwner ? (
-                    <button 
+                    <button
                       onClick={onEdit}
                       className="flex items-center gap-2 px-4 py-2 bg-background border border-border rounded-lg hover:bg-accent transition-colors font-medium text-sm"
                     >
@@ -287,14 +287,14 @@ export default function ProfileHeader({
                   ) : (
                     <>
                       {connectionStatus === 'CONNECTED' ? (
-                        <button 
+                        <button
                           onClick={onMessage}
                           className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
                         >
                           {t('profile.header.message')}
                         </button>
                       ) : connectionStatus === 'PENDING' ? (
-                        <button 
+                        <button
                           disabled
                           className="px-4 py-2 bg-muted text-muted-foreground rounded-lg font-medium text-sm cursor-not-allowed"
                         >
@@ -302,14 +302,14 @@ export default function ProfileHeader({
                         </button>
                       ) : connectionStatus === 'INCOMING' ? (
                         <div className="flex items-center gap-2">
-                          <button 
+                          <button
                             onClick={() => onAccept?.()}
                             disabled={isConnecting}
                             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
                           >
                             {t('profile.header.accept')}
                           </button>
-                          <button 
+                          <button
                             onClick={() => onDecline?.()}
                             disabled={isConnecting}
                             className="px-4 py-2 bg-background border border-border text-foreground rounded-lg hover:bg-accent transition-colors font-medium text-sm"
@@ -318,7 +318,7 @@ export default function ProfileHeader({
                           </button>
                         </div>
                       ) : (
-                        <button 
+                        <button
                           onClick={() => onConnect?.()}
                           disabled={isConnecting}
                           className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
@@ -338,16 +338,16 @@ export default function ProfileHeader({
                 </div>
               </div>
 
-               {/* Badges & Stats */}
-               <div className="mt-4">
-                 <BadgeDisplay />
-                 <ProfileStats 
-                   connectionsCount={connectionsCount} 
-                   postsCount={postsCount}
-                   viewsCount={viewsCount}
-                   isOwner={isOwner}
-                 />
-               </div>
+              {/* Badges & Stats */}
+              <div className="mt-4">
+                <BadgeDisplay />
+                <ProfileStats
+                  connectionsCount={connectionsCount}
+                  postsCount={postsCount}
+                  viewsCount={viewsCount}
+                  isOwner={isOwner}
+                />
+              </div>
             </div>
           </div>
         </div>

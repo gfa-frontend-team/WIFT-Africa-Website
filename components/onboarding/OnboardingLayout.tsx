@@ -25,7 +25,7 @@ export default function OnboardingLayout({
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="inline-block">
-              <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto" />
+              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto" />
             </Link>
             <div className="text-sm text-muted-foreground">
               {t('onboarding.common.step_count', { current: currentStep, total: totalSteps })}
@@ -42,13 +42,12 @@ export default function OnboardingLayout({
               <div key={step} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                      step < currentStep
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${step < currentStep
                         ? 'bg-primary text-primary-foreground'
                         : step === currentStep
-                        ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
-                        : 'bg-muted text-muted-foreground'
-                    }`}
+                          ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
                   >
                     {step < currentStep ? (
                       <CheckCircle className="h-5 w-5" />
@@ -66,9 +65,8 @@ export default function OnboardingLayout({
                 </div>
                 {step < totalSteps && (
                   <div
-                    className={`h-0.5 flex-1 transition-colors ${
-                      step < currentStep ? 'bg-primary' : 'bg-border'
-                    }`}
+                    className={`h-0.5 flex-1 transition-colors ${step < currentStep ? 'bg-primary' : 'bg-border'
+                      }`}
                   />
                 )}
               </div>

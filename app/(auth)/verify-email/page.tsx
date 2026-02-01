@@ -21,7 +21,7 @@ function VerifyEmailContent() {
   // Check for token in URL and verify automatically
   useEffect(() => {
     const token = searchParams.get('token')
-    
+
     if (token && !isVerified && !isVerifying) {
       handleVerification(token)
     }
@@ -34,10 +34,10 @@ function VerifyEmailContent() {
     try {
       await verifyEmail(token)
       setIsVerified(true)
-      
+
       // Clear stored email since verification is complete
       localStorage.removeItem('pendingVerificationEmail')
-      
+
       // Don't redirect here - let user click "Continue to Onboarding" button
     } catch (err: any) {
       console.error('Verification error:', err)
@@ -55,23 +55,23 @@ function VerifyEmailContent() {
     try {
       // Get user email from localStorage or use a stored email
       const userEmail = localStorage.getItem('pendingVerificationEmail')
-      
+
       if (!userEmail) {
         setError('Unable to resend email. Please try registering again.')
         return
       }
 
       await authApi.resendVerificationEmail(userEmail)
-      
+
       // Show success message
       setSuccessMessage('Verification email sent! Please check your inbox.')
       setError(null)
-      
+
       // Clear success message after 5 seconds
       setTimeout(() => {
         setSuccessMessage(null)
       }, 5000)
-      
+
     } catch (err: any) {
       console.error('Resend error:', err)
       const message = err.response?.data?.message || 'Failed to resend email. Please try again.'
@@ -91,7 +91,7 @@ function VerifyEmailContent() {
       <div className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
           <Link href="/" className="inline-block mb-6 w-full text-center">
-            <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+            <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
           </Link>
 
           <div className="bg-card border border-border rounded-2xl p-8 text-center">
@@ -116,7 +116,7 @@ function VerifyEmailContent() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <Link href="/" className="inline-block mb-6 w-full text-center">
-            <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+            <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
           </Link>
 
           {/* Success Card */}
@@ -152,13 +152,13 @@ function VerifyEmailContent() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center">
-            <Link href="/" className="inline-block mb-6">
-            <img src="/logo.jpg" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
-            </Link>
-            <h1 className="text-3xl font-bold text-foreground">Verify your email</h1>
-            <p className="mt-2 text-muted-foreground">
+          <Link href="/" className="inline-block mb-6">
+            <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+          </Link>
+          <h1 className="text-3xl font-bold text-foreground">Verify your email</h1>
+          <p className="mt-2 text-muted-foreground">
             We sent a verification link to your email address.
-            </p>
+          </p>
         </div>
 
         {/* Verification Card */}

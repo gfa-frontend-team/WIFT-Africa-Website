@@ -15,7 +15,7 @@ export default function SuspendedPage() {
     if (!isLoading && !isAuthenticated) {
       router.push('/login')
     }
-    
+
     // If authenticated but NOT suspended, redirect to feed
     if (!isLoading && isAuthenticated && user?.membershipStatus !== 'SUSPENDED') {
       router.push('/feed')
@@ -40,9 +40,9 @@ export default function SuspendedPage() {
       <div className="w-full max-w-md text-center space-y-8">
         {/* Logo */}
         <Link href="/" className="inline-block mb-8">
-            <img src="/logo.jpg" alt="WIFT Africa" className="h-12 w-auto mx-auto" />
+          <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-6 w-auto mx-auto" />
         </Link>
-        
+
         {/* Suspended Card */}
         <div className="bg-card border border-destructive/20 rounded-2xl p-8 shadow-lg">
           <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -50,7 +50,7 @@ export default function SuspendedPage() {
           </div>
 
           <h1 className="text-2xl font-bold text-foreground mb-4">Account Suspended</h1>
-          
+
           <div className="space-y-4 text-muted-foreground mb-8">
             <p>
               Your account has been suspended due to a violation of our terms of service or community guidelines.
@@ -61,7 +61,7 @@ export default function SuspendedPage() {
           </div>
 
           <div className="space-y-4">
-            <a 
+            <a
               href="mailto:support@wiftafrica.com"
               className="w-full flex items-center justify-center px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
             >

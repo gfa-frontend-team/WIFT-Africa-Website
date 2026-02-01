@@ -98,7 +98,7 @@ export default function ResourceDetailPage() {
                         </video>
                     </div>
                 ) : (
-                    <div className="aspect-[4/3] bg-white w-full">
+                    <div className="aspect-[4/3] bg-background w-full">
                         <iframe
                             src={resource.fileUrl}
                             className="w-full h-full"

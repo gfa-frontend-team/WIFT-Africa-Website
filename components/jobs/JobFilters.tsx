@@ -21,7 +21,7 @@ export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
 
   // Auto-trigger filter on debounce
   useEffect(() => {
-     onFilter(debouncedFilters)
+    onFilter(debouncedFilters)
   }, [debouncedFilters, onFilter])
 
   const handleChange = (key: keyof FilterType, value: any) => {
@@ -36,13 +36,13 @@ export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-4">
+    <div className="bg-card p-4 rounded-lg border border-border shadow-sm space-y-4">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input 
-              placeholder="Filter by Role (e.g. Producer)..." 
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Filter by Role (e.g. Producer)..."
               value={filters.role || ''}
               onChange={(e) => handleChange('role', e.target.value)}
               className="w-full pl-9"
@@ -54,12 +54,12 @@ export function JobFilters({ onFilter, initialFilters }: JobFiltersProps) {
 
       <div className="flex justify-between items-center pt-2">
         <div className="flex items-center space-x-2">
-          <Switch 
-            id="remote-mode" 
+          <Switch
+            id="remote-mode"
             checked={filters.remote || false}
             onCheckedChange={(checked) => handleChange('remote', checked)}
           />
-          <Label htmlFor="remote-mode" className="text-sm font-medium text-gray-700">Remote Only</Label>
+          <Label htmlFor="remote-mode" className="text-sm font-medium text-foreground">Remote Only</Label>
         </div>
 
         <div className="flex gap-2">

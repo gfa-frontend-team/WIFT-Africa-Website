@@ -85,7 +85,7 @@ export default function AuthenticatedLayout({
       <VerificationStatusBanner />
 
       {/* Main Content */}
-      <main className="pt-16 pb-20 md:pb-0">
+      <main className="pt-16 pb-20 lg:pb-0">
         {children}
       </main>
 

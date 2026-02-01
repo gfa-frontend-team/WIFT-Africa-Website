@@ -16,7 +16,7 @@ export function JobCard({ job }: JobCardProps) {
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-start justify-between md:justify-start gap-4">
-              <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
+              <h3 className="text-xl font-semibold text-foreground line-clamp-1">
                 {job.title}
               </h3>
               {job.isRemote && (
@@ -25,13 +25,13 @@ export function JobCard({ job }: JobCardProps) {
                 </Badge>
               )}
             </div>
-            
-            <div className="flex items-center text-gray-600 font-medium">
+
+            <div className="flex items-center text-muted-foreground font-medium">
               <Building2 className="w-4 h-4 mr-2" />
               {job.companyName}
             </div>
 
-            <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
+            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-2">
               <div className="flex items-center">
                 <MapPin className="w-4 h-4 mr-1" />
                 {job.location}
