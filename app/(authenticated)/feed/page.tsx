@@ -10,75 +10,128 @@ import { useFeed } from '@/lib/hooks/useFeed'
 import { FeedFilters } from '@/components/feed/FeedFilters'
 import { CreatePostTrigger } from '@/components/feed/CreatePostTrigger'
 import { FeedSkeleton } from '@/components/feed/FeedSkeleton'
-import LeftSidebar from '@/components/feed/LeftSidebar'
-import RightSidebar from '@/components/feed/RightSidebar'
 import PostCard from '@/components/feed/PostCard'
-import CreatePostModal from '@/components/feed/CreatePostModal'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
+import dynamic from 'next/dynamic'
 
+const LeftSidebar = dynamic(() => import('@/components/feed/LeftSidebar'))
+const RightSidebar = dynamic(() => import('@/components/feed/RightSidebar'))
+const CreatePostModal = dynamic(() => import('@/components/feed/CreatePostModal'))
 
 const FeedContainer = () => {
   const { posts, isLoading, error, hasMore, fetchNextPage, isFetchingNextPage, refetch } = useFeed()
-  const observerTarget = useRef<HTMLDivElement>(null)
-  const [pullStartY, setPullStartY] = useState(0)
-  const [pullDistance, setPullDistance] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Intersection Observer for infinite scroll
-  const handleObserver = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const [target] = entries
-      if (target.isIntersecting && hasMore && !isFetchingNextPage) {
-        fetchNextPage()
-      }
-    },
-    [hasMore, isFetchingNextPage, fetchNextPage]
-  )
+  // Refs for pull-to-refresh to avoid re-renders during gesture
+  const pullStartY = useRef(0)
+  const pullDistance = useRef(0)
+  const pullIndicatorRef = useRef<HTMLDivElement>(null)
 
+  // Refs for virtualization
+  const parentRef = useRef<HTMLDivElement>(null)
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: posts.length,
+    estimateSize: () => 600, // Estimated height of a post card
+    overscan: 5,
+    scrollMargin: 0,
+  })
+
+  // Infinite scroll trigger via virtualizer
   useEffect(() => {
-    const element = observerTarget.current
-    if (!element) return
+    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse()
 
-    const option = {
-      root: null,
-      rootMargin: '100px',
-      threshold: 0,
+    if (!lastItem) {
+      return
     }
 
-    const observer = new IntersectionObserver(handleObserver, option)
-    observer.observe(element)
+    if (
+      lastItem.index >= posts.length - 1 &&
+      hasMore &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage()
+    }
+  }, [
+    hasMore,
+    isFetchingNextPage,
+    fetchNextPage,
+    posts.length,
+    rowVirtualizer.getVirtualItems(),
+  ])
 
-    return () => observer.disconnect()
-  }, [handleObserver])
-
-  // Pull-to-refresh for mobile
+  // Optimized Pull-to-refresh for mobile
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (window.scrollY === 0) {
-      setPullStartY(e.touches[0].clientY)
+      pullStartY.current = e.touches[0].clientY
     }
   }, [])
 
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (pullStartY === 0 || window.scrollY > 0) return
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (pullStartY.current === 0 || window.scrollY > 0) return
 
-      const currentY = e.touches[0].clientY
-      const distance = currentY - pullStartY
+    const currentY = e.touches[0].clientY
+    const distance = currentY - pullStartY.current
 
-      if (distance > 0 && distance < 150) {
-        setPullDistance(distance)
+    // Resistance factor
+    const dampedDistance = Math.min(distance * 0.5, 150)
+
+    if (dampedDistance > 0 && pullIndicatorRef.current) {
+      pullDistance.current = dampedDistance
+      // Direct DOM manipulation to avoid React render cycle
+      pullIndicatorRef.current.style.transform = `translateY(${dampedDistance}px)`
+      pullIndicatorRef.current.style.opacity = String(Math.min(dampedDistance / 80, 1))
+
+      const textElement = pullIndicatorRef.current.querySelector('.pull-text')
+      if (textElement) {
+        textElement.textContent = dampedDistance > 80 ? 'Release to refresh' : 'Pull to refresh'
       }
-    },
-    [pullStartY]
-  )
+    }
+  }, [])
 
   const handleTouchEnd = useCallback(async () => {
-    if (pullDistance > 80) {
-      await refetch()
-    }
-    setPullStartY(0)
-    setPullDistance(0)
-  }, [pullDistance, refetch])
+    if (pullDistance.current > 80) {
+      setIsRefreshing(true)
+      // Reset visual indicator with animation
+      if (pullIndicatorRef.current) {
+        pullIndicatorRef.current.style.transition = 'transform 0.3s'
+        pullIndicatorRef.current.style.transform = 'translateY(60px)'
+      }
 
-  if (isLoading) {
+      try {
+        await refetch()
+      } finally {
+        setIsRefreshing(false)
+        // Reset after completion
+        if (pullIndicatorRef.current) {
+          pullIndicatorRef.current.style.transform = 'translateY(0)'
+          setTimeout(() => {
+            if (pullIndicatorRef.current) {
+              pullIndicatorRef.current.style.transition = ''
+              pullIndicatorRef.current.style.opacity = '0'
+            }
+          }, 300)
+        }
+      }
+    } else {
+      // Snap back if not pulled enough
+      if (pullIndicatorRef.current) {
+        pullIndicatorRef.current.style.transition = 'transform 0.3s'
+        pullIndicatorRef.current.style.transform = 'translateY(0)'
+        pullIndicatorRef.current.style.opacity = '0'
+        setTimeout(() => {
+          if (pullIndicatorRef.current) {
+            pullIndicatorRef.current.style.transition = ''
+          }
+        }, 300)
+      }
+    }
+
+    pullStartY.current = 0
+    pullDistance.current = 0
+  }, [refetch])
+
+  if (isLoading && !isRefreshing) {
     return <FeedSkeleton />
   }
 
@@ -89,16 +142,15 @@ const FeedContainer = () => {
   if (error && posts.length === 0) {
     return (
       <div className="bg-card border border-border rounded-lg p-12 text-center">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-          isRateLimited ? 'bg-yellow-100' : 'bg-red-100'
-        }`}>
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isRateLimited ? 'bg-yellow-100' : 'bg-red-100'
+          }`}>
           <span className="text-2xl">{isRateLimited ? '⏳' : '⚠️'}</span>
         </div>
         <h3 className="text-lg font-semibold text-foreground mb-2">
           {isRateLimited ? 'Server is Busy' : 'Failed to load feed'}
         </h3>
         <p className="text-muted-foreground mb-4">
-          {isRateLimited 
+          {isRateLimited
             ? 'The server is handling many requests right now. Please wait a moment.'
             : errorMessage
           }
@@ -113,7 +165,7 @@ const FeedContainer = () => {
     )
   }
 
-  if (posts.length === 0 && !isLoading) {
+  if (posts.length === 0 && !isLoading && !isRefreshing) {
     return (
       <div className="bg-card border border-border rounded-lg p-12 text-center">
         <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -134,27 +186,56 @@ const FeedContainer = () => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      ref={parentRef}
     >
       {/* Pull-to-refresh indicator */}
-      {pullDistance > 0 && (
-        <div
-          className="flex items-center justify-center py-4 transition-all"
-          style={{ transform: `translateY(${Math.min(pullDistance, 80)}px)` }}
-        >
-          <div className="text-muted-foreground text-sm">
-            {pullDistance > 80 ? 'Release to refresh' : 'Pull to refresh'}
-          </div>
+      <div
+        ref={pullIndicatorRef}
+        className="fixed top-20 left-0 right-0 z-50 flex items-center justify-center pointer-events-none opacity-0"
+        style={{ willChange: 'transform, opacity' }}
+      >
+        <div className="bg-background/80 backdrop-blur-sm shadow-md rounded-full px-4 py-2 flex items-center gap-2 border border-border">
+          {isRefreshing ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+          ) : (
+            <span className="text-primary text-lg">↓</span>
+          )}
+          <span className="pull-text text-sm font-medium text-foreground">
+            {isRefreshing ? 'Refreshing...' : 'Pull to refresh'}
+          </span>
         </div>
-      )}
+      </div>
 
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
+      {/* Virtualized List */}
+      <div
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+          <div
+            key={virtualRow.key}
+            ref={rowVirtualizer.measureElement}
+            data-index={virtualRow.index}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translateY(${virtualRow.start}px)`,
+            }}
+          >
+            <div className="pb-4">
+              <PostCard post={posts[virtualRow.index]} />
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Infinite scroll trigger */}
-      <div ref={observerTarget} className="py-4">
+      {/* Infinite scroll loader */}
+      <div className="py-4">
         {isFetchingNextPage && (
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -210,7 +291,7 @@ export default function HomePage() {
 
           {/* Main Feed - 6 columns on desktop */}
           <main className="lg:col-span-6">
-            <FeatureGate 
+            <FeatureGate
               feature="canViewFeed"
               showRestrictionMessage={false}
               fallback={

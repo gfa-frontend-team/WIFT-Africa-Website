@@ -22,20 +22,20 @@ export function useNotifications() {
       // Assuming pagination: { page: number, pages: number, ... }
       // If API returns current page and total pages
       if (lastPage.pages > (lastPage as any).page) { // Check implementation of Response
-         // The API response type definition might need verification, 
-         // assuming current page is tracked or calculated
-         // Let's rely on standard pagination patterns or check the API response structure again if this fails.
-         // Based on previous files, typically: lastPage.pagination.page < lastPage.pagination.totalPages
-         // But here NotificationsResponse uses `pages` (total pages?) and specific structure.
-         // Let's check api definition again in mental context: "pages: number". 
-         // We might need to track current page via pageParam.
-         // Actually the response doesn't seem to have "page" property in the interface shown in previous step.
-         // Wait, `getNotifications` returns `NotificationsResponse`.
-         // Interface: { notifications, total, unreadCount, pages }
-         // It implies `pages` is total pages. Typically we need `page` in response to know current.
-         // If missing, we infer from previous usage or assume sequential.
-         // Let's assume sequential for now using pageParam + 1.
-         return undefined; // We'll need to double check how to determine next page
+        // The API response type definition might need verification, 
+        // assuming current page is tracked or calculated
+        // Let's rely on standard pagination patterns or check the API response structure again if this fails.
+        // Based on previous files, typically: lastPage.pagination.page < lastPage.pagination.totalPages
+        // But here NotificationsResponse uses `pages` (total pages?) and specific structure.
+        // Let's check api definition again in mental context: "pages: number". 
+        // We might need to track current page via pageParam.
+        // Actually the response doesn't seem to have "page" property in the interface shown in previous step.
+        // Wait, `getNotifications` returns `NotificationsResponse`.
+        // Interface: { notifications, total, unreadCount, pages }
+        // It implies `pages` is total pages. Typically we need `page` in response to know current.
+        // If missing, we infer from previous usage or assume sequential.
+        // Let's assume sequential for now using pageParam + 1.
+        return undefined; // We'll need to double check how to determine next page
       }
       return undefined
     },
@@ -49,16 +49,16 @@ export function useNotifications() {
   const useNotificationsList = (unreadOnly = false) => useInfiniteQuery({
     queryKey: notificationKeys.list(unreadOnly),
     queryFn: async ({ pageParam = 1 }) => {
-        const res = await notificationsApi.getNotifications(pageParam as number, 20, unreadOnly)
-        // Attach current page to result for getNextPageParam if missing
-        return { ...res, _currentPage: pageParam as number }
+      const res = await notificationsApi.getNotifications(pageParam as number, 20, unreadOnly)
+      // Attach current page to result for getNextPageParam if missing
+      return { ...res, _currentPage: pageParam as number }
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-        if (lastPage._currentPage < lastPage.pages) {
-            return lastPage._currentPage + 1
-        }
-        return undefined
+      if (lastPage._currentPage < lastPage.pages) {
+        return lastPage._currentPage + 1
+      }
+      return undefined
     }
   })
 
@@ -66,56 +66,56 @@ export function useNotifications() {
   const useUnreadCount = () => useQuery({
     queryKey: notificationKeys.unreadCount(),
     queryFn: notificationsApi.getUnreadCount,
-    refetchInterval: 30000, // 30 seconds
-    staleTime: 30000,
+    refetchInterval: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   })
 
   // Mark as Read
   const markAsReadMutation = useMutation({
     mutationFn: notificationsApi.markAsRead,
     onMutate: async (id) => {
-        await queryClient.cancelQueries({ queryKey: notificationKeys.all })
+      await queryClient.cancelQueries({ queryKey: notificationKeys.all })
 
-        // 1. Optimistically update list
-        queryClient.setQueriesData({ queryKey: notificationKeys.all }, (oldData: any) => {
-            if (!oldData) return oldData
-            // Handle both infinite and regular query structures if present
-            // For infinite:
-            if (oldData.pages) {
-                return {
-                    ...oldData,
-                    pages: oldData.pages.map((page: any) => ({
-                        ...page,
-                        notifications: page.notifications.map((n: any) => 
-                            n.id === id ? { ...n, isRead: true } : n
-                        )
-                    }))
-                }
-            }
-            return oldData
-        })
-
-        // 2. Optimistically decrement unread count
-        const prevCount = queryClient.getQueryData<{count: number}>(notificationKeys.unreadCount())
-        if (prevCount) {
-            queryClient.setQueryData(notificationKeys.unreadCount(), {
-                count: Math.max(0, prevCount.count - 1)
-            })
+      // 1. Optimistically update list
+      queryClient.setQueriesData({ queryKey: notificationKeys.all }, (oldData: any) => {
+        if (!oldData) return oldData
+        // Handle both infinite and regular query structures if present
+        // For infinite:
+        if (oldData.pages) {
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              notifications: page.notifications.map((n: any) =>
+                n.id === id ? { ...n, isRead: true } : n
+              )
+            }))
+          }
         }
+        return oldData
+      })
 
-        return { prevCount }
+      // 2. Optimistically decrement unread count
+      const prevCount = queryClient.getQueryData<{ count: number }>(notificationKeys.unreadCount())
+      if (prevCount) {
+        queryClient.setQueryData(notificationKeys.unreadCount(), {
+          count: Math.max(0, prevCount.count - 1)
+        })
+      }
+
+      return { prevCount }
     },
     onSuccess: () => {
-        // Invalidate to ensure sync
-        queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() })
-        // List invalidation might be too jarring if it removes the item (if filtering by unread)
-        // so we might skip invalidating list immediately if just marking read.
+      // Invalidate to ensure sync
+      queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() })
+      // List invalidation might be too jarring if it removes the item (if filtering by unread)
+      // so we might skip invalidating list immediately if just marking read.
     },
     onError: (err, id, context) => {
-        if (context?.prevCount) {
-             queryClient.setQueryData(notificationKeys.unreadCount(), context.prevCount)
-        }
-        queryClient.invalidateQueries({ queryKey: notificationKeys.all })
+      if (context?.prevCount) {
+        queryClient.setQueryData(notificationKeys.unreadCount(), context.prevCount)
+      }
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all })
     }
   })
 
@@ -123,25 +123,25 @@ export function useNotifications() {
   const markAllAsReadMutation = useMutation({
     mutationFn: notificationsApi.markAllAsRead,
     onMutate: async () => {
-        await queryClient.cancelQueries({ queryKey: notificationKeys.all })
-        
-        // Update count to 0
-        queryClient.setQueryData(notificationKeys.unreadCount(), { count: 0 })
+      await queryClient.cancelQueries({ queryKey: notificationKeys.all })
 
-        // Update all visible lists to read
-        queryClient.setQueriesData({ queryKey: notificationKeys.all }, (oldData: any) => {
-            if (!oldData?.pages) return oldData
-             return {
-                ...oldData,
-                pages: oldData.pages.map((page: any) => ({
-                    ...page,
-                    notifications: page.notifications.map((n: any) => ({ ...n, isRead: true }))
-                }))
-            }
-        })
+      // Update count to 0
+      queryClient.setQueryData(notificationKeys.unreadCount(), { count: 0 })
+
+      // Update all visible lists to read
+      queryClient.setQueriesData({ queryKey: notificationKeys.all }, (oldData: any) => {
+        if (!oldData?.pages) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            notifications: page.notifications.map((n: any) => ({ ...n, isRead: true }))
+          }))
+        }
+      })
     },
     onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: notificationKeys.all })
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all })
     }
   })
 

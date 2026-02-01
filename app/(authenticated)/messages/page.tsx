@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useMessages } from "@/lib/hooks/useMessages";
 import ConversationList from "@/components/messages/ConversationList";
 import MessageThread from "@/components/messages/MessageThread";
@@ -162,22 +162,28 @@ export default function MessagesPage() {
   //   return threadData?.pages.flatMap(page => page.messages).reverse() || []
   // }, [threadData])
 
-  
-  
+
+
   const activeMessages = useMemo(() => {
     const messages =
       threadData?.pages.flatMap((page) => page.messages) || [];
 
-      return messages.map((m) => ({
-        ...m,
-        isMine: m.sender?._id === data?.id, // ← however you store auth user
-      }));
-    }, [threadData, data]);
-    
-    // console.log(activeMessages, "messages in thread")
+    return messages.map((m) => ({
+      ...m,
+      isMine: m.sender?._id === data?.id, // ← however you store auth user
+    }));
+  }, [threadData, data]);
+
+  // console.log(activeMessages, "messages in thread")
+  const lastReadConversationId = useRef<string | null>(null);
+
   useEffect(() => {
     if (activeConversationId && !activeConversationId.startsWith("new_")) {
+      // Prevent duplicate calls if we already marked this ID
+      if (lastReadConversationId.current === activeConversationId) return;
+
       markAsRead(activeConversationId);
+      lastReadConversationId.current = activeConversationId;
     }
   }, [activeConversationId, markAsRead]);
 
@@ -232,9 +238,8 @@ export default function MessagesPage() {
           {/* Conversation List - Left Side */}
           {(!isMobileView || showConversationList) && (
             <div
-              className={`${
-                isMobileView ? "w-full" : "w-1/3 min-w-[300px]"
-              } border-r border-border flex flex-col`}
+              className={`${isMobileView ? "w-full" : "w-1/3 min-w-[300px]"
+                } border-r border-border flex flex-col`}
             >
               <div className="p-4 border-b border-border bg-muted/30">
                 <input
@@ -255,9 +260,8 @@ export default function MessagesPage() {
           {/* Message Thread - Right Side */}
           {(!isMobileView || !showConversationList) && (
             <div
-              className={`${
-                isMobileView ? "w-full" : "w-2/3"
-              } flex flex-col bg-background/50`}
+              className={`${isMobileView ? "w-full" : "w-2/3"
+                } flex flex-col bg-background/50`}
             >
               {activeConversation ? (
                 <>
@@ -268,23 +272,29 @@ export default function MessagesPage() {
                     hasMore={hasNextPage}
                     fetchNextPage={fetchNextPage}
                     isFetchingNextPage={isFetchingNextPage}
-                    // If it was a temp conversation, the hook invalidation will fetch the new real conversation
+                  // If it was a temp conversation, the hook invalidation will fetch the new real conversation
                   />
-                  <MessageComposer
-                    conversationId={activeConversation.id}
-                    receiverId={
-                      activeConversation.otherParticipant?.id ||
-                      (activeConversation.otherParticipant as any)?._id
-                    }
-                    onMessageSent={(data) => {
-                      const realId = data.conversation.id; // The ID from the backend
-                      if (activeConversationId?.startsWith("new_")) {
-                        setTempUser(null);
-                        setActiveConversationId(realId);
-                        router.replace("/messages", { scroll: false });
+                  {activeConversation.type !== 'BROADCAST' ? (
+                    <MessageComposer
+                      conversationId={activeConversation.id}
+                      receiverId={
+                        activeConversation.otherParticipant?.id ||
+                        (activeConversation.otherParticipant as any)?._id
                       }
-                    }}
-                  />
+                      onMessageSent={(data) => {
+                        const realId = data.conversation.id;
+                        if (activeConversationId?.startsWith("new_")) {
+                          setTempUser(null);
+                          setActiveConversationId(realId);
+                          router.replace("/messages", { scroll: false });
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="p-4 text-center text-xs text-muted-foreground border-t border-border bg-muted/20">
+                      You cannot reply to this broadcast message.
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="flex-1 flex items-center justify-center p-8 text-center bg-muted/10">

@@ -1,9 +1,9 @@
 'use client'
 
 import { useTranslation } from 'react-i18next'
-
-import { useState } from 'react'
+import { useState, memo, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Pin, Flag } from 'lucide-react'
 import { type Post } from '@/lib/api/posts'
 import Avatar from '@/components/ui/Avatar'
@@ -13,7 +13,6 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import SharePostModal from './SharePostModal'
 import EmbeddedPost from './EmbeddedPost'
 import { toast } from 'sonner'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,27 +26,27 @@ interface PostCardProps {
   initialShowComments?: boolean
 }
 
-export default function PostCard({ post, initialShowComments = false }: PostCardProps) {
+const PostCard = memo(function PostCard({ post, initialShowComments = false }: PostCardProps) {
   const { t } = useTranslation()
   const [showComments, setShowComments] = useState(initialShowComments)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const { likePost, savePost, isLiking, isSaving } = usePostMutations()
   const { user } = useAuth()
-  
+
   // API now returns computed isSaved status. 
   // Optimistic updates are handled via React Query cache in usePostMutations.
   const isSaved = post.isSaved
 
-  const handleLike = async () => {
+  const handleLike = useCallback(async () => {
     try {
       await likePost(post.id)
     } catch (error) {
       console.error('Failed to like post:', error)
     }
-  }
+  }, [likePost, post.id])
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       const { saved } = await savePost(post.id)
       const message = saved ? t('feed.post_card.saved_success') : t('feed.post_card.saved_removed')
@@ -56,11 +55,27 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
       console.error('Failed to save post:', error)
       toast.error(error.message || t('feed.post_card.save_error'))
     }
-  }
+  }, [savePost, post.id, t])
 
-  const handleShare = () => {
+  const openShareModal = useCallback(() => {
     setIsShareModalOpen(true)
-  }
+  }, [])
+
+  const closeShareModal = useCallback(() => {
+    setIsShareModalOpen(false)
+  }, [])
+
+  const openReportModal = useCallback(() => {
+    setIsReportModalOpen(true)
+  }, [])
+
+  const closeReportModal = useCallback(() => {
+    setIsReportModalOpen(false)
+  }, [])
+
+  const toggleComments = useCallback(() => {
+    setShowComments((prev) => !prev)
+  }, [])
 
   const formatTimestamp = (dateString: string) => {
     const date = new Date(dateString)
@@ -90,6 +105,19 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
 
   const isOwnPost = user?.id === post.author.id
   const isLiked = post.isLiked || (user && post.likes?.includes(user.id))
+
+  // Callback stubs for comment section - TODO: implement real logic
+  const handleAddComment = useCallback((content: string) => {
+    // console.log('Add comment:', content)
+  }, [])
+
+  const handleLikeComment = useCallback((commentId: string) => {
+    // console.log('Like comment:', commentId)
+  }, [])
+
+  const handleReply = useCallback((commentId: string, content: string) => {
+    // console.log('Reply to comment:', commentId, content)
+  }, [])
 
   return (
     <article className="bg-card border border-border rounded-lg">
@@ -134,7 +162,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
             </div>
           </div>
         </div>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="p-2 hover:bg-accent rounded-lg transition-colors">
@@ -143,9 +171,9 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {!isOwnPost && (
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => setIsReportModalOpen(true)}
+                onClick={openReportModal}
               >
                 <Flag className="mr-2 h-4 w-4" />
                 {t('feed.post_card.report_btn')}
@@ -165,22 +193,23 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
 
       {/* Post Media */}
       {post.media && post.media.length > 0 && (
-        <div className={`grid gap-1 ${
-          post.media.length === 1 ? 'grid-cols-1' :
+        <div className={`grid gap-1 ${post.media.length === 1 ? 'grid-cols-1' :
           post.media.length === 2 ? 'grid-cols-2' :
-          post.media.length === 3 ? 'grid-cols-3' :
-          'grid-cols-2'
-        }`}>
+            post.media.length === 3 ? 'grid-cols-3' :
+              'grid-cols-2'
+          }`}>
           {post.media.slice(0, 4).map((media, index) => (
             <div
               key={index}
               className="relative aspect-square overflow-hidden bg-muted"
             >
               {media.type === 'image' ? (
-                <img
+                <Image
                   src={media.url}
                   alt={`Post media ${index + 1}`}
-                  className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover hover:opacity-90 transition-opacity cursor-pointer"
                 />
               ) : (
                 <video
@@ -202,7 +231,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
           ))}
         </div>
       )}
-      
+
       {/* Shared Post Content */}
       {post.postType === 'SHARED' && post.originalPost && (
         <EmbeddedPost post={post.originalPost} />
@@ -216,7 +245,7 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
         <div className="flex items-center gap-3">
           {post.commentsCount > 0 && (
             <button
-              onClick={() => setShowComments(!showComments)}
+              onClick={toggleComments}
               className="hover:underline"
             >
               {t('feed.post_card.stats.comments_plural', { count: post.commentsCount })}
@@ -235,16 +264,14 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
         <button
           onClick={handleLike}
           disabled={isLiking}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-            isLiked
-              ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'
-              : 'text-muted-foreground hover:bg-accent'
-          } ${isLiking ? 'scale-95' : 'hover:scale-105 active:scale-95'}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${isLiked
+            ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'
+            : 'text-muted-foreground hover:bg-accent'
+            } ${isLiking ? 'scale-95' : 'hover:scale-105 active:scale-95'}`}
         >
           <Heart
-            className={`h-5 w-5 transition-all duration-200 ${
-              isLiked ? 'fill-current animate-pulse' : ''
-            }`}
+            className={`h-5 w-5 transition-all duration-200 ${isLiked ? 'fill-current animate-pulse' : ''
+              }`}
           />
           <span className="text-sm font-medium hidden sm:inline">
             {isLiked ? t('feed.post_card.liked_btn') : t('feed.post_card.like_btn')}
@@ -252,19 +279,18 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
         </button>
 
         <button
-          onClick={() => setShowComments(!showComments)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 ${
-            showComments
-              ? 'text-primary bg-primary/10'
-              : 'text-muted-foreground hover:bg-accent'
-          }`}
+          onClick={toggleComments}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 ${showComments
+            ? 'text-primary bg-primary/10'
+            : 'text-muted-foreground hover:bg-accent'
+            }`}
         >
           <MessageCircle className="h-5 w-5" />
           <span className="text-sm font-medium hidden sm:inline">{t('feed.post_card.comment_btn')}</span>
         </button>
 
         <button
-          onClick={handleShare}
+          onClick={openShareModal}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-muted-foreground hover:bg-accent transition-all duration-200 hover:scale-105 active:scale-95"
         >
           <Share2 className="h-5 w-5" />
@@ -274,11 +300,10 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 ${
-            isSaved
-              ? 'text-primary bg-primary/10'
-              : 'text-muted-foreground hover:bg-accent'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 ${isSaved
+            ? 'text-primary bg-primary/10'
+            : 'text-muted-foreground hover:bg-accent'
+            }`}
         >
           <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-current' : ''}`} />
         </button>
@@ -288,33 +313,27 @@ export default function PostCard({ post, initialShowComments = false }: PostCard
       {showComments && (
         <CommentSection
           postId={post.id}
-          onAddComment={(content) => {
-            // console.log('Add comment:', content)
-            // TODO: Implement add comment functionality
-          }}
-          onLikeComment={(commentId) => {
-            // console.log('Like comment:', commentId)
-            // TODO: Implement like comment functionality
-          }}
-          onReply={(commentId, content) => {
-            // console.log('Reply to comment:', commentId, content)
-            // TODO: Implement reply functionality
-          }}
+          onAddComment={handleAddComment}
+          onLikeComment={handleLikeComment}
+          onReply={handleReply}
         />
       )}
-      
-      <SharePostModal 
+
+      <SharePostModal
         post={post}
-        isOpen={isShareModalOpen} 
-        onClose={() => setIsShareModalOpen(false)} 
+        isOpen={isShareModalOpen}
+        onClose={closeShareModal}
       />
 
       <ReportModal
         isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
+        onClose={closeReportModal}
         targetId={post.id}
         targetType="POST"
       />
     </article>
   )
-}
+})
+
+PostCard.displayName = 'PostCard'
+export default PostCard
