@@ -238,9 +238,9 @@ function VerifyEmailContent() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Didn&apos;t receive the email? Check your spam folder or{' '}
-            <Link href="/contact" className="text-primary hover:text-primary/80">
+            <a href="mailto:support@wiftafrica.org" className="text-primary hover:text-primary/80">
               contact support
-            </Link>
+            </a>
           </p>
         </div>
       </div>

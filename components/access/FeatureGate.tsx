@@ -94,7 +94,7 @@ export default function FeatureGate({
   return (
     <RestrictedFeatureMessage
       title={restrictionTitle || defaultContent.title}
-      description={restrictionDescription || defaultContent.description}
+      description={restrictionDescription || restriction?.upgradeMessage || restriction?.reason || defaultContent.description}
       membershipStatus={membershipStatus || MembershipStatus.PENDING}
       actionText={restriction?.actionText}
       actionHref={restriction?.actionHref}
@@ -113,12 +113,12 @@ interface FeatureButtonProps {
   disabled?: boolean
 }
 
-export function FeatureButton({ 
-  feature, 
-  children, 
-  onClick, 
-  className = '', 
-  disabled = false 
+export function FeatureButton({
+  feature,
+  children,
+  onClick,
+  className = '',
+  disabled = false
 }: FeatureButtonProps) {
   const { access } = useFeatureAccess()
   const hasAccess = access[feature]
@@ -142,18 +142,18 @@ interface FeatureLinkProps {
   className?: string
 }
 
-export function FeatureLink({ 
-  feature, 
-  href, 
-  children, 
-  className = '' 
+export function FeatureLink({
+  feature,
+  href,
+  children,
+  className = ''
 }: FeatureLinkProps) {
   const { access } = useFeatureAccess()
   const hasAccess = access[feature]
 
   if (!hasAccess) {
     return (
-      <span 
+      <span
         className={`${className} opacity-50 cursor-not-allowed`}
         title="Complete membership verification to access this feature"
       >

@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { onboardingApi, type Chapter } from '@/lib/api/onboarding'
 import { MembershipStatus } from '@/types'
-import { 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle, 
-  MapPin, 
+import {
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  MapPin,
   Users,
   Calendar,
   Mail,
@@ -93,6 +93,7 @@ export default function VerificationProgress() {
           timeline: null,
           nextSteps: [
             'Contact your chapter administrator for more information',
+            'Contact support@wiftafrica.org for further assistance',
             'Review membership requirements',
             'Consider reapplying with additional information'
           ]
@@ -109,6 +110,7 @@ export default function VerificationProgress() {
           timeline: null,
           nextSteps: [
             'Contact your chapter administrator immediately',
+            'Contact support@wiftafrica.org for appeals',
             'Review community guidelines',
             'Follow reinstatement procedures if available'
           ]
@@ -216,7 +218,7 @@ export default function VerificationProgress() {
           View Account Settings
           <ExternalLink className="h-3 w-3" />
         </a>
-        
+
         {user.membershipStatus === MembershipStatus.PENDING && (
           <button
             onClick={() => window.location.reload()}

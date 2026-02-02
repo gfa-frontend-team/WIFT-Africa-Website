@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, MapPin, Users, Crown, AlertCircle, Loader2, Chec
 import ChapterCard from '@/components/shared/ChapterCard'
 import { Chapter } from '@/lib/api/onboarding'
 import { useOnboarding } from '@/lib/hooks/useOnboarding'
+import { getCountryFlagUrl } from '@/lib/utils/countryMapping'
 
 interface ChapterSelectionStepProps {
   onNext: (nextStep: number) => void
@@ -38,25 +39,10 @@ export default function ChapterSelectionStep({
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
 
-  const getCountryFlag = (countryCode: string) => {
-    if (countryCode === 'HQ' || countryCode === 'AFRICA') {
-      return '🌍'
-    }
-    // Convert country name to ISO code for flag API
-    const countryToCode: { [key: string]: string } = {
-      'Egypt': 'EG',
-      'Ghana': 'GH',
-      'Kenya': 'KE',
-      'Morocco': 'MA',
-      'Nigeria': 'NG',
-      'Senegal': 'SN',
-      'South Africa': 'ZA',
-      'Tanzania': 'TZ',
-      'Uganda': 'UG',
-      'Zimbabwe': 'ZW',
-    }
-    const code = countryToCode[countryCode] || 'ZZ'
-    return `https://flagsapi.com/${code}/flat/64.png`
+  const getCountryFlag = (countryCode: string, countryName: string) => {
+    const flagUrl = getCountryFlagUrl(countryCode, countryName)
+    if (flagUrl === 'AFRICA') return '🌍'
+    return flagUrl
   }
 
   const validateAndSubmit = () => {

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { getCountryFlagUrl } from '@/lib/utils/countryMapping'
 
 export default function ChapterDetailsPage() {
   const params = useParams()
@@ -45,17 +46,7 @@ export default function ChapterDetailsPage() {
     )
   }
 
-  // Get flag URL helper
-  const getFlagUrl = (countryName: string) => {
-    if (countryName === 'Global' || chapter.code === 'HQ') return null; // Use placeholder
-    // Basic mapping or try direct name (FlagsAPI supports country codes usually)
-    // We already have code in chapter.code (e.g. NG, GH)
-    // If code is strictly 2 chars, use it. Else try name mapping?
-    // Using simple fallback for now.
-    const code = chapter.code?.length === 2 ? chapter.code : 'UNKNOWN';
-    return `https://flagsapi.com/${code}/flat/64.png`
-  }
-
+  // We will use the utility directly in the render
   return (
     <div className="min-h-screen bg-background pb-12">
       <div className="max-w-screen-xl mx-auto px-4 py-6">
@@ -82,7 +73,7 @@ export default function ChapterDetailsPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <div className="w-20 h-20 rounded bg-card shadow-sm flex items-center justify-center overflow-hidden">
                       <img
-                        src={`https://flagsapi.com/${chapter.code}/flat/64.png`}
+                        src={getCountryFlagUrl(chapter.code, chapter.country)}
                         alt={`${chapter.country} flag`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
