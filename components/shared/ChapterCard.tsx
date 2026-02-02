@@ -1,5 +1,6 @@
 import { Users, MapPin, Crown, User, Info } from 'lucide-react'
 import Link from 'next/link'
+import { getCountryIsoCode } from '@/lib/utils/countryMapping'
 
 interface ChapterCardProps {
   id: string
@@ -33,28 +34,7 @@ export default function ChapterCard({
   actionLink,
 }: ChapterCardProps) {
   const isHQ = code === 'HQ'
-
-  // Helper to ensure valid flag URL or fallback
-  const getFlagUrl = (countryCode: string) => {
-    // Basic mapping or just pass 2-letter code if available.
-    // Assuming backend might pass full name, we might need a mapper if we don't have iso codes.
-    // For now we rely on the logic from the reference or previous onboarding step.
-    // The previous code had a map. I will try to use the country name -> code map or just use the code if it's 2 letters.
-
-    if (countryCode === 'HQ' || country === 'Global') return 'AFRICA'
-
-    // Quick mapper for common ones (duplicate logic from onboarding step, ideally moved to utils)
-    const countryToCode: { [key: string]: string } = {
-      'Egypt': 'EG', 'Ghana': 'GH', 'Kenya': 'KE', 'Morocco': 'MA',
-      'Nigeria': 'NG', 'Senegal': 'SN', 'South Africa': 'ZA',
-      'Tanzania': 'TZ', 'Uganda': 'UG', 'Zimbabwe': 'ZW',
-      'Rwanda': 'RW', 'Namibia': 'NA'
-    }
-
-    return countryToCode[country] || 'ZZ'
-  }
-
-  const flagCode = getFlagUrl(code)
+  const flagCode = getCountryIsoCode(code, country)
 
   return (
     <div
@@ -174,8 +154,8 @@ export default function ChapterCard({
           ) : actionLabel && onClick ? (
             <button
               className={`block w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-center shadow-sm ${isSelected
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'bg-accent text-accent-foreground hover:bg-accent/80'
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'bg-accent text-accent-foreground hover:bg-accent/80'
                 }`}
             >
               {isSelected ? 'Selected' : actionLabel}

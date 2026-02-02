@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { onboardingApi, type Chapter } from '@/lib/api/onboarding'
 import { MembershipStatus } from '@/types'
-import { 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle, 
-  X, 
-  MapPin, 
+import {
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  X,
+  MapPin,
   Users,
   ExternalLink,
   Loader2
@@ -68,7 +68,7 @@ export default function VerificationStatusBanner() {
           iconColor: 'text-red-600',
           icon: AlertTriangle,
           title: 'Membership Application Declined',
-          message: 'Your membership application was not approved. Contact your chapter administrator for more information.',
+          message: 'Your membership application was not approved. Contact your chapter administrator or support@wiftafrica.org for more information.',
           actionText: 'View Details',
           actionHref: '/verification'
         }
@@ -79,7 +79,7 @@ export default function VerificationStatusBanner() {
           iconColor: 'text-gray-600',
           icon: AlertTriangle,
           title: 'Membership Suspended',
-          message: 'Your membership has been temporarily suspended. Please contact your chapter administrator.',
+          message: 'Your membership has been temporarily suspended. Please contact your chapter administrator or support@wiftafrica.org.',
           actionText: 'View Details',
           actionHref: '/verification'
         }

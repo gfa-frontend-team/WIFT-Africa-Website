@@ -11,18 +11,18 @@ export interface FeatureAccess {
   canViewDirectory: boolean
   canViewEvents: boolean
   canRSVPEvents: boolean
-  
+
   // Profile features
   canEditProfile: boolean
   canUploadCV: boolean
   canChangeUsername: boolean
   canViewOtherProfiles: boolean
-  
+
   // Networking features
   canConnectWithMembers: boolean
   canJoinGroups: boolean
   canCreateContent: boolean
-  
+
   // Settings
   canChangePassword: boolean
   canDeleteAccount: boolean
@@ -81,18 +81,18 @@ export function useFeatureAccess() {
     canViewDirectory: isApproved || isPending, // Can view but not connect
     canViewEvents: isApproved || isPending,
     canRSVPEvents: isApproved,
-    
+
     // Profile features - basic editing allowed for all
     canEditProfile: !isSuspended, // Everyone except suspended can edit
     canUploadCV: !isSuspended,
     canChangeUsername: isApproved, // Only approved members
     canViewOtherProfiles: isApproved || isPending,
-    
+
     // Networking features - approved only
     canConnectWithMembers: isApproved,
     canJoinGroups: isApproved,
     canCreateContent: isApproved,
-    
+
     // Settings - basic access for all
     canChangePassword: !isSuspended,
     canDeleteAccount: !isSuspended,
@@ -103,17 +103,17 @@ export function useFeatureAccess() {
   const restrictedFeatures: RestrictedFeature[] = []
 
   if (!isApproved) {
-    const baseReason = isPending 
+    const baseReason = isPending
       ? 'Your membership is pending verification'
-      : isRejected 
+      : isRejected
         ? 'Your membership application was declined'
         : 'Your membership is suspended'
 
     const upgradeMessage = isPending
       ? 'Complete verification to unlock all features'
       : isRejected
-        ? 'Contact your chapter administrator for assistance'
-        : 'Contact your chapter administrator to resolve suspension'
+        ? 'Contact your chapter administrator or support@wiftafrica.org for assistance'
+        : 'Contact your chapter administrator or support@wiftafrica.org to resolve suspension'
 
     if (!access.canSendMessages) {
       restrictedFeatures.push({

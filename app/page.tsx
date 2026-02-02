@@ -87,7 +87,7 @@ const featuredMembers = [
     name: 'Fatou Jupiter Touré',
     role: 'Award-Winning Producer',
     chapter: 'WIFT Senegal',
-    image: '/Fatou Jupiter Touré.jpeg',
+    image: '/fatou-jupiter-toure.jpeg',
     quote: "Through WIFT, I was able to expand my professional network and access new opportunities within the film and television industry.",
     achievement: 'Producer',
     verified: true
