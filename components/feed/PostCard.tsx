@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ReportModal } from '@/components/reports/ReportModal'
+import PostLikesModal from './PostLikesModal'
 
 interface PostCardProps {
   post: Post
@@ -31,6 +32,7 @@ const PostCard = memo(function PostCard({ post, initialShowComments = false }: P
   const [showComments, setShowComments] = useState(initialShowComments)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [isLikesModalOpen, setIsLikesModalOpen] = useState(false)
   const { likePost, savePost, isLiking, isSaving } = usePostMutations()
   const { user } = useAuth()
 
@@ -71,6 +73,16 @@ const PostCard = memo(function PostCard({ post, initialShowComments = false }: P
 
   const closeReportModal = useCallback(() => {
     setIsReportModalOpen(false)
+  }, [])
+
+  const openLikesModal = useCallback(() => {
+    if (post.likesCount > 0) {
+      setIsLikesModalOpen(true)
+    }
+  }, [post.likesCount])
+
+  const closeLikesModal = useCallback(() => {
+    setIsLikesModalOpen(false)
   }, [])
 
   const toggleComments = useCallback(() => {
@@ -239,7 +251,11 @@ const PostCard = memo(function PostCard({ post, initialShowComments = false }: P
 
       {/* Interaction Stats */}
       <div className="px-4 py-2 flex items-center justify-between text-sm text-muted-foreground border-t border-border">
-        <button className="hover:underline">
+        <button
+          className="hover:underline"
+          onClick={openLikesModal}
+          disabled={post.likesCount === 0}
+        >
           {post.likesCount > 0 && t('feed.post_card.stats.likes_plural', { count: post.likesCount })}
         </button>
         <div className="flex items-center gap-3">
@@ -330,6 +346,12 @@ const PostCard = memo(function PostCard({ post, initialShowComments = false }: P
         onClose={closeReportModal}
         targetId={post.id}
         targetType="POST"
+      />
+
+      <PostLikesModal
+        isOpen={isLikesModalOpen}
+        onClose={closeLikesModal}
+        postId={post.id}
       />
     </article>
   )

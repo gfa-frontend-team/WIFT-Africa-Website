@@ -1,8 +1,6 @@
 'use client'
 
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import { useEffect } from 'react'
-import { useSearchStore } from '@/lib/stores/searchStore'
+import { useUrlSearch } from '@/lib/hooks/useUrlSearch'
 import { useSearch } from '@/lib/hooks/useSearch'
 import SearchBar from '@/components/search/SearchBar'
 import SearchFilters from '@/components/search/SearchFilters'
@@ -13,48 +11,28 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from 
 import { Button } from '@/components/ui/button'
 
 export default function SearchPage() {
-  const { currentQuery, activeFilters, setQuery, page, limit, sortBy, setPage } = useSearchStore()
+  const {
+    query, setQuery,
+    page, setPage,
+    sortBy, setFilter, setQuery: setUrlQuery, // Aliasing setQuery to avoid conflict
+    updateUrl,
+    clearFilters,
+    // Deconstruct all filters
+    roles, skills, location, chapter, availability, isMultihyphenate
+  } = useUrlSearch()
+
   const { useSearchMembers } = useSearch()
-  
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const queryParam = searchParams.get('query')
-
-  // Initial fetch handling URL params
-  useEffect(() => {
-    // Only set if different to avoid infinite loops or overwriting initial state unnecessarily
-    if (queryParam && queryParam !== currentQuery) {
-        setQuery(queryParam)
-    }
-  }, [queryParam]) // Removed currentQuery dependency to strictly follow URL on change
-
-  // Sync Store -> URL
-  // We debounce this slightly or just rely on the fact that currentQuery is already debounced by SearchBar
-  useEffect(() => {
-     // Create new URLSearchParams to preserve other params if we were syncing them, 
-     // but for now we basically focus on query. 
-     // Actually, we should be careful not to blow away manual params if the user navigated here with them.
-     const params = new URLSearchParams(searchParams.toString())
-     
-     if (currentQuery) {
-         params.set('query', currentQuery)
-     } else {
-         params.delete('query')
-     }
-     
-     const newSearch = params.toString()
-     // Only replace if actually different to avoid router churn
-     if (newSearch !== searchParams.toString()) {
-         router.replace(`${pathname}?${newSearch}`, { scroll: false })
-     }
-  }, [currentQuery, pathname, router, searchParams])
 
   const { data, isLoading: isSearching } = useSearchMembers({
-    query: currentQuery,
-    ...activeFilters,
+    query,
+    roles: roles.length > 0 ? roles : undefined,
+    skills: skills.length > 0 ? skills : undefined,
+    location: location || undefined,
+    chapter: chapter || undefined,
+    availability: availability as any,
+    isMultihyphenate: isMultihyphenate || undefined,
     page,
-    limit,
+    limit: 20, // Default limit matching backend
     sortBy
   })
 
@@ -73,11 +51,9 @@ export default function SearchPage() {
             Connect with other professionals in the WIFT Africa network.
           </p>
           <div className="w-full max-w-2xl">
-            <SearchBar />
+            <SearchBar query={query} onQueryChange={setQuery} />
           </div>
         </div>
-
-
 
         {/* Mobile Filter Toggle */}
         <div className="lg:hidden">
@@ -89,12 +65,20 @@ export default function SearchPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="h-[90vh] overflow-y-auto sm:max-w-[425px]">
-               <DialogHeader>
-                  <DialogTitle>Search Filters</DialogTitle>
-               </DialogHeader>
-               <div className="py-4">
-                  <SearchFilters />
-               </div>
+              <DialogHeader>
+                <DialogTitle>Search Filters</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                <SearchFilters
+                  activeFilters={{
+                    roles, skills, location, chapter, availability, isMultihyphenate
+                  }}
+                  sortBy={sortBy}
+                  onFilterChange={setFilter}
+                  onSortChange={(sort) => updateUrl({ sortBy: sort })}
+                  onClear={clearFilters}
+                />
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -102,7 +86,15 @@ export default function SearchPage() {
         <div className="flex flex-col lg:flex-row gap-8 mt-6">
           {/* Sidebar Filters - Desktop only */}
           <aside className="hidden lg:block w-64 bg-card border border-border rounded-lg p-6 h-fit sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto">
-            <SearchFilters />
+            <SearchFilters
+              activeFilters={{
+                roles, skills, location, chapter, availability, isMultihyphenate
+              }}
+              sortBy={sortBy}
+              onFilterChange={setFilter}
+              onSortChange={(sort) => updateUrl({ sortBy: sort })}
+              onClear={clearFilters}
+            />
           </aside>
 
           {/* Results Grid */}
@@ -117,14 +109,14 @@ export default function SearchPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Found {totalResults} member{totalResults !== 1 ? 's' : ''}
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {results.map((user) => (
-                        <MemberCard key={user.id} user={user} />
-                    ))}
+                  {results.map((user) => (
+                    <MemberCard key={user.id} user={user} />
+                  ))}
                 </div>
 
-                <SearchPagination 
+                <SearchPagination
                   currentPage={page}
                   totalPages={totalPages}
                   onPageChange={setPage}
@@ -133,7 +125,7 @@ export default function SearchPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-20 bg-card border border-border rounded-lg text-center p-8">
                 <div className="bg-muted p-4 rounded-full mb-4">
-                    <SearchX className="h-8 w-8 text-muted-foreground" />
+                  <SearchX className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No members found</h3>
                 <p className="text-muted-foreground max-w-sm">

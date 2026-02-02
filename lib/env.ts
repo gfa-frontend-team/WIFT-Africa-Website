@@ -8,4 +8,7 @@ export const env = {
 } as const
 
 // Construct full API base URL
-export const API_BASE_URL = `${env.apiUrl}/api/${env.apiVersion}`
+// In development, use relative path to leverage Next.js rewrites (proxies) to bypass CORS
+export const API_BASE_URL = env.isDevelopment
+  ? `/api/${env.apiVersion}`
+  : `${env.apiUrl}/api/${env.apiVersion}`

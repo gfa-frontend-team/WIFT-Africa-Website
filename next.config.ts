@@ -43,6 +43,14 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: "http://localhost:3001/api/v1/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {
