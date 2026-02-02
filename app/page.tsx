@@ -280,22 +280,21 @@ export default function LandingPage() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
               {/* Left: Framed Vision Image */}
-              <div className="lg:w-2/5">
-                <div className="relative aspect-[3/4] w-full max-w-md mx-auto rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
-                  {/* <div className="absolute inset-0 border-[8px] border-yellow-400/30 rounded-lg transform translate-x-4 translate-y-4" /> */}
-                  {/* <div className="÷relative h-full w-full border-[8px] border-white shadow-2xl rounded-lg overflow-hidden bg-white"> */}
+              <div className="lg:w-1/2">
+                <div className="relative w-full max-w-lg mx-auto rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
                   <Image
-                    src="/4.png"
+                    src="/mission-vision.png"
                     alt="WIFT Africa Vision"
-                    fill
-                    className="object-cover"
+                    width={1859}
+                    height={1416}
+                    className="w-full h-auto "
+                    priority
                   />
-                  {/* </div> */}
                 </div>
               </div>
 
               {/* Right: Content */}
-              <div className="lg:w-3/5 space-y-12">
+              <div className="lg:w-1/2 space-y-12">
                 {/* Vision */}
                 <div className="space-y-4">
                   <h3 className="text-4xl md:text-5xl font-bold uppercase tracking-tight">Vision</h3>
