@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { searchApi, type SearchUsersParams } from '../api/search'
 
 // Query keys
@@ -13,7 +13,7 @@ export const searchKeys = {
 }
 
 export function useSearch() {
-  
+
   // Search Members
   const useSearchMembers = (params: SearchUsersParams, enabled = true) => useQuery({
     queryKey: searchKeys.members(params),
@@ -21,6 +21,21 @@ export function useSearch() {
     enabled,
     staleTime: 1000 * 60 * 1, // Cache results for 1 minute
     placeholderData: (previousData) => previousData, // Keep previous results while fetching new ones
+  })
+
+  // Infinite Search Members
+  const useInfiniteSearchMembers = (params: SearchUsersParams, enabled = true) => useInfiniteQuery({
+    queryKey: searchKeys.members(params),
+    queryFn: ({ pageParam = 1 }) => searchApi.searchMembers({ ...params, page: pageParam as number }),
+    getNextPageParam: (lastPage: any, allPages: any[]) => {
+      if (lastPage.pages > allPages.length) {
+        return allPages.length + 1
+      }
+      return undefined
+    },
+    initialPageParam: 1,
+    enabled,
+    staleTime: 1000 * 60 * 1,
   })
 
   // Recommendations
@@ -46,6 +61,7 @@ export function useSearch() {
 
   return {
     useSearchMembers,
+    useInfiniteSearchMembers,
     useRecommendations,
     usePopularSkills,
     useSearchFilters

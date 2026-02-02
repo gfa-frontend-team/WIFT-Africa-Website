@@ -1,34 +1,34 @@
 'use client'
 
-import { useSearchStore } from '@/lib/stores/searchStore'
 import { useDebounce } from '@/lib/hooks/useDebounce'
 import { Search } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
-export default function SearchBar() {
-  const { currentQuery, setQuery } = useSearchStore()
-  const [localQuery, setLocalQuery] = useState(currentQuery)
+interface SearchBarProps {
+  query: string
+  onQueryChange: (query: string) => void
+}
+
+export default function SearchBar({ query, onQueryChange }: SearchBarProps) {
+  const [localQuery, setLocalQuery] = useState(query)
+
+  // Sync local state if prop updates externally (e.g. from URL)
+  useEffect(() => {
+    setLocalQuery(query)
+  }, [query])
 
   const debouncedQuery = useDebounce(localQuery, 500)
 
-  // Sync local state if store updates externally
+  // Debounced update to parent
   useEffect(() => {
-    setLocalQuery(currentQuery)
-  }, [currentQuery])
-
-  // Debounced update to store
-  useEffect(() => {
-    // Only update if different to avoid loops
-    // We intentionally omit currentQuery from deps to avoid triggering this effect 
-    // when store updates externally (which would use stale debounced value)
-    if (debouncedQuery !== currentQuery) {
-        setQuery(debouncedQuery)
+    if (debouncedQuery !== query) {
+      onQueryChange(debouncedQuery)
     }
-  }, [debouncedQuery])
+  }, [debouncedQuery, query, onQueryChange])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setQuery(localQuery)
+    onQueryChange(localQuery)
   }
 
   return (
@@ -43,10 +43,10 @@ export default function SearchBar() {
           className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
         />
         <button
-            type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+          type="submit"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
         >
-            Search
+          Search
         </button>
       </div>
     </form>

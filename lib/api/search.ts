@@ -39,19 +39,20 @@ export interface SearchUserResult {
   firstName: string
   lastName: string
   username?: string
+  profileSlug: string
   headline?: string
   primaryRole?: string // Assuming string in response, mapped from Role
   roles?: string[]
   location?: string
   profilePhoto?: string
   availabilityStatus?: AvailabilityStatus
-  
+
   chapter?: {
     id: string
     name: string
     code: string
   }
-  
+
   isConnected: boolean
   connectionStatus: ConnectionStatus
   matchScore?: number

@@ -150,12 +150,12 @@ export const postsApi = {
   getFeed: async (page = 1, limit = 10): Promise<FeedResponse> => {
     try {
       const response = await apiClient.get<FeedResponse>(`/posts/feed?page=${page}&limit=${limit}`)
-      
+
       // Map posts to ensure IDs exist
       if (response && response.posts) {
         response.posts = response.posts.map(mapPost)
       }
-      
+
       return response
     } catch (error) {
       console.error('❌ Feed API error:', error)
@@ -212,6 +212,38 @@ export const postsApi = {
    */
   toggleLike: async (postId: string): Promise<{ liked: boolean; likesCount: number; message: string }> => {
     return await apiClient.post<{ liked: boolean; likesCount: number; message: string }>(`/posts/${postId}/like`)
+  },
+
+  /**
+   * Get list of users who liked a post
+   */
+  getPostLikes: async (postId: string, page = 1, limit = 20): Promise<{
+    users: Array<{
+      id: string
+      firstName: string
+      lastName: string
+      username: string
+      profilePhoto?: string
+      headline?: string
+      primaryRole?: string
+    }>
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      totalPages: number
+      hasNext: boolean
+      hasPrev: boolean
+    }
+  }> => {
+    const response = await apiClient.get<any>(`/posts/${postId}/likes?page=${page}&limit=${limit}`)
+    if (response && response.users) {
+      response.users = response.users.map((user: any) => ({
+        ...user,
+        id: user.id || user._id
+      }))
+    }
+    return response
   },
 
   /**
@@ -323,9 +355,9 @@ export const postsApi = {
   /**
    * Create admin announcement post
    */
-  createAdminPost: async (data: CreatePostInput & { 
+  createAdminPost: async (data: CreatePostInput & {
     targetChapters?: string[]
-    isPinned?: boolean 
+    isPinned?: boolean
   }): Promise<{ post: Post; message: string }> => {
     const response = await apiClient.post<{ post: Post; message: string }>('/posts/admin', data)
     if (response && response.post) {
