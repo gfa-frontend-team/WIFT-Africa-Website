@@ -3,16 +3,17 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { 
-  User, 
-  Shield, 
-  AtSign, 
-  Bell, 
+import {
+  User,
+  Shield,
+  AtSign,
+  Bell,
   ChevronRight,
   Settings as SettingsIcon,
   Lock,
   Monitor,
-  CheckCircle2
+  CheckCircle2,
+  LifeBuoy
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -69,6 +70,13 @@ export default function SettingsPage() {
       href: '/settings/notifications',
       color: 'text-pink-600 bg-pink-100',
       comingSoon: true
+    },
+    {
+      title: 'Support & Feedback',
+      description: 'Get help or share your feedback with us',
+      icon: LifeBuoy,
+      href: 'mailto:support@wiftafrica.org',
+      color: 'text-cyan-600 bg-cyan-100'
     }
   ]
 
@@ -90,7 +98,7 @@ export default function SettingsPage() {
         <div className="grid gap-4">
           {settingsSections.map((section) => {
             const Icon = section.icon
-            
+
             if (section.comingSoon) {
               return (
                 <div

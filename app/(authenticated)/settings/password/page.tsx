@@ -109,7 +109,7 @@ export default function ChangePasswordPage() {
     try {
       await authApi.changePassword(formData.currentPassword, formData.newPassword)
       setIsSuccess(true)
-      
+
       // Clear form
       setFormData({
         currentPassword: '',
@@ -210,9 +210,8 @@ export default function ChangePasswordPage() {
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={formData.currentPassword}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
-                  formErrors.currentPassword ? 'border-destructive' : 'border-border'
-                }`}
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.currentPassword ? 'border-destructive' : 'border-border'
+                  }`}
                 placeholder="Enter your current password"
                 disabled={isLoading}
               />
@@ -221,7 +220,7 @@ export default function ChangePasswordPage() {
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showCurrentPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
               </button>
             </div>
             {formErrors.currentPassword && (
@@ -242,9 +241,8 @@ export default function ChangePasswordPage() {
                 type={showNewPassword ? 'text' : 'password'}
                 value={formData.newPassword}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
-                  formErrors.newPassword ? 'border-destructive' : 'border-border'
-                }`}
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.newPassword ? 'border-destructive' : 'border-border'
+                  }`}
                 placeholder="Enter your new password"
                 disabled={isLoading}
               />
@@ -253,7 +251,7 @@ export default function ChangePasswordPage() {
                 onClick={() => setShowNewPassword(!showNewPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showNewPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
               </button>
             </div>
             {formErrors.newPassword && (
@@ -277,9 +275,8 @@ export default function ChangePasswordPage() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
-                  formErrors.confirmPassword ? 'border-destructive' : 'border-border'
-                }`}
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${formErrors.confirmPassword ? 'border-destructive' : 'border-border'
+                  }`}
                 placeholder="Confirm your new password"
                 disabled={isLoading}
               />
@@ -288,7 +285,7 @@ export default function ChangePasswordPage() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
               </button>
             </div>
             {formErrors.confirmPassword && (

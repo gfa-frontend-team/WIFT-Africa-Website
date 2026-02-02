@@ -17,7 +17,7 @@ export default function ChapterSelectionStep({
   const { t } = useTranslation()
   const { chapters: dataChapters, isLoadingChapters, submitChapter, isSubmittingChapter: isSaving } = useOnboarding()
   const [chapters, setChapters] = useState<Chapter[]>([])
-  
+
   // Sort chapters when data loads
   useEffect(() => {
     if (dataChapters) {
@@ -32,7 +32,7 @@ export default function ChapterSelectionStep({
 
   const [selectedChapter, setSelectedChapter] = useState<string>('')
   const [memberType, setMemberType] = useState<'NEW' | 'EXISTING' | null>(null)
-  const [membershipId, setMembershipId] = useState('')
+
   const [phoneNumber, setPhoneNumber] = useState('')
   const [additionalInfo, setAdditionalInfo] = useState('')
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -70,9 +70,7 @@ export default function ChapterSelectionStep({
       newErrors.chapter = 'Please select a chapter'
     }
 
-    if (memberType === 'EXISTING' && !membershipId.trim()) {
-      newErrors.membershipId = 'Membership ID is required for existing members'
-    }
+
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -93,9 +91,7 @@ export default function ChapterSelectionStep({
         memberType: memberType!,
       }
 
-      if (memberType === 'EXISTING' && membershipId.trim()) {
-        data.membershipId = membershipId.trim()
-      }
+
 
       if (phoneNumber.trim()) {
         data.phoneNumber = phoneNumber.trim()
@@ -159,11 +155,10 @@ export default function ChapterSelectionStep({
                 setErrors((prev) => ({ ...prev, memberType: '' }))
               }
             }}
-            className={`px-6 py-3 rounded-lg font-medium transition-all text-center ${
-              memberType === 'EXISTING'
-                ? 'bg-primary text-primary-foreground'
-                : 'border border-border hover:bg-accent'
-            }`}
+            className={`px-6 py-3 rounded-lg font-medium transition-all text-center ${memberType === 'EXISTING'
+              ? 'bg-primary text-primary-foreground'
+              : 'border border-border hover:bg-accent'
+              }`}
           >
             <div className="font-semibold">{t('onboarding.chapter.btn_existing')}</div>
           </button>
@@ -176,20 +171,19 @@ export default function ChapterSelectionStep({
                 setErrors((prev) => ({ ...prev, memberType: '' }))
               }
             }}
-            className={`px-6 py-3 rounded-lg font-medium transition-all text-center ${
-              memberType === 'NEW'
-                ? 'bg-primary text-primary-foreground'
-                : 'border border-border hover:bg-accent'
-            }`}
+            className={`px-6 py-3 rounded-lg font-medium transition-all text-center ${memberType === 'NEW'
+              ? 'bg-primary text-primary-foreground'
+              : 'border border-border hover:bg-accent'
+              }`}
           >
             <div className="font-semibold">{t('onboarding.chapter.btn_new')}</div>
           </button>
         </div>
-        
+
         {errors.memberType && (
           <p className="mt-2 text-sm text-destructive text-center">{errors.memberType}</p>
         )}
-        
+
         {memberType === 'EXISTING' && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
@@ -197,7 +191,7 @@ export default function ChapterSelectionStep({
             </p>
           </div>
         )}
-        
+
         {memberType === 'NEW' && (
           <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
@@ -229,7 +223,7 @@ export default function ChapterSelectionStep({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {chapters.map((chapter) => {
           const isSelected = selectedChapter === chapter.id
-          
+
           return (
             <ChapterCard
               key={chapter.id}
@@ -248,10 +242,10 @@ export default function ChapterSelectionStep({
               isSelected={isSelected}
               onClick={() => {
                 if (memberType) {
-                   setSelectedChapter(chapter.id)
-                   if (errors.chapter) {
-                     setErrors((prev) => ({ ...prev, chapter: '' }))
-                   }
+                  setSelectedChapter(chapter.id)
+                  if (errors.chapter) {
+                    setErrors((prev) => ({ ...prev, chapter: '' }))
+                  }
                 }
               }}
               actionLabel={memberType ? (isSelected ? 'Selected' : 'Select Chapter') : 'Select Member Type First'}
@@ -267,27 +261,7 @@ export default function ChapterSelectionStep({
       {/* Membership ID for Existing Members */}
       {memberType === 'EXISTING' && selectedChapter && (
         <div className="p-6 border border-border rounded-lg bg-card space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              {t('onboarding.chapter.member_id_label')}
-              <span className="text-red-500 ml-1">*</span>
-            </label>
-            <input
-              type="text"
-              value={membershipId}
-              onChange={(e) => {
-                setMembershipId(e.target.value)
-                if (errors.membershipId) {
-                  setErrors((prev) => ({ ...prev, membershipId: '' }))
-                }
-              }}
-              className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder={t('onboarding.chapter.member_id_placeholder') as string}
-            />
-            {errors.membershipId && (
-              <p className="mt-1 text-sm text-destructive">{errors.membershipId}</p>
-            )}
-          </div>
+
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
@@ -323,7 +297,7 @@ export default function ChapterSelectionStep({
           <AlertCircle className="h-5 w-5 text-primary" />
           {t('onboarding.chapter.important_info_title')}
         </h3>
-        
+
         <div className="space-y-4 text-sm">
           <div>
             <h4 className="font-medium text-foreground mb-2">{t('onboarding.chapter.verification_title')}</h4>

@@ -478,7 +478,7 @@ export default function LandingPage() {
                 <p className="text-sm font-medium text-muted-foreground mb-8 text-center uppercase tracking-wider">
                   Trusted by professionals at
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto items-center">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto items-center">
                   <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                     <div className="relative w-full h-full">
                       <Image
@@ -489,7 +489,7 @@ export default function LandingPage() {
                       />
                     </div>
                   </div>
-                  <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
+                  {/* <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                     <div className="relative w-full h-full">
                       <Image
                         src="/BMGFoundation_logo_banner.jpg"
@@ -498,7 +498,7 @@ export default function LandingPage() {
                         className="object-contain"
                       />
                     </div>
-                  </div>
+                  </div> */}
                   <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 flex items-center justify-center h-24">
                     <div className="relative w-full h-full">
                       <Image
