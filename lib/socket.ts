@@ -22,7 +22,7 @@ export const getSocket = (token: string) => {
     activeToken = token;
     socket = io(SOCKET_URL, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
