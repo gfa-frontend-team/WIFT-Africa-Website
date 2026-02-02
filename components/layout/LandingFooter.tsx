@@ -70,7 +70,7 @@ export default function LandingFooter() {
             <h3 className="font-semibold text-foreground mb-4">Company</h3>
             <ul className="space-y-3 text-sm">
               <li><a href="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</a></li>
-              <li><a href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+              <li><a href="mailto:support@wiftafrica.org" className="text-muted-foreground hover:text-primary transition-colors">Contact Support</a></li>
               <li><a href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a></li>
               <li><a href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</a></li>
             </ul>
