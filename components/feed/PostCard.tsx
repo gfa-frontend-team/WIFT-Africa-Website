@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import SharePostModal from './SharePostModal'
 import EmbeddedPost from './EmbeddedPost'
 import { toast } from 'sonner'
+import { getProfileUrl } from '@/lib/utils/routes'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -136,7 +137,7 @@ const PostCard = memo(function PostCard({ post, initialShowComments = false }: P
       {/* Post Header */}
       <div className="p-4 flex items-start justify-between">
         <div className="flex items-start gap-3 flex-1">
-          <Link href={`/in/${post.author.username || post.author.id}`}>
+          <Link href={getProfileUrl(post.author)}>
             <Avatar
               src={post.author.profilePhoto}
               name={`${post.author.firstName} ${post.author.lastName}`}
@@ -146,7 +147,7 @@ const PostCard = memo(function PostCard({ post, initialShowComments = false }: P
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <Link
-                href={`/in/${post.author.username || post.author.id}`}
+                href={getProfileUrl(post.author)}
                 className="font-semibold text-foreground hover:underline block truncate"
               >
                 {post.author.firstName} {post.author.lastName}

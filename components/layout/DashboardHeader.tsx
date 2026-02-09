@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
 import { MembershipStatus, type User } from '@/types';
+import { getProfileUrl } from '@/lib/utils/routes';
 import {
   Home,
   User as UserIcon,
@@ -258,7 +259,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                     </div>
                     <div className="p-2 space-y-0.5">
                       <Link
-                        href={`/in/${user.username || user.id}`}
+                        href={getProfileUrl(user)}
                         className="flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group"
                         onClick={() => setIsUserMenuOpen(false)}
                       >

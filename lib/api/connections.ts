@@ -14,6 +14,8 @@ export interface ConnectionRequest {
 export interface ConnectionProfile {
   id: string
   name: string
+  username?: string
+  profileSlug?: string
   profilePhoto?: string
   professionalHeadline?: string
   connectedAt: string

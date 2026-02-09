@@ -2,17 +2,18 @@
 
 import { SearchUserResult } from '@/lib/api/search'
 import { ConnectionRequest } from '@/lib/api/connections'
-import { Button } from '@/components/ui/button' // Assuming we have this, or use standard html button with tailwind
+import { Button } from '@/components/ui/button'
 import Avatar from '@/components/ui/Avatar'
-import { MapPin, Users, UserPlus, MessageCircle, Check, Clock, UserCheck, X } from 'lucide-react'
+import { MapPin, Users, UserPlus, MessageCircle, Clock, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 interface MemberCardProps {
   member: SearchUserResult
   onConnect: (id: string) => void
   onAccept?: (requestId: string) => void
-  incomingRequest?: any // Using any for simplicity as import might fail or circular dependency? No, let's use ConnectionRequest if available or infer
+  incomingRequest?: ConnectionRequest
   isConnecting?: boolean
 }
 
@@ -25,7 +26,7 @@ export default function MemberCard({ member, onConnect, onAccept, incomingReques
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
       return
     }
-    router.push(`/in/${member.username || member.id}`)
+    router.push(getProfileUrl(member))
   }
 
   const renderActionButton = () => {
@@ -109,7 +110,7 @@ export default function MemberCard({ member, onConnect, onAccept, incomingReques
 
       <div className="space-y-1 mb-4 w-full">
         <Link 
-            href={`/in/${member.username || member.id}`} 
+            href={getProfileUrl(member)} 
             className="font-bold text-lg text-foreground hover:text-primary hover:underline line-clamp-1"
         >
           {member.firstName} {member.lastName}

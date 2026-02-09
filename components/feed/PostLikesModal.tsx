@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import Avatar from '@/components/ui/Avatar'
 import { usePostLikes } from '@/lib/hooks/usePostLikes'
 import { Loader2 } from 'lucide-react'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 interface PostLikesModalProps {
     isOpen: boolean
@@ -39,7 +40,7 @@ export default function PostLikesModal({ isOpen, onClose, postId }: PostLikesMod
                         <div className="space-y-4">
                             {users.map((user) => (
                                 <div key={user.id} className="flex items-center gap-3">
-                                    <Link href={`/in/${user.username || user.id}`} onClick={onClose}>
+                                    <Link href={getProfileUrl(user)} onClick={onClose}>
                                         <Avatar
                                             src={user.profilePhoto}
                                             name={`${user.firstName} ${user.lastName}`}
@@ -48,7 +49,7 @@ export default function PostLikesModal({ isOpen, onClose, postId }: PostLikesMod
                                     </Link>
                                     <div className="flex-1 min-w-0">
                                         <Link
-                                            href={`/in/${user.username || user.id}`}
+                                            href={getProfileUrl(user)}
                                             onClick={onClose}
                                             className="font-semibold text-sm hover:underline block truncate"
                                         >

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { chaptersApi } from '@/lib/api/chapters'
+import { useChapterEvents, useChapterFunding, useChapterMentorships } from '@/lib/hooks/useChapter'
 import {
   ArrowLeft, Users, MapPin, Mail, Calendar, Briefcase, Crown,
   Loader2, Globe
@@ -11,6 +12,10 @@ import {
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { getCountryFlagUrl } from '@/lib/utils/countryMapping'
+import { EventCard } from '@/components/events/EventCard'
+import { FundingCard } from '@/components/funding/FundingCard'
+import { MentorshipCard } from '@/components/mentorship/MentorshipCard'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ChapterDetailsPage() {
   const params = useParams()
@@ -25,6 +30,20 @@ export default function ChapterDetailsPage() {
   })
 
   const chapter = chapterResponse?.chapter
+
+  // Fetch chapter-specific data
+  const { data: eventsData, isLoading: isLoadingEvents } = useChapterEvents(chapterId)
+  const { data: fundingData, isLoading: isLoadingFunding } = useChapterFunding(chapterId)
+  const { data: mentorshipsData, isLoading: isLoadingMentorships } = useChapterMentorships(chapterId)
+
+  // Extract data arrays
+  const events = eventsData?.events || []
+  const funding = fundingData?.data || []
+  const mentorships = mentorshipsData?.data || []
+
+  // Calculate counts
+  const upcomingEventsCount = events.length
+  const opportunitiesCount = funding.length + mentorships.length
 
   if (isLoading) {
     return (
@@ -230,23 +249,82 @@ export default function ChapterDetailsPage() {
 
             {activeTab === "events" && (
               <div className="space-y-4">
-                <div className="bg-card border border-border rounded-lg p-12 text-center">
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    No upcoming events for this chapter.
-                  </p>
-                </div>
+                {isLoadingEvents ? (
+                  <div className="bg-card border border-border rounded-lg p-12 text-center">
+                    <Loader2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                    <p className="text-muted-foreground">Loading events...</p>
+                  </div>
+                ) : events.length === 0 ? (
+                  <div className="bg-card border border-border rounded-lg p-12 text-center">
+                    <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      No upcoming events for this chapter.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {events.map((event) => (
+                      <EventCard key={event.id || event._id} event={event} />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {activeTab === "opportunities" && (
-              <div className="space-y-4">
-                <div className="bg-card border border-border rounded-lg p-12 text-center">
-                  <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    No opportunities available for this chapter.
-                  </p>
-                </div>
+              <div className="space-y-6">
+                {isLoadingFunding || isLoadingMentorships ? (
+                  <div className="bg-card border border-border rounded-lg p-12 text-center">
+                    <Loader2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                    <p className="text-muted-foreground">Loading opportunities...</p>
+                  </div>
+                ) : funding.length === 0 && mentorships.length === 0 ? (
+                  <div className="bg-card border border-border rounded-lg p-12 text-center">
+                    <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      No opportunities available for this chapter.
+                    </p>
+                  </div>
+                ) : (
+                  <Tabs defaultValue="funding" className="space-y-6">
+                    <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+                      <TabsTrigger value="funding">
+                        Grants ({funding.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="mentorship">
+                        Mentorship ({mentorships.length})
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="funding">
+                      {funding.length === 0 ? (
+                        <div className="bg-muted/30 border border-border rounded-xl p-12 text-center">
+                          <p className="text-muted-foreground">No funding opportunities available.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {funding.map((opportunity) => (
+                            <FundingCard key={opportunity.id || opportunity._id} opportunity={opportunity} />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="mentorship">
+                      {mentorships.length === 0 ? (
+                        <div className="bg-muted/30 border border-border rounded-xl p-12 text-center">
+                          <p className="text-muted-foreground">No mentorship opportunities available.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {mentorships.map((mentorship) => (
+                            <MentorshipCard key={mentorship.id || mentorship._id} mentorship={mentorship} />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                )}
               </div>
             )}
           </div>
@@ -272,7 +350,7 @@ export default function ChapterDetailsPage() {
                     Upcoming Events
                   </span>
                   <span className="font-semibold text-foreground">
-                    0
+                    {upcomingEventsCount}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -280,7 +358,7 @@ export default function ChapterDetailsPage() {
                     Open Opportunities
                   </span>
                   <span className="font-semibold text-foreground">
-                    0
+                    {opportunitiesCount}
                   </span>
                 </div>
               </div>

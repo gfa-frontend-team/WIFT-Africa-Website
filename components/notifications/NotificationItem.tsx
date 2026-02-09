@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Bell, MessageCircle, UserPlus, Heart, MessageSquare } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 interface NotificationItemProps {
   notification: Notification
@@ -69,8 +70,8 @@ export default function NotificationItem({ notification }: NotificationItemProps
             return '/connections?tab=incoming'
             
         case 'CONNECTION_ACCEPTED':
-            // Use ID as fallback since username is not in the type definition currently
-            return notification.sender?.id ? `/in/${notification.sender.id}` : '/connections'
+            // Use getProfileUrl with sender object
+            return notification.sender ? getProfileUrl(notification.sender) : '/connections'
 
         case 'NEW_MESSAGE':
             if (metadata?.conversationId) {

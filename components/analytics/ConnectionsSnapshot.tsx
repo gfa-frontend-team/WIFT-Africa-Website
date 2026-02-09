@@ -6,17 +6,8 @@ import Avatar from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, UserMinus, Loader2, Users } from 'lucide-react'
 import Link from 'next/link'
-import { toast } from 'sonner' // Assuming sonner is used, or use toast hook
-// If sonner is not installed, I should check. But standard these days. 
-// I'll check package.json if I can, but standard usage is risky without checking.
-// From previous context, `components/ui/use-toast.ts` might exist.
-// Checking `components/ui` list in Step 125, it didn't show toast.
-// Wait, `components/ui` had 18 files.
-// `dialog.tsx` etc.
-// I'll just use simple alert or console log if toast not found, or try standard `sonner` / `react-hot-toast` imports if I knew.
-// I'll stick to a safer approach: assume no toast library for now or just log errors, but better to check later.
-// Actually, I'll use `window.alert` for error handling if needed, or better, simply render error state. 
-// Ideally I should check `components/ui/use-toast.ts`.
+import { toast } from 'sonner'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 export function ConnectionsSnapshot() {
   const queryClient = useQueryClient()
@@ -75,7 +66,7 @@ export function ConnectionsSnapshot() {
         // Flat structure: id, name, profilePhoto, professionalHeadline
         return (
           <div key={conn.id} className="flex items-center justify-center p-3 bg-white border rounded-lg hover:shadow-sm transition-shadow">
-            <Link href={`/in/${conn.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+            <Link href={getProfileUrl(conn)} className="flex items-center gap-3 flex-1 min-w-0">
                <Avatar 
                   src={conn.profilePhoto} 
                   name={conn.name}

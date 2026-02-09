@@ -7,6 +7,7 @@ import { type Comment } from '@/lib/api/posts'
 import { postsApi } from '@/lib/api/posts'
 import Avatar from '@/components/ui/Avatar'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 interface CommentSectionProps {
   postId: string
@@ -78,7 +79,7 @@ const CommentItem = ({
         <div className="absolute top-0 left-[-20px] bottom-0 w-[2px] bg-border rounded-full" />
       )}
       <div className="flex items-start gap-3">
-        <Link href={`/${comment.author.username}`}>
+        <Link href={getProfileUrl(comment.author)}>
           <Avatar
             src={comment.author.profilePhoto}
             name={`${comment.author.firstName} ${comment.author.lastName}`}

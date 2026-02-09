@@ -27,6 +27,7 @@ export interface Post {
     lastName: string
     profilePhoto?: string
     username: string
+    profileSlug?: string
     primaryRole: string
   }
   likesCount: number
@@ -55,6 +56,7 @@ export interface Comment {
     lastName: string
     profilePhoto?: string
     username: string
+    profileSlug?: string
   }
   likesCount: number
   repliesCount: number
@@ -112,30 +114,32 @@ export interface SavedCollectionsResponse {
 // ============================================
 
 // Helper to ensure ID exists (mapping _id to id if needed)
-const mapPost = (post: any): Post => {
+const mapPost = (post: Post | null | undefined): Post | null | undefined => {
   if (!post) return post
+  const postWithId = post as Post & { _id?: string; saves?: unknown[] }
   return {
     ...post,
-    id: post.id || post._id,
-    isSaved: post.isSaved || post.saves?.length > 0 || false, // Fallback if isSaved isn't directly boolean
+    id: post.id || postWithId._id || '',
+    isSaved: post.isSaved || (postWithId.saves && postWithId.saves.length > 0) || false,
     author: post.author ? {
       ...post.author,
-      id: post.author.id || post.author._id
+      id: post.author.id || (post.author as typeof post.author & { _id?: string })._id || ''
     } : post.author,
-    originalPost: post.originalPost ? mapPost(post.originalPost) : undefined
+    originalPost: post.originalPost ? mapPost(post.originalPost) as Post : undefined
   }
 }
 
-const mapComment = (comment: any): Comment => {
+const mapComment = (comment: Comment | null | undefined): Comment | null | undefined => {
   if (!comment) return comment
+  const commentWithId = comment as Comment & { _id?: string; parentComment?: string }
   return {
     ...comment,
-    id: comment.id || comment._id,
+    id: comment.id || commentWithId._id || '',
     author: comment.author ? {
       ...comment.author,
-      id: comment.author.id || comment.author._id
+      id: comment.author.id || (comment.author as typeof comment.author & { _id?: string })._id || ''
     } : comment.author,
-    parentCommentId: comment.parentComment || comment.parentCommentId
+    parentCommentId: commentWithId.parentComment || comment.parentCommentId
   }
 }
 
@@ -153,7 +157,7 @@ export const postsApi = {
 
       // Map posts to ensure IDs exist
       if (response && response.posts) {
-        response.posts = response.posts.map(mapPost)
+        response.posts = response.posts.map(mapPost).filter((p): p is Post => p !== null && p !== undefined)
       }
 
       return response
@@ -169,7 +173,8 @@ export const postsApi = {
   createPost: async (data: CreatePostInput): Promise<{ post: Post }> => {
     const response = await apiClient.post<{ post: Post }>('/posts', data)
     if (response && response.post) {
-      response.post = mapPost(response.post)
+      const mapped = mapPost(response.post)
+      if (mapped) response.post = mapped
     }
     return response
   },
@@ -180,7 +185,8 @@ export const postsApi = {
   getPost: async (postId: string): Promise<{ post: Post }> => {
     const response = await apiClient.get<{ post: Post }>(`/posts/${postId}`)
     if (response && response.post) {
-      response.post = mapPost(response.post)
+      const mapped = mapPost(response.post)
+      if (mapped) response.post = mapped
     }
     return response
   },
@@ -191,7 +197,8 @@ export const postsApi = {
   updatePost: async (postId: string, data: Partial<CreatePostInput>): Promise<{ post: Post }> => {
     const response = await apiClient.patch<{ post: Post }>(`/posts/${postId}`, data)
     if (response && response.post) {
-      response.post = mapPost(response.post)
+      const mapped = mapPost(response.post)
+      if (mapped) response.post = mapped
     }
     return response
   },
@@ -223,6 +230,7 @@ export const postsApi = {
       firstName: string
       lastName: string
       username: string
+      profileSlug?: string
       profilePhoto?: string
       headline?: string
       primaryRole?: string
@@ -236,14 +244,56 @@ export const postsApi = {
       hasPrev: boolean
     }
   }> => {
-    const response = await apiClient.get<any>(`/posts/${postId}/likes?page=${page}&limit=${limit}`)
+    interface UserWithId {
+      id?: string
+      _id?: string
+      firstName: string
+      lastName: string
+      username: string
+      profileSlug?: string
+      profilePhoto?: string
+      headline?: string
+      primaryRole?: string
+    }
+    
+    const response = await apiClient.get<{
+      users: UserWithId[]
+      pagination: {
+        page: number
+        limit: number
+        total: number
+        totalPages: number
+        hasNext: boolean
+        hasPrev: boolean
+      }
+    }>(`/posts/${postId}/likes?page=${page}&limit=${limit}`)
+    
     if (response && response.users) {
-      response.users = response.users.map((user: any) => ({
+      response.users = response.users.map((user) => ({
         ...user,
-        id: user.id || user._id
+        id: user.id || user._id || ''
       }))
     }
-    return response
+    return response as {
+      users: Array<{
+        id: string
+        firstName: string
+        lastName: string
+        username: string
+        profileSlug?: string
+        profilePhoto?: string
+        headline?: string
+        primaryRole?: string
+      }>
+      pagination: {
+        page: number
+        limit: number
+        total: number
+        totalPages: number
+        hasNext: boolean
+        hasPrev: boolean
+      }
+    }
   },
 
   /**
@@ -255,7 +305,8 @@ export const postsApi = {
       visibility
     })
     if (response && response.post) {
-      response.post = mapPost(response.post)
+      const mapped = mapPost(response.post)
+      if (mapped) response.post = mapped
     }
     return response
   },
@@ -286,7 +337,7 @@ export const postsApi = {
   getComments: async (postId: string, page = 1, limit = 20): Promise<CommentsResponse> => {
     const response = await apiClient.get<CommentsResponse>(`/posts/${postId}/comments?page=${page}&limit=${limit}`)
     if (response && response.comments) {
-      response.comments = response.comments.map(mapComment)
+      response.comments = response.comments.map(mapComment).filter((c): c is Comment => c !== null && c !== undefined)
     }
     return response
   },
@@ -297,7 +348,7 @@ export const postsApi = {
   getReplies: async (commentId: string, page = 1, limit = 10): Promise<CommentsResponse> => {
     const response = await apiClient.get<CommentsResponse>(`/posts/comments/${commentId}/replies?page=${page}&limit=${limit}`)
     if (response && response.comments) {
-      response.comments = response.comments.map(mapComment)
+      response.comments = response.comments.map(mapComment).filter((c): c is Comment => c !== null && c !== undefined)
     }
     return response
   },
@@ -311,7 +362,8 @@ export const postsApi = {
       parentCommentId
     })
     if (response && response.comment) {
-      response.comment = mapComment(response.comment)
+      const mapped = mapComment(response.comment)
+      if (mapped) response.comment = mapped
     }
     return response
   },
@@ -336,7 +388,7 @@ export const postsApi = {
     }
     const response = await apiClient.get<SavedPostsResponse>(`/posts/saved?${params}`)
     if (response && response.posts) {
-      response.posts = response.posts.map(mapPost)
+      response.posts = response.posts.map(mapPost).filter((p): p is Post => p !== null && p !== undefined)
     }
     return response
   },
@@ -361,7 +413,8 @@ export const postsApi = {
   }): Promise<{ post: Post; message: string }> => {
     const response = await apiClient.post<{ post: Post; message: string }>('/posts/admin', data)
     if (response && response.post) {
-      response.post = mapPost(response.post)
+      const mapped = mapPost(response.post)
+      if (mapped) response.post = mapped
     }
     return response
   },
@@ -390,6 +443,7 @@ export const postsApi = {
         lastName: string
         profilePhoto?: string
         username: string
+        profileSlug?: string
       }
       sharedAt: string
     }>
