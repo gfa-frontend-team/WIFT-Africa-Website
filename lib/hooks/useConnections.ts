@@ -42,6 +42,8 @@ export function useConnections() {
       queryClient.invalidateQueries({ queryKey: connectionKeys.stats() })
       // Invalidate status for specific user
       queryClient.invalidateQueries({ queryKey: connectionKeys.status(variables.receiverId) })
+      // Invalidate search queries to update connectionStatus in search results
+      queryClient.invalidateQueries({ queryKey: ['search'] })
     },
   })
 
@@ -83,13 +85,13 @@ export function useConnections() {
       staleTime: 1000 * 60 * 5, // 5 mins
       enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken'),
     }),
-    
+
     // Actions (Mutations)
     sendRequest: (receiverId: string, message?: string) => sendRequestMutation.mutateAsync({ receiverId, message }),
-    respondToRequest: (requestId: string, action: 'accept' | 'decline' | 'cancel', reason?: string) => 
+    respondToRequest: (requestId: string, action: 'accept' | 'decline' | 'cancel', reason?: string) =>
       respondMutation.mutateAsync({ requestId, action, reason }),
     removeConnection: (connectionId: string) => removeConnectionMutation.mutateAsync(connectionId),
-    
+
     // Loading states
     isSending: sendRequestMutation.isPending,
     isResponding: respondMutation.isPending,

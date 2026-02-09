@@ -73,8 +73,8 @@ export const profilesApi = {
     return await apiClient.get<PublicProfileResponse>(`/profiles/${identifier}`)
   },
 
-  getProfileViews: async (userId: string, lastMonth: boolean = false): Promise<ProfileViewsResponse> => {
-    const response = await apiClient.get<ProfileViewsResponse>(`/profiles/views/${userId}`, {
+  getProfileViews: async (identifier: string, lastMonth: boolean = false): Promise<ProfileViewsResponse> => {
+    const response = await apiClient.get<ProfileViewsResponse>(`/profiles/views/${identifier}`, {
       params: { lastMonth },
     })
     return response
@@ -82,14 +82,11 @@ export const profilesApi = {
 
   /**
    * Get experience list
+   * @param identifier - Optional identifier (username, profileSlug, or user ID) to fetch experience for. If omitted, fetches current user's experience.
    */
-  /**
-   * Get experience list
-   * @param userId - Optional user ID to fetch experience for. If omitted, fetches current user's experience.
-   */
-  getExperience: async (userId?: string): Promise<any[]> => {
+  getExperience: async (identifier?: string): Promise<any[]> => {
     // Note: The backend returns an array of experience objects
-    const endpoint = userId ? `/profiles/${userId}/experience` : '/profiles/experience'
+    const endpoint = identifier ? `/profiles/${identifier}/experience` : '/profiles/experience'
     return await apiClient.get<any[]>(endpoint)
   },
 

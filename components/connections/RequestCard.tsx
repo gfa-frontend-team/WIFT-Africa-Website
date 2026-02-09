@@ -4,6 +4,7 @@ import { UserCheck, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 interface RequestCardProps {
   request: ConnectionRequest
@@ -26,7 +27,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
   return (
     <div className="bg-card border border-border rounded-lg p-4 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <Link href={`/profile/${user.profileSlug || user.username}`}>
+        <Link href={getProfileUrl(user)}>
           <div className="w-12 h-12 rounded-full overflow-hidden bg-muted relative">
             {user.profilePhoto ? (
               <Image
@@ -44,7 +45,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
         </Link>
         <div>
           <Link 
-            href={`/in/${user.profileSlug || user.username}`}
+            href={getProfileUrl(user)}
             className="font-semibold text-foreground hover:underline"
           >
             {user.firstName} {user.lastName}

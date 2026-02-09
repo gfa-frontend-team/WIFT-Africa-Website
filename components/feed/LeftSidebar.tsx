@@ -8,6 +8,9 @@ import Avatar from '@/components/ui/Avatar'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useSavedPostsCount } from '@/lib/hooks/useSavedPosts'
 import { useConnections } from '@/lib/hooks/useConnections'
+import { useProfileAnalytics } from '@/lib/hooks/useProfileAnalytics'
+import { useAnalytics } from '@/lib/hooks/useAnalytics'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 export default function LeftSidebar() {
   const { t } = useTranslation()
@@ -15,6 +18,9 @@ export default function LeftSidebar() {
   const { data: savedCount } = useSavedPostsCount()
   const { useStats } = useConnections()
   const { data: stats } = useStats()
+  const { profileViews, isLoading: isLoadingAnalytics } = useProfileAnalytics()
+  const { useUserPostsStats } = useAnalytics()
+  const { data: myPostsStats } = useUserPostsStats()
 
   if (!user) return null
 
@@ -24,7 +30,7 @@ export default function LeftSidebar() {
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         {/* Header Banner */}
         <div className="h-16 bg-gradient-to-r from-primary/20 to-primary/10"></div>
-        
+
         {/* Profile Info */}
         <div className="px-4 pb-4">
           <div className="-mt-8 mb-3">
@@ -35,9 +41,9 @@ export default function LeftSidebar() {
               className="border-4 border-card"
             />
           </div>
-          
+
           <Link
-            href={user.username || user.id ? `/in/${user.username || user.id}` : '#'}
+            href={user.username || user.id ? getProfileUrl(user) : '#'}
             className="block hover:underline"
           >
             <h3 className="font-semibold text-foreground">
@@ -57,6 +63,7 @@ export default function LeftSidebar() {
                 {t('sidebar.profile_views')}
               </span>
               <span className="font-semibold text-primary">
+                {isLoadingAnalytics ? '—' : (profileViews?.count?.toLocaleString() || 0)}
               </span>
             </Link>
             <Link href="/connections" className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
@@ -68,12 +75,13 @@ export default function LeftSidebar() {
                 {stats?.connectionsCount?.toLocaleString() || 0}
               </span>
             </Link>
-            <Link href={`/in/${user.username || user.id}`} className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
+            <Link href={getProfileUrl(user)} className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
               <span className="text-muted-foreground group-hover:text-foreground flex items-center gap-2 transition-colors">
                 <TrendingUp className="h-4 w-4" />
                 {t('sidebar.posts')}
               </span>
               <span className="font-semibold text-primary">
+                {myPostsStats?.total?.toLocaleString() || 0}
               </span>
             </Link>
           </div>
@@ -86,7 +94,7 @@ export default function LeftSidebar() {
               </p>
             </div>
           )}
-          
+
           {user.membershipStatus === 'PENDING' && (
             <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-xs text-yellow-800 font-medium">
@@ -103,7 +111,7 @@ export default function LeftSidebar() {
           <Bookmark className="h-4 w-4 text-muted-foreground" />
           <h3 className="font-semibold text-foreground text-sm">{t('sidebar.saved_items')}</h3>
         </div>
-        
+
         <div className="space-y-2">
           <Link
             href="/saved-posts"
@@ -117,7 +125,7 @@ export default function LeftSidebar() {
               {typeof savedCount === 'number' ? savedCount : '—'}
             </span>
           </Link>
-          
+
           <div className="flex items-center justify-between text-sm p-2 rounded-lg opacity-50">
             <span className="text-muted-foreground flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
@@ -127,7 +135,7 @@ export default function LeftSidebar() {
               {t('coming_soon')}
             </span>
           </div>
-          
+
           <div className="flex items-center justify-between text-sm p-2 rounded-lg opacity-50">
             <span className="text-muted-foreground flex items-center gap-2">
               <Calendar className="h-4 w-4" />
@@ -145,10 +153,10 @@ export default function LeftSidebar() {
         <h3 className="font-semibold text-foreground text-sm mb-3">
           {t('sidebar.quick_links')}
         </h3>
-        
+
         <div className="space-y-1">
           <Link
-            href={user.username || user.id ? `/in/${user.username || user.id}` : '#'}
+            href={user.username || user.id ? getProfileUrl(user) : '#'}
             className="block text-sm text-muted-foreground hover:text-primary hover:bg-accent p-2 rounded-lg transition-colors"
           >
             {t('sidebar.my_profile')}

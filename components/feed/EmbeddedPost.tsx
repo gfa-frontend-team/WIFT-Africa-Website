@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Avatar from '@/components/ui/Avatar'
 import { type Post } from '@/lib/api/posts'
 import { Pin } from 'lucide-react'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 interface EmbeddedPostProps {
   post: Post
@@ -31,7 +32,7 @@ export default function EmbeddedPost({ post }: EmbeddedPostProps) {
     <div className="mt-3 mx-4 p-3 border border-border rounded-lg bg-accent/30">
       {/* Embedded Header */}
       <div className="flex items-start gap-3 mb-2">
-        <Link href={`/in/${post.author.username || post.author.id}`} className="shrink-0">
+        <Link href={getProfileUrl(post.author)} className="shrink-0">
             <Avatar 
                 src={post.author.profilePhoto} 
                 name={`${post.author.firstName} ${post.author.lastName}`} 
@@ -41,7 +42,7 @@ export default function EmbeddedPost({ post }: EmbeddedPostProps) {
         <div className="min-w-0 flex-1">
            <div className="flex items-center gap-2">
               <Link 
-                href={`/in/${post.author.username || post.author.id}`}
+                href={getProfileUrl(post.author)}
                 className="font-semibold text-sm hover:underline truncate"
               >
                   {post.author.firstName} {post.author.lastName}

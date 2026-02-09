@@ -32,6 +32,8 @@ export function middleware(request: NextRequest) {
     '/favicon.ico',
     '/saved-posts',
     '/about',
+    '/privacy',
+    '/terms',
   ]
 
   // Check if pathname starts with any reserved route
@@ -42,7 +44,7 @@ export function middleware(request: NextRequest) {
   if (!isReservedRoute && pathname.match(/^\/[\w-]+$/)) {
     const newPath = pathname.replace(/^\//, '/in/')
     const response = NextResponse.rewrite(new URL(newPath, request.url))
-    
+
     // Pass original path for client-side use
     response.headers.set('x-original-path', pathname)
     response.headers.set('x-profile-route', 'true')
@@ -54,11 +56,11 @@ export function middleware(request: NextRequest) {
     // Check if it's not a reserved route with /edit
     const baseRoute = pathname.replace('/edit', '')
     const isReservedBase = reservedRoutes.some(route => baseRoute.startsWith(route))
-    
+
     if (!isReservedBase) {
       const newPath = pathname.replace(/^\//, '/in/')
       const response = NextResponse.rewrite(new URL(newPath, request.url))
-      
+
       response.headers.set('x-original-path', pathname)
       return response
     }
@@ -66,7 +68,7 @@ export function middleware(request: NextRequest) {
 
   // Since we use localStorage for tokens (not cookies), middleware can't check auth state
   // All auth checks are handled at the page level in useEffect hooks
-  
+
   // Let all routes through - pages handle their own auth checks
   return NextResponse.next()
 }

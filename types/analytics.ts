@@ -37,6 +37,8 @@ export interface ProfileView {
   firstName: string
   lastName: string
   email: string
+  username?: string
+  profileSlug?: string
   profilePhoto?: string
   headline?: string
   location?: string

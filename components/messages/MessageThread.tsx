@@ -298,8 +298,10 @@ export default function MessageThread({
               ? `${otherUser?.firstName} ${otherUser?.lastName}`
               : conversation.title}
           </h3>
-          {conversation.type === 'DIRECT' && (
-            <p className="text-[10px] text-muted-foreground">@{otherUser?.username}</p>
+          {conversation.type === 'DIRECT' && otherUser && (
+            <p className="text-[10px] text-muted-foreground">
+              @{otherUser.username || otherUser.profileSlug}
+            </p>
           )}
         </div>
 

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MoreHorizontal, MessageCircle, UserMinus, Ban } from 'lucide-react'
 import { useState } from 'react'
+import { getProfileUrl } from '@/lib/utils/routes'
 
 // Mock connection interface until we have a real one or fetch it
 // Usually list of connections comes from a different endpoint not yet in store, 
@@ -56,7 +57,7 @@ export default function ConnectionList({ connections, onRemove, onBlock }: Conne
             </div>
             
             <Link 
-              href={`/in/${connection.id}`} // Assuming ID maps to profile
+              href={getProfileUrl(connection)} 
               className="font-bold text-lg text-foreground hover:underline mb-1"
             >
               {connection.name}

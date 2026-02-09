@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
+import { getProfileUrl } from '@/lib/utils/routes';
 import {
   Home,
   User,
@@ -46,7 +47,7 @@ export default function MobileBottomNav() {
       <div className="relative flex items-center justify-around h-16 px-2">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
-          const href = item.isProfile && user ? `/in/${user.username || user.id}` : item.href;
+          const href = item.isProfile && user ? getProfileUrl(user) : item.href;
           const isActive = isActiveRoute(href, item.isProfile);
           const hasAccess = access[item.requiredFeature];
           const targetHref = hasAccess ? href : '/verification';

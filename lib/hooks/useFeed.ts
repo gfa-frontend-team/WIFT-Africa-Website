@@ -1,7 +1,7 @@
 'use client'
 
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { postsApi, type Post } from '../api/posts'
+import { useInfiniteQuery, useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
+import { postsApi, type Post, type FeedResponse } from '../api/posts'
 import { useFeedStore } from '../stores/feedStore'
 
 // Query keys
@@ -39,15 +39,15 @@ export function useFeed() {
       await queryClient.cancelQueries({ queryKey: feedKeys.list(filters) })
 
       // Snapshot previous value
-      const previousFeed = queryClient.getQueryData(feedKeys.list(filters))
+      const previousFeed = queryClient.getQueryData<InfiniteData<FeedResponse>>(feedKeys.list(filters))
 
       // Optimistic update
-      queryClient.setQueryData(feedKeys.list(filters), (old: any) => {
+      queryClient.setQueryData<InfiniteData<FeedResponse>>(feedKeys.list(filters), (old) => {
         if (!old) return old
 
         return {
           ...old,
-          pages: old.pages.map((page: any) => ({
+          pages: old.pages.map((page) => ({
             ...page,
             posts: page.posts.map((post: Post) => {
               if (post.id === postId) {
@@ -65,7 +65,7 @@ export function useFeed() {
 
       return { previousFeed }
     },
-    onError: (err, newTodo, context) => {
+    onError: (_err, _postId, context) => {
       queryClient.setQueryData(feedKeys.list(filters), context?.previousFeed)
     },
     onSettled: () => {
@@ -79,13 +79,13 @@ export function useFeed() {
       postsApi.toggleSave(postId, collectionName),
     onMutate: async ({ postId }) => {
       await queryClient.cancelQueries({ queryKey: feedKeys.list(filters) })
-      const previousFeed = queryClient.getQueryData(feedKeys.list(filters))
+      const previousFeed = queryClient.getQueryData<InfiniteData<FeedResponse>>(feedKeys.list(filters))
 
-      queryClient.setQueryData(feedKeys.list(filters), (old: any) => {
+      queryClient.setQueryData<InfiniteData<FeedResponse>>(feedKeys.list(filters), (old) => {
         if (!old) return old
         return {
           ...old,
-          pages: old.pages.map((page: any) => ({
+          pages: old.pages.map((page) => ({
             ...page,
             posts: page.posts.map((post: Post) => {
               if (post.id === postId) {
@@ -99,7 +99,7 @@ export function useFeed() {
 
       return { previousFeed }
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       queryClient.setQueryData(feedKeys.list(filters), context?.previousFeed)
     },
   })

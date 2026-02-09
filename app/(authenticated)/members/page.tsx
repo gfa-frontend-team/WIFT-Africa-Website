@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, Suspense, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useRef, useCallback } from 'react'
 import { useSearch } from '@/lib/hooks/useSearch'
 import { useUrlSearch } from '@/lib/hooks/useUrlSearch'
 import { useConnections } from '@/lib/hooks/useConnections'
-import { Role } from '@/lib/api/search'
+import { Role, AvailabilityStatus } from '@/lib/api/search'
 
 import MembersSearchHeader from '@/components/members/MembersSearchHeader'
 import MembersFilterSidebar from '@/components/members/MembersFilterSidebar'
@@ -27,13 +26,11 @@ function MembersPageLoading() {
 }
 
 function MembersPageContent() {
-  const router = useRouter()
   // 1. Replaced local state plumbing with useUrlSearch hook
   const {
     query, setQuery,
     roles, setFilter,
-    chapter, availability,
-    updateUrl
+    chapter, availability
   } = useUrlSearch()
 
   const { useInfiniteSearchMembers, useSearchFilters } = useSearch()
@@ -52,14 +49,14 @@ function MembersPageContent() {
     query,
     roles: roles.length > 0 ? roles : undefined,
     chapter: chapter || undefined,
-    availability: availability as any,
+    availability: availability as AvailabilityStatus | undefined,
     limit: 12
   })
 
   const { data: filterOptions } = useSearchFilters()
 
   // Flatten pages into a single array of users
-  const allUsers = data?.pages.flatMap((page: any) => page.users) || []
+  const allUsers = data?.pages.flatMap((page) => page.users) || []
   const totalResults = data?.pages[0]?.total || 0
 
   // 3. Infinite Scroll Trigger
@@ -119,7 +116,7 @@ function MembersPageContent() {
             selectedChapter={chapter || null}
             setChapter={(val) => setFilter('chapter', val || undefined)}
             availability={availability || null}
-            setAvailability={(val) => setFilter('availability', val ? (val as any) : undefined)}
+            setAvailability={(val) => setFilter('availability', val ? (val as AvailabilityStatus) : undefined)}
             className="sticky top-24"
           />
         </div>
@@ -150,7 +147,7 @@ function MembersPageContent() {
 
           {!hasNextPage && allUsers.length > 0 && (
             <p className="text-center text-muted-foreground text-sm py-8">
-              You've reached the end of the directory.
+              You&apos;ve reached the end of the directory.
             </p>
           )}
         </div>
