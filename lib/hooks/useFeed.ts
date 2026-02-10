@@ -24,9 +24,19 @@ export function useFeed() {
       const response = await postsApi.getFeed(pageParam, 10)
       return response
     },
-    getNextPageParam: (lastPage) => {
-      if (!lastPage || !lastPage.pagination || !lastPage.pagination.hasNext) return undefined
-      return lastPage.pagination.page + 1
+    getNextPageParam: (lastPage, allPages) => {
+      // Handle flat pagination structure (current API behavior)
+      if (lastPage.pages) {
+        const nextPage = allPages.length + 1
+        return nextPage <= lastPage.pages ? nextPage : undefined
+      }
+
+      // Handle nested pagination structure (interface definition)
+      if (lastPage.pagination && lastPage.pagination.hasNext) {
+        return lastPage.pagination.page + 1
+      }
+
+      return undefined
     },
     staleTime: 60 * 1000, // 1 minute stale time
   })
@@ -75,7 +85,7 @@ export function useFeed() {
   })
 
   const saveMutation = useMutation({
-    mutationFn: ({ postId, collectionName }: { postId: string; collectionName?: string }) => 
+    mutationFn: ({ postId, collectionName }: { postId: string; collectionName?: string }) =>
       postsApi.toggleSave(postId, collectionName),
     onMutate: async ({ postId }) => {
       await queryClient.cancelQueries({ queryKey: feedKeys.list(filters) })
@@ -112,7 +122,7 @@ export function useFeed() {
     error: feedQuery.error,
     hasMore: feedQuery.hasNextPage,
     isFetchingNextPage: feedQuery.isFetchingNextPage,
-    
+
     // Actions
     fetchNextPage: feedQuery.fetchNextPage,
     refetch: feedQuery.refetch,

@@ -11,7 +11,6 @@ import { FeedFilters } from '@/components/feed/FeedFilters'
 import { CreatePostTrigger } from '@/components/feed/CreatePostTrigger'
 import { FeedSkeleton } from '@/components/feed/FeedSkeleton'
 import PostCard from '@/components/feed/PostCard'
-import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import dynamic from 'next/dynamic'
 
 const LeftSidebar = dynamic(() => import('@/components/feed/LeftSidebar'))
@@ -21,44 +20,30 @@ const CreatePostModal = dynamic(() => import('@/components/feed/CreatePostModal'
 const FeedContainer = () => {
   const { posts, isLoading, error, hasMore, fetchNextPage, isFetchingNextPage, refetch } = useFeed()
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const observerTarget = useRef<HTMLDivElement>(null)
 
-  // Refs for pull-to-refresh to avoid re-renders during gesture
+  // Infinite scroll trigger
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current)
+    }
+
+    return () => observer.disconnect()
+  }, [hasMore, isFetchingNextPage, fetchNextPage])
+
+  // Pull-to-refresh logic
   const pullStartY = useRef(0)
   const pullDistance = useRef(0)
   const pullIndicatorRef = useRef<HTMLDivElement>(null)
-
-  // Refs for virtualization
-  const parentRef = useRef<HTMLDivElement>(null)
-
-  const rowVirtualizer = useWindowVirtualizer({
-    count: posts.length,
-    estimateSize: () => 600, // Estimated height of a post card
-    overscan: 5,
-    scrollMargin: 0,
-  })
-
-  // Infinite scroll trigger via virtualizer
-  useEffect(() => {
-    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse()
-
-    if (!lastItem) {
-      return
-    }
-
-    if (
-      lastItem.index >= posts.length - 1 &&
-      hasMore &&
-      !isFetchingNextPage
-    ) {
-      fetchNextPage()
-    }
-  }, [
-    hasMore,
-    isFetchingNextPage,
-    fetchNextPage,
-    posts.length,
-    rowVirtualizer.getVirtualItems(),
-  ])
 
   // Optimized Pull-to-refresh for mobile
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -72,13 +57,10 @@ const FeedContainer = () => {
 
     const currentY = e.touches[0].clientY
     const distance = currentY - pullStartY.current
-
-    // Resistance factor
     const dampedDistance = Math.min(distance * 0.5, 150)
 
     if (dampedDistance > 0 && pullIndicatorRef.current) {
       pullDistance.current = dampedDistance
-      // Direct DOM manipulation to avoid React render cycle
       pullIndicatorRef.current.style.transform = `translateY(${dampedDistance}px)`
       pullIndicatorRef.current.style.opacity = String(Math.min(dampedDistance / 80, 1))
 
@@ -92,7 +74,6 @@ const FeedContainer = () => {
   const handleTouchEnd = useCallback(async () => {
     if (pullDistance.current > 80) {
       setIsRefreshing(true)
-      // Reset visual indicator with animation
       if (pullIndicatorRef.current) {
         pullIndicatorRef.current.style.transition = 'transform 0.3s'
         pullIndicatorRef.current.style.transform = 'translateY(60px)'
@@ -102,7 +83,6 @@ const FeedContainer = () => {
         await refetch()
       } finally {
         setIsRefreshing(false)
-        // Reset after completion
         if (pullIndicatorRef.current) {
           pullIndicatorRef.current.style.transform = 'translateY(0)'
           setTimeout(() => {
@@ -114,7 +94,6 @@ const FeedContainer = () => {
         }
       }
     } else {
-      // Snap back if not pulled enough
       if (pullIndicatorRef.current) {
         pullIndicatorRef.current.style.transition = 'transform 0.3s'
         pullIndicatorRef.current.style.transform = 'translateY(0)'
@@ -126,24 +105,22 @@ const FeedContainer = () => {
         }, 300)
       }
     }
-
     pullStartY.current = 0
     pullDistance.current = 0
   }, [refetch])
+
 
   if (isLoading && !isRefreshing) {
     return <FeedSkeleton />
   }
 
-  // React Query handles errors, we can extract the message
   const errorMessage = error instanceof Error ? error.message : 'Failed to load feed';
   const isRateLimited = errorMessage.includes('429');
 
   if (error && posts.length === 0) {
     return (
       <div className="bg-card border border-border rounded-lg p-12 text-center">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isRateLimited ? 'bg-yellow-100' : 'bg-red-100'
-          }`}>
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isRateLimited ? 'bg-yellow-100' : 'bg-red-100'}`}>
           <span className="text-2xl">{isRateLimited ? '⏳' : '⚠️'}</span>
         </div>
         <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -186,7 +163,7 @@ const FeedContainer = () => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      ref={parentRef}
+      className="relative min-h-screen"
     >
       {/* Pull-to-refresh indicator */}
       <div
@@ -206,36 +183,15 @@ const FeedContainer = () => {
         </div>
       </div>
 
-      {/* Virtualized List */}
-      <div
-        style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
-        }}
-      >
-        {rowVirtualizer.getVirtualItems().map((virtualRow) => (
-          <div
-            key={virtualRow.key}
-            ref={rowVirtualizer.measureElement}
-            data-index={virtualRow.index}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              transform: `translateY(${virtualRow.start}px)`,
-            }}
-          >
-            <div className="pb-4">
-              <PostCard post={posts[virtualRow.index]} />
-            </div>
-          </div>
+      {/* Feed List */}
+      <div className="space-y-4 pb-4">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
         ))}
       </div>
 
       {/* Infinite scroll loader */}
-      <div className="py-4">
+      <div ref={observerTarget} className="py-4">
         {isFetchingNextPage && (
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

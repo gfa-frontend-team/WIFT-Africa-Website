@@ -67,7 +67,8 @@ export interface Comment {
 
 export interface FeedResponse {
   posts: Post[]
-  pagination: {
+  // Support both nested and flat pagination structures
+  pagination?: {
     page: number
     limit: number
     total: number
@@ -75,6 +76,10 @@ export interface FeedResponse {
     hasNext: boolean
     hasPrev: boolean
   }
+  // Flat pagination structure from some endpoints
+  total?: number
+  pages?: number
+  page?: number
 }
 
 export interface CommentsResponse {
@@ -255,7 +260,7 @@ export const postsApi = {
       headline?: string
       primaryRole?: string
     }
-    
+
     const response = await apiClient.get<{
       users: UserWithId[]
       pagination: {
@@ -267,7 +272,7 @@ export const postsApi = {
         hasPrev: boolean
       }
     }>(`/posts/${postId}/likes?page=${page}&limit=${limit}`)
-    
+
     if (response && response.users) {
       response.users = response.users.map((user) => ({
         ...user,

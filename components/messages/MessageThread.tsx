@@ -69,6 +69,43 @@ function MessageItem({ message, isMine, showSenderInfo, onDelete }: {
           </span>
         )}
 
+        {/* Media Attachments */}
+        {message.media && message.media.length > 0 && (
+          <div className={`flex flex-col gap-2 mb-2 ${isMine ? 'items-end' : 'items-start'}`}>
+            {message.media.map((item, index) => (
+              <div key={index} className="relative overflow-hidden rounded-lg border border-border shadow-sm bg-background max-w-full">
+                {item.type === 'image' && (
+                  <div className="relative aspect-video min-w-[200px] max-w-[300px]">
+                    {/* Use standard img tag for arbitrary URLs or Next/Image if allowed domains */}
+                    <img src={item.url} alt="attachment" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                {item.type === 'video' && (
+                  <div className="min-w-[200px] max-w-[300px]">
+                    <video src={item.url} controls className="w-full rounded-lg" />
+                  </div>
+                )}
+                {item.type === 'document' && (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 hover:bg-accent transition-colors min-w-[200px]"
+                  >
+                    <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold uppercase">{item.filename?.split('.').pop() || 'DOC'}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{item.filename || 'Document'}</p>
+                      <p className="text-xs text-muted-foreground">Click to download</p>
+                    </div>
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className={`relative rounded-2xl px-4 py-2.5 shadow-sm ${isMine
           ? 'bg-primary text-primary-foreground rounded-br-none'
           : 'bg-card border border-border text-foreground rounded-bl-none'
