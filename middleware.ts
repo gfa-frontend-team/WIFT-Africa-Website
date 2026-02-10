@@ -34,6 +34,8 @@ export function middleware(request: NextRequest) {
     '/about',
     '/privacy',
     '/terms',
+    '/forgot-password',
+    '/reset-password',
   ]
 
   // Check if pathname starts with any reserved route

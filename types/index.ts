@@ -417,6 +417,23 @@ export enum MentorshipStatus {
   CLOSED = 'Closed',
 }
 
+export enum DayOfWeek {
+  Monday = 'Monday',
+  Tuesday = 'Tuesday',
+  Wednesday = 'Wednesday',
+  Thursday = 'Thursday',
+  Friday = 'Friday',
+  Saturday = 'Saturday',
+  Sunday = 'Sunday',
+}
+
+export enum ApplicationStatus {
+  Pending = 'Pending',
+  Accepted = 'Accepted',
+  Rejected = 'Rejected',
+  Withdrawn = 'Withdrawn',
+}
+
 export interface Mentorship {
   id?: string
   _id?: string
@@ -424,14 +441,63 @@ export interface Mentorship {
   mentorRole: string
   areasOfExpertise: string[]
   mentorshipFormat: MentorshipFormat
-  availability: string
-  duration: string
+
+  // Enhanced Schedule
+  startPeriod: string              // ISO date string
+  endPeriod: string                // ISO date string
+  days: DayOfWeek[]                // Available days of week
+  timeFrame: string                // e.g., "12:30pm - 3:00pm"
+
+  // Optional Fields
+  mentorshipLink?: string          // URL for virtual meetings
   description: string
-  eligibility: string
+  eligibility?: string
+
+  // Metadata
   status: MentorshipStatus
-  chapterId?: string
+  chapterId?: string | null
+  createdBy?: string               // Admin who created it
+  viewCount?: number               // Engagement tracking
+
+  // Timestamps
   createdAt: string
   updatedAt?: string
+
+  // User-specific (only when authenticated)
+  isSaved?: boolean                // Has current user saved this?
+  hasApplied?: boolean             // Has current user applied?
+}
+
+export interface MentorshipApplication {
+  _id: string
+  mentorshipId: string | Mentorship  // Can be populated with full mentorship
+  applicantId: string | UserProfile  // Can be populated with user details
+  status: ApplicationStatus
+  message: string                    // Application message from user
+
+  // Admin Review
+  adminResponse?: string             // Optional response from admin
+  reviewedBy?: string                // Admin who reviewed
+  reviewedAt?: string                // ISO date string
+
+  // Timestamps
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UserProfile {
+  _id: string
+  firstName: string
+  lastName: string
+  email: string
+  profilePhoto?: string
+}
+
+export interface SavedMentorship {
+  _id: string
+  userId: string
+  mentorshipId: string | Mentorship  // Can be populated with full mentorship
+  createdAt: string
 }
 
 export interface MentorshipListResponse {
@@ -440,6 +506,18 @@ export interface MentorshipListResponse {
 
 export interface MentorshipDetailResponse {
   data: Mentorship
+}
+
+export interface ApplicationListResponse {
+  data: MentorshipApplication[]
+}
+
+export interface ApplicationDetailResponse {
+  data: MentorshipApplication
+}
+
+export interface SavedMentorshipListResponse {
+  data: SavedMentorship[]
 }
 
 // ============================================

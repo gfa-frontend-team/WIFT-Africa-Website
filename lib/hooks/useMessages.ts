@@ -245,7 +245,7 @@ export function useMessages() {
     mutationFn: ({ receiverId, content, media }: { receiverId: string, content: string, media?: any[] }) =>
       messagesApi.sendMessage(receiverId, content, media),
 
-    onMutate: async ({ content, receiverId }) => {
+    onMutate: async ({ content, receiverId, media }) => {
       // console.log('Optimistic update for message:', content);
 
       // Find the active conversation ID for this receiver
@@ -278,6 +278,7 @@ export function useMessages() {
         conversationId: activeConversationId,
         isMine: true,
         isReadByMe: true,
+        media, // Include media in optimistic update
         createdAt: new Date().toISOString(),
       };
 

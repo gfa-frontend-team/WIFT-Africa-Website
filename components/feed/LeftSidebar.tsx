@@ -126,15 +126,15 @@ export default function LeftSidebar() {
             </span>
           </Link>
 
-          <div className="flex items-center justify-between text-sm p-2 rounded-lg opacity-50">
+          <Link
+            href="/opportunities/mentorship/saved"
+            className="flex items-center justify-between text-sm hover:bg-accent p-2 rounded-lg transition-colors"
+          >
             <span className="text-muted-foreground flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
-              {t('nav.opportunities')}
+              Mentorships
             </span>
-            <span className="text-xs text-muted-foreground">
-              {t('coming_soon')}
-            </span>
-          </div>
+          </Link>
 
           <div className="flex items-center justify-between text-sm p-2 rounded-lg opacity-50">
             <span className="text-muted-foreground flex items-center gap-2">
@@ -167,10 +167,12 @@ export default function LeftSidebar() {
           >
             {t('sidebar.settings')}
           </Link>
-          <div className="block text-sm text-muted-foreground p-2 rounded-lg opacity-50">
+          <Link
+            href="/opportunities/mentorship/applications"
+            className="block text-sm text-muted-foreground hover:text-primary hover:bg-accent p-2 rounded-lg transition-colors"
+          >
             {t('sidebar.my_applications')}
-            <span className="text-xs ml-2">{t('coming_soon')}</span>
-          </div>
+          </Link>
           <Link
             href="/opportunities"
             className="block text-sm text-muted-foreground hover:text-primary hover:bg-accent p-2 rounded-lg transition-colors"

@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic'
 const DashboardHeader = dynamic(() => import('@/components/layout/DashboardHeader'))
 const MobileBottomNav = dynamic(() => import('@/components/layout/MobileBottomNav'))
 const VerificationStatusBanner = dynamic(() => import('@/components/layout/VerificationStatusBanner'))
+const MentorshipSocketListener = dynamic(() => import('@/components/mentorship/MentorshipSocketListener').then(mod => mod.MentorshipSocketListener), { ssr: false })
 
 export default function AuthenticatedLayout({
   children,
@@ -83,6 +84,9 @@ export default function AuthenticatedLayout({
 
       {/* Verification Status Banner */}
       <VerificationStatusBanner />
+
+      {/* Socket Listeners */}
+      <MentorshipSocketListener />
 
       {/* Main Content */}
       <main className="pt-16 pb-20 lg:pb-0">

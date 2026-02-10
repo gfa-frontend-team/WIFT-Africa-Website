@@ -31,7 +31,7 @@ export function useChapterFunding(chapterId: string) {
 export function useChapterMentorships(chapterId: string) {
     return useQuery({
         queryKey: chapterKeys.mentorships(chapterId),
-        queryFn: () => mentorshipsApi.getMentorships(chapterId),
+        queryFn: () => mentorshipsApi.getMentorships({ chapterId }),
         enabled: !!chapterId,
         staleTime: 1000 * 60 * 5, // 5 minutes
     })

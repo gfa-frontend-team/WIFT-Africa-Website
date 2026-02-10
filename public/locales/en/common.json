@@ -13,7 +13,11 @@
     "profile": "Profile"
   },
   "coming_soon": "Coming Soon",
+  "common": {
+    "view_all": "View All"
+  },
   "sidebar": {
+    "view_all": "View All",
     "profile_views": "Profile views",
     "connections": "Connections",
     "posts": "Posts",
@@ -28,7 +32,7 @@
     "suggested_connections": "Suggested Connections",
     "latest_news": "Latest News",
     "upcoming_events": "Upcoming Events",
-    "trending_topics": "Trending Topics",
+    "trending_posts": "Trending Posts",
     "latest_opportunities": "Latest Opportunities",
     "recent_activity": "Recent Activity",
     "welcome_msg": "Welcome to the WIFT Africa community!",
