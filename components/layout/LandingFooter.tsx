@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Linkedin, Facebook, Instagram, Youtube } from 'lucide-react';
+import { Logo } from '@/components/shared/Logo';
 
 export default function LandingFooter() {
   return (
@@ -9,7 +10,7 @@ export default function LandingFooter() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto" />
+              <Logo className="h-5 w-auto" />
             </div>
             <p className="text-muted-foreground text-sm mb-4 max-w-md">
               Empowering women in the African film and television industry. Connect with professionals, discover opportunities, and advance your career.

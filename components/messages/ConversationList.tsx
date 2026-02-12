@@ -133,7 +133,9 @@ export default function ConversationList({
                   <h4 className={`text-sm font-semibold truncate ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                     {conversation.type === 'DIRECT'
                       ? `${otherUser?.firstName} ${otherUser?.lastName}`
-                      : conversation.title}
+                      : conversation.broadcastType === 'CHAPTER' && conversation.chapter
+                        ? conversation.chapter.name
+                        : conversation.title || 'Broadcast Message'}
                   </h4>
                   {conversation.lastMessage && (
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">

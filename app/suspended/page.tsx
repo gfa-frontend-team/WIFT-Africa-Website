@@ -5,6 +5,7 @@ import { AlertTriangle, LogOut, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { Logo } from '@/components/shared/Logo'
 
 export default function SuspendedPage() {
   const { logout, user, isAuthenticated, isLoading } = useAuth()
@@ -40,7 +41,7 @@ export default function SuspendedPage() {
       <div className="w-full max-w-md text-center space-y-8">
         {/* Logo */}
         <Link href="/" className="inline-block mb-8">
-          <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-6 w-auto mx-auto" />
+          <Logo className="h-6 w-auto mx-auto" />
         </Link>
 
         {/* Suspended Card */}

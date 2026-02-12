@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { authApi } from '@/lib/api/auth'
+import { Logo } from '@/components/shared/Logo'
 
 function VerifyEmailContent() {
   const router = useRouter()
@@ -91,7 +92,7 @@ function VerifyEmailContent() {
       <div className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
           <Link href="/" className="inline-block mb-6 w-full text-center">
-            <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
+            <Logo className="h-5 w-auto mx-auto" />
           </Link>
 
           <div className="bg-card border border-border rounded-2xl p-8 text-center">
@@ -116,7 +117,7 @@ function VerifyEmailContent() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <Link href="/" className="inline-block mb-6 w-full text-center">
-            <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+            <Logo className="h-10 w-auto mx-auto" />
           </Link>
 
           {/* Success Card */}
@@ -153,7 +154,7 @@ function VerifyEmailContent() {
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="inline-block mb-6">
-            <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto mx-auto" />
+            <Logo className="h-10 w-auto mx-auto" />
           </Link>
           <h1 className="text-3xl font-bold text-foreground">Verify your email</h1>
           <p className="mt-2 text-muted-foreground">

@@ -25,6 +25,24 @@ export interface Conversation {
   lastMessage?: Message
   unreadCount: number
   updatedAt: string
+  // New broadcast fields
+  broadcastType?: 'ALL' | 'CHAPTER' | 'CUSTOM'
+  chapter?: {
+    _id: string
+    name: string
+    code: string
+    country: string
+    city?: string
+  } | null
+  recipientCount?: number
+  creator?: {
+    _id: string
+    firstName: string
+    lastName: string
+    username?: string
+    profileSlug?: string
+    profilePhoto?: string
+  }
 }
 
 export interface ConversationsResponse {

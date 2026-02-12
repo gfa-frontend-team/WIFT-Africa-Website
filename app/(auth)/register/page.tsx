@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGoogleAuth } from '@/lib/hooks/useGoogleAuth'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
+import { Logo } from '@/components/shared/Logo'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -121,7 +122,7 @@ export default function RegisterPage() {
             {/* Header */}
             <div className="text-center">
               <Link href="/" className="inline-block mb-6">
-                <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
+                <Logo className="h-5 w-auto mx-auto" />
               </Link>
               <h1 className="text-3xl font-bold text-foreground">Join WIFT Africa</h1>
               <p className="mt-2 text-muted-foreground">
