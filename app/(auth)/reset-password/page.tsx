@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react'
 import { authApi } from '@/lib/api/auth'
+import { Logo } from '@/components/shared/Logo'
 
 function ResetPasswordContent() {
   const router = useRouter()
@@ -103,7 +104,7 @@ function ResetPasswordContent() {
           {/* Header */}
           <div className="text-center">
             <Link href="/" className="inline-block mb-6">
-              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
+              <Logo className="h-5 w-auto mx-auto" />
             </Link>
             <h1 className="text-3xl font-bold text-foreground">Reset Password</h1>
             <p className="mt-2 text-muted-foreground">Enter your new password below</p>
@@ -139,7 +140,7 @@ function ResetPasswordContent() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto" />
+            <Logo className="h-10 w-auto" />
             <span className="text-xl font-bold text-foreground">WIFT Africa</span>
           </Link>
 
@@ -181,7 +182,7 @@ function ResetPasswordContent() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-          <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto" />
+          <Logo className="h-10 w-auto" />
           <span className="text-xl font-bold text-foreground">WIFT Africa</span>
         </Link>
 

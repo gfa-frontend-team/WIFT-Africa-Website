@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import { authApi } from '@/lib/api/auth'
+import { Logo } from '@/components/shared/Logo'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -65,7 +66,7 @@ export default function ForgotPasswordPage() {
           {/* Header */}
           <div className="text-center">
             <Link href="/" className="inline-block mb-6">
-              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto mx-auto" />
+              <Logo className="h-5 w-auto mx-auto" />
             </Link>
             <h1 className="text-3xl font-bold text-foreground">Forgot Password?</h1>
           </div>
@@ -121,7 +122,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-          <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-10 w-auto" />
+          <Logo className="h-10 w-auto" />
           <span className="text-xl font-bold text-foreground">WIFT Africa</span>
         </Link>
 

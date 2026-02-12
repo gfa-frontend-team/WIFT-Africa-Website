@@ -333,11 +333,21 @@ export default function MessageThread({
           <h3 className="font-semibold text-foreground truncate">
             {conversation.type === 'DIRECT'
               ? `${otherUser?.firstName} ${otherUser?.lastName}`
-              : conversation.title}
+              : conversation.broadcastType === 'CHAPTER' && conversation.chapter
+                ? conversation.chapter.name
+                : conversation.title || 'Broadcast Message'}
           </h3>
           {conversation.type === 'DIRECT' && otherUser && (
             <p className="text-[10px] text-muted-foreground">
               @{otherUser.username || otherUser.profileSlug}
+            </p>
+          )}
+          {conversation.type === 'BROADCAST' && (
+            <p className="text-[10px] text-muted-foreground">
+              {conversation.broadcastType === 'ALL' && 'Platform-wide Broadcast'}
+              {conversation.broadcastType === 'CHAPTER' && conversation.chapter && `${conversation.chapter.country} Chapter`}
+              {conversation.broadcastType === 'CUSTOM' && 'Custom Broadcast'}
+              {conversation.creator && ` • from ${conversation.creator.firstName} ${conversation.creator.lastName}`}
             </p>
           )}
         </div>

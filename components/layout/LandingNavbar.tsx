@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Linkedin, Facebook, Instagram, Youtube } from "lucide-react";
 import { ModeToggle } from "@/components/shared/ModeToggle";
+import { Logo } from "@/components/shared/Logo";
 
 export default function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -49,7 +50,7 @@ export default function LandingNavbar() {
           {/* Logo */}
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto" />
+              <Logo className="h-5 w-auto" />
             </Link>
           </div>
 

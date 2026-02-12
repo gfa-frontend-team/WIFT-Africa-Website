@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
+import { Logo } from '@/components/shared/Logo'
 
 interface OnboardingLayoutProps {
   currentStep: number
@@ -25,7 +26,7 @@ export default function OnboardingLayout({
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="inline-block">
-              <img src="/WIFTAFRICA.png" alt="WIFT Africa" className="h-5 w-auto" />
+              <Logo className="h-5 w-auto" />
             </Link>
             <div className="text-sm text-muted-foreground">
               {t('onboarding.common.step_count', { current: currentStep, total: totalSteps })}
