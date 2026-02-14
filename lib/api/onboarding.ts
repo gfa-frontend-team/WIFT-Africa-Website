@@ -63,7 +63,11 @@ export interface Chapter {
   city?: string
   description?: string
   memberCount: number
+  fixedMemberCount: number
   requiresApproval: boolean
+  currentPresident?: string
+  presidentName?: string
+  adminName?: string
 }
 
 export const onboardingApi = {
@@ -93,19 +97,34 @@ export const onboardingApi = {
 
   // Step 3: Submit chapter selection
   submitChapter: async (data: ChapterSelectionInput) => {
-    const response = await apiClient.post<{ message: string; nextStep: number }>('/onboarding/chapter', data)
+    const response = await apiClient.post<{ 
+      message: string; 
+      nextStep: number;
+      requiresApproval: boolean;
+      membershipStatus: string;
+      expectedReviewDate: string | null;
+    }>('/onboarding/chapter', data)
     return response
   },
 
   // Step 4: Submit profile setup
-  submitProfile: async (data: ProfileSetupInput) => {
-    const response = await apiClient.post<{ message: string; nextStep: number }>('/onboarding/profile', data)
+  submitProfile: async (data: ProfileSetupInput | FormData) => {
+    const isFormData = data instanceof FormData
+    const response = await apiClient.post<{ message: string; nextStep: number }>(
+      '/onboarding/profile', 
+      data,
+      isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined
+    )
     return response
   },
 
   // Step 5: Accept terms
   acceptTerms: async () => {
-    const response = await apiClient.post<{ message: string }>('/onboarding/accept-terms')
+    const response = await apiClient.post<{ 
+      message: string;
+      onboardingComplete: boolean;
+      membershipStatus: string;
+    }>('/onboarding/accept-terms')
     return response
   },
 }

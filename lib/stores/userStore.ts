@@ -1,3 +1,5 @@
+'use client'
+
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { User } from '@/types'
@@ -7,6 +9,8 @@ interface UserStore {
   currentUser: User | null
   isLoading: boolean
   error: string | null
+  _hasHydrated: boolean
+  setHasHydrated: (state: boolean) => void
 
   // Actions
   setUser: (user: User | null) => void
@@ -23,6 +27,8 @@ export const useUserStore = create<UserStore>()(
       currentUser: null,
       isLoading: false,
       error: null,
+      _hasHydrated: false,
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
 
       // Actions
       setUser: (user) => set({ currentUser: user, error: null }),
@@ -43,6 +49,9 @@ export const useUserStore = create<UserStore>()(
     {
       name: 'user-storage', // localStorage key
       partialize: (state) => ({ currentUser: state.currentUser }), // Only persist user
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )

@@ -3,19 +3,23 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { 
-  User, 
-  Shield, 
-  AtSign, 
-  Bell, 
+import {
+  User,
+  Shield,
+  AtSign,
+  Bell,
   ChevronRight,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Lock,
+  Monitor,
+  CheckCircle2,
+  LifeBuoy
 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -30,6 +34,13 @@ export default function SettingsPage() {
       icon: User,
       href: '/me/edit',
       color: 'text-blue-600 bg-blue-100'
+    },
+    {
+      title: 'Verification Status',
+      description: 'View your membership verification status and progress',
+      icon: CheckCircle2,
+      href: '/verification',
+      color: 'text-emerald-600 bg-emerald-100'
     },
     {
       title: 'Privacy Settings',
@@ -59,6 +70,13 @@ export default function SettingsPage() {
       href: '/settings/notifications',
       color: 'text-pink-600 bg-pink-100',
       comingSoon: true
+    },
+    {
+      title: 'Support & Feedback',
+      description: 'Get help or share your feedback with us',
+      icon: LifeBuoy,
+      href: 'mailto:support@wiftafrica.org',
+      color: 'text-cyan-600 bg-cyan-100'
     }
   ]
 
@@ -80,7 +98,7 @@ export default function SettingsPage() {
         <div className="grid gap-4">
           {settingsSections.map((section) => {
             const Icon = section.icon
-            
+
             if (section.comingSoon) {
               return (
                 <div
@@ -131,25 +149,43 @@ export default function SettingsPage() {
         {/* Quick Actions */}
         <div className="mt-8 bg-card border border-border rounded-lg p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <Link
-              href="/me"
-              className="block text-primary hover:underline text-sm"
-            >
-              View My Profile
-            </Link>
-            <Link
-              href="/me/share"
-              className="block text-primary hover:underline text-sm"
-            >
-              Share My Profile
-            </Link>
-            <Link
-              href="/me/edit"
-              className="block text-primary hover:underline text-sm"
-            >
-              Edit Profile
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <Link
+                href={user?.username ? `/in/${user.username}` : '#'}
+                className="block text-primary hover:underline text-sm"
+              >
+                View My Profile
+              </Link>
+              <Link
+                href="/me/share"
+                className="block text-primary hover:underline text-sm"
+              >
+                Share My Profile
+              </Link>
+              <Link
+                href="/me/edit"
+                className="block text-primary hover:underline text-sm"
+              >
+                Edit Profile
+              </Link>
+            </div>
+            <div className="space-y-3">
+              <Link
+                href="/settings/password"
+                className="flex items-center gap-2 text-primary hover:underline text-sm"
+              >
+                <Lock className="h-4 w-4" />
+                Change Password
+              </Link>
+              <Link
+                href="/settings/sessions"
+                className="flex items-center gap-2 text-primary hover:underline text-sm"
+              >
+                <Monitor className="h-4 w-4" />
+                Manage Sessions
+              </Link>
+            </div>
           </div>
         </div>
       </div>

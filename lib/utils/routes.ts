@@ -2,84 +2,86 @@
  * Route utility functions for generating URLs
  */
 
+import { User } from "@/types"
+
 /**
- * Generate profile URL
- * @param username - User's username or profileSlug
- * @returns Profile URL (e.g., /jane-doe)
+ * Generate profile URL using username or profileSlug
+ * Priority: username > profileSlug > id (for backward compatibility)
+ * @param user - User object with username, profileSlug, or id
+ * @returns Profile URL (e.g., /in/jane-doe)
  */
-export function getProfileUrl(username: string): string {
-  return `/${username}`
+export function getProfileUrl(user: { username?: string; profileSlug?: string; id?: string } | string): string {
+  // Handle legacy string parameter
+  if (typeof user === 'string') {
+    return `/in/${user}`
+  }
+  
+  // Prefer username, fallback to profileSlug, then id
+  const identifier = user.username || user.profileSlug || user.id
+  if (!identifier) {
+    console.warn('getProfileUrl: No valid identifier found', user)
+    return '/feed'
+  }
+  
+  // Warn if falling back to ID (indicates backend data is incomplete)
+  if (!user.username && !user.profileSlug && user.id && isIdBasedUrl(user.id)) {
+    console.warn(
+      `[Profile URL] Using ID-based URL for user. Backend should include username/profileSlug.`,
+      { id: user.id, hasUsername: !!user.username, hasProfileSlug: !!user.profileSlug }
+    )
+  }
+  
+  return `/in/${identifier}`
 }
 
 /**
- * Generate profile edit URL
- * @param username - User's username or profileSlug
- * @returns Profile edit URL (e.g., /jane-doe/edit)
+ * Check if a URL is using an ID (MongoDB ObjectId) instead of username/slug
+ * This helps identify when backend data is missing username/profileSlug
  */
+export function isIdBasedUrl(identifier: string): boolean {
+  // MongoDB ObjectId is 24 hex characters
+  return /^[0-9a-fA-F]{24}$/.test(identifier)
+}
+
 export function getProfileEditUrl(username: string): string {
-  return `/${username}/edit`
+  return `/in/${username}/edit`
 }
 
-/**
- * Generate profile posts URL (future feature)
- * @param username - User's username or profileSlug
- * @returns Profile posts URL (e.g., /jane-doe/posts)
- */
+export function getOwnProfileUrl(user: User | null): string {
+  if (!user || !user.username) return '/login'
+  return `/in/${user.username}`
+}
+
 export function getProfilePostsUrl(username: string): string {
-  return `/${username}/posts`
+  return `/in/${username}/posts`
 }
 
-/**
- * Generate profile connections URL (future feature)
- * @param username - User's username or profileSlug
- * @returns Profile connections URL (e.g., /jane-doe/connections)
- */
 export function getProfileConnectionsUrl(username: string): string {
-  return `/${username}/connections`
+  return `/in/${username}/connections`
 }
 
-/**
- * Generate profile activity URL (future feature)
- * @param username - User's username or profileSlug
- * @returns Profile activity URL (e.g., /jane-doe/activity)
- */
 export function getProfileActivityUrl(username: string): string {
-  return `/${username}/activity`
+  return `/in/${username}/activity`
 }
 
-/**
- * Generate shareable profile URL (full URL with domain)
- * @param username - User's username or profileSlug
- * @param baseUrl - Base URL (defaults to window.location.origin)
- * @returns Full profile URL (e.g., https://members.wiftafrica.org/jane-doe)
- */
 export function getShareableProfileUrl(username: string, baseUrl?: string): string {
   const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : '')
-  return `${base}/${username}`
+  return `${base}/in/${username}`
 }
 
-/**
- * Extract username from profile URL
- * @param url - Profile URL (e.g., /jane-doe or /profile/jane-doe)
- * @returns Username
- */
 export function extractUsernameFromUrl(url: string): string | null {
-  // Match /username pattern
+  // Match /in/username pattern
+  const profileMatch = url.match(/^\/in\/([\w-]+)/)
+  if (profileMatch) return profileMatch[1]
+  
+  // Match old /profile/username pattern for backward compatibility if needed, 
+  // or just /username if we support root
   const usernameMatch = url.match(/^\/([\w-]+)/)
   if (usernameMatch) return usernameMatch[1]
-  
-  // Match /profile/username pattern
-  const profileMatch = url.match(/^\/profile\/([\w-]+)/)
-  if (profileMatch) return profileMatch[1]
   
   return null
 }
 
-/**
- * Check if a URL is a profile URL
- * @param url - URL to check
- * @returns True if URL is a profile URL
- */
 export function isProfileUrl(url: string): boolean {
-  return /^\/[\w-]+$/.test(url) || /^\/profile\/[\w-]+/.test(url)
+  return /^\/in\/[\w-]+/.test(url)
 }

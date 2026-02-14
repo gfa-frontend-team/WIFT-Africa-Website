@@ -1,8 +1,7 @@
-'use client'
-
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ArrowRight, Tv, Clapperboard, Sparkles, Video, Scissors, Music2, Volume2, Palette, Shirt, Paintbrush, Lightbulb, Scale, Radio, DollarSign, Megaphone, Handshake, Newspaper } from 'lucide-react'
-import { onboardingApi } from '@/lib/api/onboarding'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface SpecializationsStepProps {
   roles: string[]
@@ -12,10 +11,8 @@ interface SpecializationsStepProps {
   onWriterSpecChange: (spec: string) => void
   onCrewSpecsChange: (specs: string[]) => void
   onBusinessSpecsChange: (specs: string[]) => void
-  onNext: () => void
+  onNext: (nextStep: number) => void
   onPrevious: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 const WRITER_SPECIALIZATIONS = [
@@ -54,10 +51,15 @@ export default function SpecializationsStep({
   onBusinessSpecsChange,
   onNext,
   onPrevious,
-  isSaving,
-  setIsSaving,
 }: SpecializationsStepProps) {
+  const { t } = useTranslation()
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const { submitSpecializations, isSubmittingSpecializations: isSaving, prefetchChapters } = useOnboarding()
+
+  // Prefetch chapters for the next step
+  useEffect(() => {
+    prefetchChapters()
+  }, [prefetchChapters])
 
   // Check if specializations are needed
   const needsWriterSpec = roles.includes('WRITER')
@@ -67,6 +69,12 @@ export default function SpecializationsStep({
   // If no specializations needed, skip to next step automatically
   useEffect(() => {
     if (!needsWriterSpec && !needsCrewSpec && !needsBusinessSpec) {
+      // Just call onNext directly if no specs needed, but maybe we should ensure consistency?
+      // The original code called handleSubmit -> API. 
+      // If we skip API call here, we might miss tracking. 
+      // BE likely expects this step if it returns true for needsSpecialization?
+      // Actually if !needsSpec, we technically shouldn't be here or we just pass through.
+      // Let's call submit with empty data to be safe if that's what the original did.
       handleSubmit()
     }
   }, [needsWriterSpec, needsCrewSpec, needsBusinessSpec])
@@ -75,15 +83,15 @@ export default function SpecializationsStep({
     const newErrors: { [key: string]: string } = {}
 
     if (needsWriterSpec && !writerSpecialization) {
-      newErrors.writer = 'Please select your writer specialization'
+      newErrors.writer = t('onboarding.specialization.error_writer')
     }
 
     if (needsCrewSpec && crewSpecializations.length === 0) {
-      newErrors.crew = 'Please select at least one crew specialization'
+      newErrors.crew = t('onboarding.specialization.error_crew')
     }
 
     if (needsBusinessSpec && businessSpecializations.length === 0) {
-      newErrors.business = 'Please select at least one business specialization'
+      newErrors.business = t('onboarding.specialization.error_business')
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -99,8 +107,6 @@ export default function SpecializationsStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
       const data: any = {}
       
@@ -109,22 +115,30 @@ export default function SpecializationsStep({
       }
       
       if (needsCrewSpec && crewSpecializations.length > 0) {
-        data.crewSpecializations = crewSpecializations  // Send array
+        data.crewSpecializations = crewSpecializations
       }
       
       if (needsBusinessSpec && businessSpecializations.length > 0) {
-        data.businessSpecializations = businessSpecializations  // Send array
+        data.businessSpecializations = businessSpecializations
       }
 
-      await onboardingApi.submitSpecializations(data)
+      const response = await submitSpecializations(data)
+// The hook 'submitSpecializations' returns the response directly in this codebase (unlike standard react-query which might return data), 
+// but let's double check. `submitSpecializationsMutation.mutateAsync` returns data.
+// In `useOnboarding.ts`: `mutationFn: (data) => onboardingApi.submitSpecializations(data)`.
+// `onboardingApi` returns response.
+// So yes, we get response.
 
       console.log('✅ Specializations saved successfully')
-      onNext()
+      
+      if (response && response.nextStep) {
+        onNext(response.nextStep)
+      } else {
+        onNext(3) // Fallback
+      }
     } catch (error: any) {
       console.error('❌ Failed to save specializations:', error)
       alert(error.response?.data?.error || 'Failed to save specializations')
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -134,7 +148,7 @@ export default function SpecializationsStep({
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Proceeding to next step...</p>
+          <p className="text-muted-foreground">{t('onboarding.common.loading')}</p>
         </div>
       </div>
     )
@@ -145,10 +159,10 @@ export default function SpecializationsStep({
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-foreground mb-2">
-          Tell us more about your specialization
+          {t('onboarding.specialization.title')}
         </h2>
         <p className="text-muted-foreground">
-          This helps us connect you with relevant opportunities
+          {t('onboarding.specialization.subtitle')}
         </p>
       </div>
 
@@ -156,7 +170,7 @@ export default function SpecializationsStep({
       {needsWriterSpec && (
         <div>
           <h3 className="font-semibold text-foreground mb-4">
-            Writer Specialization
+            {t('onboarding.specialization.writer_title')}
             <span className="text-red-500 ml-1">*</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -199,11 +213,11 @@ export default function SpecializationsStep({
       {needsCrewSpec && (
         <div>
           <h3 className="font-semibold text-foreground mb-4">
-            Crew Specializations
+            {t('onboarding.specialization.crew_title')}
             <span className="text-red-500 ml-1">*</span>
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select all that apply - you can choose multiple specializations
+            {t('onboarding.specialization.crew_subtitle')}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {CREW_SPECIALIZATIONS.map((spec) => {
@@ -246,7 +260,7 @@ export default function SpecializationsStep({
           </div>
           {crewSpecializations.length > 0 && (
             <p className="mt-2 text-sm text-primary">
-              {crewSpecializations.length} specialization{crewSpecializations.length > 1 ? 's' : ''} selected
+              {t('onboarding.specialization.selected_count', { count: crewSpecializations.length })}
             </p>
           )}
           {errors.crew && (
@@ -259,11 +273,11 @@ export default function SpecializationsStep({
       {needsBusinessSpec && (
         <div>
           <h3 className="font-semibold text-foreground mb-4">
-            Business Specializations
+            {t('onboarding.specialization.business_title')}
             <span className="text-red-500 ml-1">*</span>
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select all that apply - you can choose multiple specializations
+            {t('onboarding.specialization.business_subtitle')}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {BUSINESS_SPECIALIZATIONS.map((spec) => {
@@ -323,14 +337,14 @@ export default function SpecializationsStep({
           className="px-6 py-3 border border-border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
           <ArrowLeft className="h-5 w-5" />
-          Back
+          {t('onboarding.common.back')}
         </button>
         <button
           onClick={handleSubmit}
           disabled={isSaving}
           className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
-          {isSaving ? 'Saving...' : 'Continue'}
+          {isSaving ? t('onboarding.common.saving') : t('onboarding.common.continue')}
           {!isSaving && <ArrowRight className="h-5 w-5" />}
         </button>
       </div>

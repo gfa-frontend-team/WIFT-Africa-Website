@@ -1,22 +1,19 @@
-'use client'
-
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ArrowRight, Link as LinkIcon, Film, Globe, MapPin, Upload } from 'lucide-react'
-import { onboardingApi } from '@/lib/api/onboarding'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface ProfileSetupStepProps {
-  onNext: () => void
+  onNext: (nextStep: number) => void
   onPrevious: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 export default function ProfileSetupStep({
   onNext,
   onPrevious,
-  isSaving,
-  setIsSaving,
 }: ProfileSetupStepProps) {
+  const { t } = useTranslation()
+  const { submitProfile, isSubmittingProfile: isSaving } = useOnboarding()
   const [headline, setHeadline] = useState('')
   const [bio, setBio] = useState('')
   const [location, setLocation] = useState('')
@@ -32,9 +29,15 @@ export default function ProfileSetupStep({
   const validateAndSubmit = () => {
     const newErrors: { [key: string]: string } = {}
 
-    // Headline validation (optional but has max length)
-    if (headline && headline.length > 255) {
+    // Required fields validation
+    if (!headline.trim()) {
+      newErrors.headline = t('onboarding.profile.errors.headline_required')
+    } else if (headline.length > 255) {
       newErrors.headline = 'Headline must be 255 characters or less'
+    }
+
+    if (!location.trim()) {
+      newErrors.location = t('onboarding.profile.errors.location_required')
     }
 
     // Bio validation (optional but has max length)
@@ -42,16 +45,29 @@ export default function ProfileSetupStep({
       newErrors.bio = 'Bio must be 1000 characters or less'
     }
 
-    // URL validation (basic)
+    // Professional Links Validation (At least one required)
+    const hasProfessionalLink = [
+      linkedinUrl,
+      imdbUrl,
+      website,
+      instagramHandle,
+      twitterHandle
+    ].some(link => link.trim() !== '')
+
+    if (!hasProfessionalLink) {
+      newErrors.professionalLinks = t('onboarding.profile.errors.links_required')
+    }
+
+    // URL validation
     const urlPattern = /^https?:\/\/.+/
     if (website && !urlPattern.test(website)) {
-      newErrors.website = 'Please enter a valid URL starting with http:// or https://'
+      newErrors.website = t('onboarding.profile.errors.invalid_url')
     }
     if (imdbUrl && !urlPattern.test(imdbUrl)) {
-      newErrors.imdbUrl = 'Please enter a valid URL starting with http:// or https://'
+      newErrors.imdbUrl = t('onboarding.profile.errors.invalid_url')
     }
     if (linkedinUrl && !urlPattern.test(linkedinUrl)) {
-      newErrors.linkedinUrl = 'Please enter a valid URL starting with http:// or https://'
+      newErrors.linkedinUrl = t('onboarding.profile.errors.invalid_url')
     }
 
     // CV file validation (optional)
@@ -70,6 +86,8 @@ export default function ProfileSetupStep({
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
+      // Scroll to top to show errors if needed
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       return false
     }
 
@@ -81,9 +99,9 @@ export default function ProfileSetupStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
+      let response;
+
       // Use FormData if CV file is present, otherwise use JSON
       if (cvFile) {
         const formData = new FormData()
@@ -102,36 +120,35 @@ export default function ProfileSetupStep({
         // Add CV file
         formData.append('cv', cvFile)
 
-        // Import apiClient for direct FormData upload
-        const { apiClient } = await import('@/lib/api/client')
-        await apiClient.post('/onboarding/profile', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        })
+        response = await submitProfile(formData)
       } else {
         // No CV file, use regular JSON
         const data: any = {
           availabilityStatus,
+          headline: headline.trim(), // Required
+          location: location.trim(), // Required
         }
 
-        if (headline.trim()) data.headline = headline.trim()
         if (bio.trim()) data.bio = bio.trim()
-        if (location.trim()) data.location = location.trim()
         if (website.trim()) data.website = website.trim()
         if (imdbUrl.trim()) data.imdbUrl = imdbUrl.trim()
         if (linkedinUrl.trim()) data.linkedinUrl = linkedinUrl.trim()
         if (instagramHandle.trim()) data.instagramHandle = instagramHandle.trim()
         if (twitterHandle.trim()) data.twitterHandle = twitterHandle.trim()
 
-        await onboardingApi.submitProfile(data)
+        response = await submitProfile(data)
       }
 
       console.log('✅ Profile setup saved successfully')
-      onNext()
+      
+      if (response && response.nextStep) {
+         onNext(response.nextStep)
+      } else {
+         onNext(5)
+      }
     } catch (error: any) {
       console.error('❌ Failed to save profile setup:', error)
       alert(error.response?.data?.error || 'Failed to save profile setup')
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -140,20 +157,32 @@ export default function ProfileSetupStep({
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-foreground mb-2">
-          Complete Your Professional Profile
+          {t('onboarding.profile.title')}
         </h2>
         <p className="text-muted-foreground">
-          Tell us about yourself and your work (all fields are optional)
+          {t('onboarding.profile.subtitle')}
         </p>
       </div>
 
+      {/* Global Error Message */}
+      {errors.professionalLinks && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center text-red-800">
+            <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span className="text-sm font-medium">{errors.professionalLinks}</span>
+          </div>
+        </div>
+      )}
+
       {/* Professional Info */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-foreground">Professional Information</h3>
+        <h3 className="font-semibold text-foreground">{t('onboarding.profile.professional_info_title')}</h3>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Professional Headline
+            {t('onboarding.profile.headline_label')} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -165,12 +194,14 @@ export default function ProfileSetupStep({
               }
             }}
             maxLength={255}
-            className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder="e.g., Award-winning Film Producer | Storyteller"
+            className={`w-full p-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
+              errors.headline ? 'border-destructive' : 'border-border'
+            }`}
+            placeholder={t('onboarding.profile.headline_placeholder') as string}
           />
           <div className="flex justify-between mt-1">
             <p className="text-xs text-muted-foreground">
-              A brief professional tagline
+              {t('onboarding.profile.headline_hint')}
             </p>
             <p className="text-xs text-muted-foreground">
               {headline.length}/255
@@ -183,7 +214,7 @@ export default function ProfileSetupStep({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Bio
+            {t('onboarding.profile.bio_label')}
           </label>
           <textarea
             value={bio}
@@ -196,11 +227,11 @@ export default function ProfileSetupStep({
             maxLength={1000}
             rows={5}
             className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-            placeholder="Tell us about your experience, achievements, and what you're passionate about..."
+            placeholder={t('onboarding.profile.bio_placeholder') as string}
           />
           <div className="flex justify-between mt-1">
             <p className="text-xs text-muted-foreground">
-              Share your story and professional journey
+              {t('onboarding.profile.bio_hint')}
             </p>
             <p className="text-xs text-muted-foreground">
               {bio.length}/1000
@@ -213,46 +244,58 @@ export default function ProfileSetupStep({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Location
+            {t('onboarding.profile.location_label')} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="e.g., Lagos, Nigeria"
+              onChange={(e) => {
+                  setLocation(e.target.value)
+                  if (errors.location) {
+                    setErrors((prev) => ({ ...prev, location: '' }))
+                  }
+              }}
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
+                errors.location ? 'border-destructive' : 'border-border'
+              }`}
+              placeholder={t('onboarding.profile.location_placeholder') as string}
             />
           </div>
+          {errors.location && (
+            <p className="mt-1 text-sm text-destructive">{errors.location}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Availability Status
+            {t('onboarding.profile.availability_label')}
           </label>
           <select
             value={availabilityStatus}
             onChange={(e) => setAvailabilityStatus(e.target.value as any)}
             className="w-full p-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="AVAILABLE">Available for opportunities</option>
-            <option value="BUSY">Currently busy</option>
-            <option value="NOT_LOOKING">Not looking</option>
+            <option value="AVAILABLE">{t('onboarding.profile.availability_options.available')}</option>
+            <option value="BUSY">{t('onboarding.profile.availability_options.busy')}</option>
+            <option value="NOT_LOOKING">{t('onboarding.profile.availability_options.not_looking')}</option>
           </select>
         </div>
       </div>
 
       {/* Professional Links */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-foreground">Professional Links</h3>
+        <h3 className="font-semibold text-foreground">
+            {t('onboarding.profile.social_title')} <span className="text-red-500">*</span>
+        </h3>
         <p className="text-sm text-muted-foreground">
-          Add your professional profiles to showcase your work
+          {t('onboarding.profile.social_subtitle')}
         </p>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            LinkedIn Profile
+            {t('onboarding.profile.linkedin_label')}
           </label>
           <div className="relative">
             <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -276,7 +319,7 @@ export default function ProfileSetupStep({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            IMDb Profile
+            {t('onboarding.profile.imdb_label')}
           </label>
           <div className="relative">
             <Film className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -300,7 +343,7 @@ export default function ProfileSetupStep({
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Website / Portfolio
+            {t('onboarding.profile.website_label')}
           </label>
           <div className="relative">
             <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -325,12 +368,12 @@ export default function ProfileSetupStep({
 
       {/* Social Media */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-foreground">Social Media</h3>
+        <h3 className="font-semibold text-foreground">{t('onboarding.profile.social_media_title')}</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Instagram Handle
+              {t('onboarding.profile.instagram_label')}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
@@ -346,7 +389,7 @@ export default function ProfileSetupStep({
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Twitter Handle
+              {t('onboarding.profile.twitter_label')}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
@@ -364,14 +407,14 @@ export default function ProfileSetupStep({
 
       {/* CV Upload */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-foreground">CV / Resume (Optional)</h3>
+        <h3 className="font-semibold text-foreground">{t('onboarding.profile.cv_title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Upload your CV to showcase your experience and qualifications
+          {t('onboarding.profile.cv_subtitle')}
         </p>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Upload CV / Resume
+            {t('onboarding.profile.cv_label')}
           </label>
           <div className="relative">
             <input
@@ -388,7 +431,7 @@ export default function ProfileSetupStep({
             />
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Accepted formats: PDF, DOC, DOCX (Max 10MB)
+            {t('onboarding.profile.cv_hint')}
           </p>
           {cvFile && (
             <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
@@ -419,7 +462,7 @@ export default function ProfileSetupStep({
       {/* Info Note */}
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> You can always update your profile information and CV later in your account settings.
+          {t('onboarding.profile.note_update')}
         </p>
       </div>
 
@@ -431,14 +474,14 @@ export default function ProfileSetupStep({
           className="px-6 py-3 border border-border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
           <ArrowLeft className="h-5 w-5" />
-          Back
+          {t('onboarding.common.back')}
         </button>
         <button
           onClick={handleSubmit}
           disabled={isSaving}
           className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
-          {isSaving ? 'Saving...' : 'Continue'}
+          {isSaving ? t('onboarding.common.saving') : t('onboarding.common.continue')}
           {!isSaving && <ArrowRight className="h-5 w-5" />}
         </button>
       </div>

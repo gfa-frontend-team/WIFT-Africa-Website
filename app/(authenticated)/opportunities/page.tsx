@@ -1,23 +1,47 @@
 'use client'
 
-import { Briefcase } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { JobsList } from '@/components/jobs/JobsList'
+import { MentorshipsList } from '@/components/mentorship/MentorshipsList'
+import { FundingList } from '@/components/funding/FundingList'
+import { Briefcase, FileText, Video } from 'lucide-react'
 
 export default function OpportunitiesPage() {
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-6">
-      <div className="bg-card border border-border rounded-lg p-12 text-center">
-        <div className="max-w-md mx-auto">
-          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Briefcase className="h-10 w-10 text-primary" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground mb-3">
-            Opportunities Coming Soon
-          </h2>
-          <p className="text-muted-foreground">
-            Discover jobs, grants, mentorship programs, and collaboration opportunities in the film industry.
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Opportunities</h1>
+        <p className="text-muted-foreground">Explore career opportunities, grants, and casting calls.</p>
       </div>
+
+      <Tabs defaultValue="jobs" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
+          <TabsTrigger value="jobs" className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4" />
+            Jobs
+          </TabsTrigger>
+          <TabsTrigger value="grants" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Grants
+          </TabsTrigger>
+          <TabsTrigger value="mentorship" className="flex items-center gap-2">
+            <Video className="w-4 h-4" />
+            Mentorship
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="jobs">
+          <JobsList />
+        </TabsContent>
+
+        <TabsContent value="grants" className="mt-6">
+          <FundingList />
+        </TabsContent>
+
+        <TabsContent value="mentorship" className="mt-6">
+          <MentorshipsList />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

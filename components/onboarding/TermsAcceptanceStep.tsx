@@ -1,24 +1,17 @@
-'use client'
-
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, CheckCircle, Briefcase, Users, Clock } from 'lucide-react'
-import { onboardingApi } from '@/lib/api/onboarding'
-import { useUserStore } from '@/lib/stores/userStore'
+import { useOnboarding } from '@/lib/hooks/useOnboarding'
 
 interface TermsAcceptanceStepProps {
   onPrevious: () => void
-  isSaving: boolean
-  setIsSaving: (saving: boolean) => void
 }
 
 export default function TermsAcceptanceStep({
   onPrevious,
-  isSaving,
-  setIsSaving,
 }: TermsAcceptanceStepProps) {
-  const router = useRouter()
-  const { updateUser } = useUserStore()
+  const { t } = useTranslation()
+  const { acceptTerms, isAcceptingTerms: isSaving } = useOnboarding()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
@@ -28,26 +21,14 @@ export default function TermsAcceptanceStep({
       return
     }
 
-    setIsSaving(true)
-
     try {
-      const response = await onboardingApi.acceptTerms()
-
+      await acceptTerms()
       console.log('✅ Terms accepted - Onboarding complete!')
       
-      // Update user state to reflect onboarding completion
-      updateUser({ 
-        onboardingComplete: true,
-        termsAccepted: true 
-      })
-      
-      // Redirect to home page after successful completion
-      router.push('/feed')
+      // Redirect handled by hook
     } catch (error: any) {
       console.error('❌ Failed to accept terms:', error)
       alert(error.response?.data?.error || 'Failed to complete onboarding')
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -56,10 +37,10 @@ export default function TermsAcceptanceStep({
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-foreground mb-2">
-          Terms, Rules & Guidelines
+          {t('onboarding.terms.title')}
         </h2>
         <p className="text-muted-foreground">
-          Please review and accept our community guidelines
+          {t('onboarding.terms.subtitle')}
         </p>
       </div>
 
@@ -69,7 +50,7 @@ export default function TermsAcceptanceStep({
         <div className="p-6 border border-border rounded-lg">
           <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-primary" />
-            Verification Process
+            {t('onboarding.terms.sections.verification')}
           </h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• Profile verification completed within 24 hours</li>
@@ -83,7 +64,7 @@ export default function TermsAcceptanceStep({
         <div className="p-6 border border-border rounded-lg">
           <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
             <Briefcase className="h-5 w-5 text-primary" />
-            Opportunity Posting Guidelines
+            {t('onboarding.terms.sections.jobs')}
           </h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• Opportunity postings reviewed within 48-72 hours</li>
@@ -97,7 +78,7 @@ export default function TermsAcceptanceStep({
         <div className="p-6 border border-border rounded-lg">
           <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            Community Standards
+            {t('onboarding.terms.sections.community')}
           </h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• Respectful and professional communication</li>
@@ -112,7 +93,7 @@ export default function TermsAcceptanceStep({
         <div className="p-6 border border-border rounded-lg">
           <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            What Happens Next
+            {t('onboarding.terms.sections.timeline')}
           </h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• Your chapter administrator will review your application</li>
@@ -138,34 +119,7 @@ export default function TermsAcceptanceStep({
               className="mt-1 h-4 w-4 text-primary focus:ring-ring border-border rounded cursor-pointer"
             />
             <span className="text-sm text-foreground">
-              I have read and agree to the{' '}
-              <a
-                href="/terms"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary/80 underline"
-              >
-                Terms of Service
-              </a>
-              ,{' '}
-              <a
-                href="/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary/80 underline"
-              >
-                Privacy Policy
-              </a>
-              , and{' '}
-              <a
-                href="/community-guidelines"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary/80 underline"
-              >
-                Community Guidelines
-              </a>
-              . I understand the verification process and opportunity posting approval timeline.
+              {t('onboarding.terms.checkbox_label')}
             </span>
           </label>
           {errors.terms && (
@@ -176,8 +130,7 @@ export default function TermsAcceptanceStep({
         {/* Final Note */}
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-sm text-green-800">
-            <strong>Almost there!</strong> Once you accept the terms, your profile will be submitted for review. 
-            You'll be able to access the platform with limited features while your membership is being verified.
+            {t('onboarding.terms.final_note')}
           </p>
         </div>
       </div>
@@ -190,14 +143,14 @@ export default function TermsAcceptanceStep({
           className="px-6 py-3 border border-border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
           <ArrowLeft className="h-5 w-5" />
-          Back
+          {t('onboarding.common.back')}
         </button>
         <button
           onClick={handleSubmit}
           disabled={isSaving || !termsAccepted}
           className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors inline-flex items-center gap-2"
         >
-          {isSaving ? 'Completing...' : 'Complete Registration'}
+          {isSaving ? t('onboarding.terms.completing_btn') : t('onboarding.terms.complete_btn')}
           {!isSaving && <CheckCircle className="h-5 w-5" />}
         </button>
       </div>

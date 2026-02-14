@@ -4,8 +4,12 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useState } from 'react'
-import DashboardHeader from '@/components/layout/DashboardHeader'
-import MobileBottomNav from '@/components/layout/MobileBottomNav'
+import dynamic from 'next/dynamic'
+
+const DashboardHeader = dynamic(() => import('@/components/layout/DashboardHeader'))
+const MobileBottomNav = dynamic(() => import('@/components/layout/MobileBottomNav'))
+const VerificationStatusBanner = dynamic(() => import('@/components/layout/VerificationStatusBanner'))
+const MentorshipSocketListener = dynamic(() => import('@/components/mentorship/MentorshipSocketListener').then(mod => mod.MentorshipSocketListener), { ssr: false })
 
 export default function AuthenticatedLayout({
   children,
@@ -13,12 +17,20 @@ export default function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { user, isAuthenticated, isEmailVerified, onboardingComplete } = useAuth()
-  const [isChecking, setIsChecking] = useState(true)
+  const { user, isAuthenticated, isEmailVerified, onboardingComplete, refreshUserData, isLoading } = useAuth()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Check authentication and onboarding status
-    const checkAuth = () => {
+    setMounted(true)
+  }, [])
+
+
+
+  useEffect(() => {
+    // Only check auth when hydration is done
+    if (isLoading) return
+
+    const checkAuth = async () => {
       if (!isAuthenticated) {
         router.push('/login')
         return
@@ -29,20 +41,26 @@ export default function AuthenticatedLayout({
         return
       }
 
+      // Check suspension status BEFORE onboarding check
+      // This prevents suspended users from even seeing onboarding if they got banned early
+      if (user?.membershipStatus === 'SUSPENDED') {
+        router.push('/suspended')
+        return
+      }
+
       if (!onboardingComplete) {
         router.push('/onboarding')
         return
       }
-
-      // All checks passed
-      setIsChecking(false)
     }
 
     checkAuth()
   }, [isAuthenticated, isEmailVerified, onboardingComplete, router])
 
+  if (!mounted) return null
+
   // Show loading while checking auth
-  if (isChecking) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -54,7 +72,8 @@ export default function AuthenticatedLayout({
   }
 
   // Don't render if not authenticated (will redirect)
-  if (!isAuthenticated || !isEmailVerified || !onboardingComplete || !user) {
+  // Also block render if suspended to prevent flash of content
+  if (!isAuthenticated || !isEmailVerified || !onboardingComplete || !user || user.membershipStatus === 'SUSPENDED') {
     return null
   }
 
@@ -62,12 +81,18 @@ export default function AuthenticatedLayout({
     <div className="min-h-screen bg-background">
       {/* Fixed Header */}
       <DashboardHeader user={user} />
-      
+
+      {/* Verification Status Banner */}
+      <VerificationStatusBanner />
+
+      {/* Socket Listeners */}
+      <MentorshipSocketListener />
+
       {/* Main Content */}
-      <main className="pt-16 pb-20 md:pb-0">
+      <main className="pt-16 pb-20 lg:pb-0">
         {children}
       </main>
-      
+
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
     </div>

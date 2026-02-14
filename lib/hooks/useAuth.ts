@@ -1,107 +1,29 @@
+import { useUser } from './useAuthQuery'
+import { useAuthMutations } from './useAuthMutations'
 import { useUserStore, selectIsAuthenticated, selectIsEmailVerified, selectOnboardingComplete } from '../stores/userStore'
-import { authApi } from '../api/auth'
-import { useRouter } from 'next/navigation'
 import { AccountType } from '@/types'
+import { useMutation } from '@tanstack/react-query'
+import { authApi } from '../api/auth'
 
 export function useAuth() {
-  const router = useRouter()
-  const { currentUser, setUser, clearUser, setLoading, setError } = useUserStore()
+  const { data: user, isLoading: isUserLoading, refetch: refreshUserData } = useUser()
+  const { loginMutation, registerMutation, logoutMutation } = useAuthMutations()
+  
+  // Use store selectors for derived state
+  // Even though we have data from RQ, the store is synced via useUser so these selectors work
   const isAuthenticated = useUserStore(selectIsAuthenticated)
   const isEmailVerified = useUserStore(selectIsEmailVerified)
   const onboardingComplete = useUserStore(selectOnboardingComplete)
+  const currentUser = useUserStore((state) => state.currentUser)
 
-  const login = async (email: string, password: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await authApi.login({ email, password })
-      
-      // Set user in store first
-      setUser(response.user)
-      
-      // Determine redirect path based on user state
-      let redirectPath = '/feed' // Default for fully onboarded users
-      
-      if (!response.user.emailVerified) {
-        redirectPath = '/verify-email'
-      } else if (!response.user.onboardingComplete) {
-        redirectPath = '/onboarding'
-      }
-      
-      // Always redirect to appropriate page after login
-      router.push(redirectPath)
-      
-      return response
-    } catch (error: any) {
-      console.error('❌ Login error:', error)
-      const message = error.response?.data?.message || 'Login failed'
-      setError(message)
-      throw error
-    } finally {
-      setLoading(false)
+  // Verify Email Mutation (kept local as it's specific)
+  const verifyEmailMutation = useMutation({
+    mutationFn: (token: string) => authApi.verifyEmail({ token }),
+    onSuccess: (data) => {
+      // Refresh user data after verification
+      refreshUserData()
     }
-  }
-
-  const register = async (data: { email: string; password: string; firstName: string; lastName: string }) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await authApi.register(data)
-      router.push('/verify-email')
-      return response
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Registration failed'
-      setError(message)
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const logout = async () => {
-    try {
-      const refreshToken = localStorage.getItem('refreshToken')
-      if (refreshToken) {
-        await authApi.logout(refreshToken)
-      }
-    } catch (error) {
-      console.error('Logout error:', error)
-      // Even if API call fails, clear local state
-    } finally {
-      // Clear user state
-      clearUser()
-      
-      // Clear any remaining tokens (belt and suspenders approach)
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      
-      // Force redirect to login
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login'
-      }
-    }
-  }
-
-  const verifyEmail = async (token: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await authApi.verifyEmail({ token })
-      
-      // Update user with verified status
-      if (currentUser) {
-        setUser({ ...currentUser, emailVerified: true })
-      }
-      
-      return response
-    } catch (error: unknown) {
-      const message = (error as any)?.response?.data?.message || 'Email verification failed'
-      setError(message)
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }
+  })
 
   // Role checks
   const isMember = currentUser?.accountType === AccountType.CHAPTER_MEMBER || currentUser?.accountType === AccountType.HQ_MEMBER
@@ -110,17 +32,32 @@ export function useAuth() {
   const isAdmin = isChapterAdmin || isSuperAdmin
 
   return {
-    user: currentUser,
+    // State
+    user: currentUser, // Prefer store user as it's globally synced
     isAuthenticated,
     isEmailVerified,
     onboardingComplete,
+    
+    // Roles
     isMember,
     isChapterAdmin,
     isSuperAdmin,
     isAdmin,
-    login,
-    register,
-    logout,
-    verifyEmail,
+    
+    // Status
+    membershipStatus: currentUser?.membershipStatus,
+    isSuspended: currentUser?.membershipStatus === 'SUSPENDED',
+    
+    // Actions - wrapping mutations to match original interface promise return
+    login: (email: string, password: string) => loginMutation.mutateAsync({ email, password }),
+    register: (data: { email: string; password: string; firstName: string; lastName: string }) => registerMutation.mutateAsync(data),
+    logout: () => logoutMutation.mutateAsync(),
+    verifyEmail: (token: string) => verifyEmailMutation.mutateAsync(token),
+    
+    // Loading states
+    isLoading: isUserLoading || loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
+    
+    // Utils
+    refreshUserData,
   }
 }

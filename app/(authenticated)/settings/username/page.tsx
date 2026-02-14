@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { usersApi } from '@/lib/api/users'
+import { useUsername } from '@/lib/hooks/useSettings'
 import { 
   AtSign, 
   Check, 
@@ -19,13 +19,18 @@ import Link from 'next/link'
 export default function UsernameSettingsPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
+  const { 
+    checkUsername, 
+    isChecking, 
+    suggestions, 
+    isLoadingSuggestions,
+    updateUsername, 
+    isUpdating 
+  } = useUsername()
+
   const [username, setUsername] = useState('')
-  const [isChecking, setIsChecking] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null)
-  const [suggestions, setSuggestions] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [checkTimeout, setCheckTimeout] = useState<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -37,24 +42,12 @@ export default function UsernameSettingsPage() {
     if (user?.username) {
       setUsername(user.username)
     }
-
-    loadSuggestions()
-  }, [isAuthenticated, user, router])
-
-  const loadSuggestions = async () => {
-    try {
-      const data = await usersApi.getUsernameSuggestions()
-      setSuggestions(data.suggestions)
-    } catch (err) {
-      console.error('Failed to load suggestions:', err)
-    }
-  }
+  }, [isAuthenticated, router, user])
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
     setUsername(value)
     setError(null)
-    setSuccessMessage(null)
     setIsAvailable(null)
 
     // Clear previous timeout
@@ -80,16 +73,15 @@ export default function UsernameSettingsPage() {
 
     // Check availability after 500ms delay
     const timeout = setTimeout(() => {
-      checkAvailability(value)
+      handleCheckAvailability(value)
     }, 500)
 
     setCheckTimeout(timeout)
   }
 
-  const checkAvailability = async (usernameToCheck: string) => {
+  const handleCheckAvailability = async (usernameToCheck: string) => {
     try {
-      setIsChecking(true)
-      const data = await usersApi.checkUsername(usernameToCheck)
+      const data = await checkUsername(usernameToCheck)
       setIsAvailable(data.available)
       if (!data.available) {
         setError('Username is already taken')
@@ -97,8 +89,6 @@ export default function UsernameSettingsPage() {
     } catch (err: any) {
       console.error('Failed to check username:', err)
       setError(err.response?.data?.error || 'Failed to check username')
-    } finally {
-      setIsChecking(false)
     }
   }
 
@@ -119,26 +109,19 @@ export default function UsernameSettingsPage() {
     }
 
     try {
-      setIsSaving(true)
       setError(null)
-      setSuccessMessage(null)
-      
-      await usersApi.updateUsername(username)
-      setSuccessMessage('Username updated successfully')
-      
-      // Reload user data
-      window.location.reload()
+      await updateUsername(username)
+      // No manual reload needed, hooks handle query invalidation
     } catch (err: any) {
+      // toast handled in hook
       console.error('Failed to update username:', err)
-      setError(err.response?.data?.error || 'Failed to update username')
-    } finally {
-      setIsSaving(false)
+      setError(err.response?.data?.message || 'Failed to update username')
     }
   }
 
   const handleSuggestionClick = (suggestion: string) => {
     setUsername(suggestion)
-    checkAvailability(suggestion)
+    handleCheckAvailability(suggestion)
   }
 
   return (
@@ -158,7 +141,7 @@ export default function UsernameSettingsPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Username Settings</h1>
-              <p className="text-muted-foreground">Set your custom username for your profile URL</p>
+              <p className="text-muted-foreground">Set or change your custom username</p>
             </div>
           </div>
         </div>
@@ -169,15 +152,6 @@ export default function UsernameSettingsPage() {
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-800">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-green-800">{successMessage}</p>
             </div>
           </div>
         )}
@@ -247,10 +221,10 @@ export default function UsernameSettingsPage() {
 
             <button
               onClick={handleSave}
-              disabled={isSaving || !username || username === user?.username || isAvailable === false}
+              disabled={isUpdating || !username || username === user?.username || isAvailable === false}
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isSaving ? (
+              {isUpdating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Saving...
@@ -266,37 +240,37 @@ export default function UsernameSettingsPage() {
         </div>
 
         {/* Suggestions */}
-        {suggestions.length > 0 && (
+        {(isLoadingSuggestions || suggestions.length > 0) && (
           <div className="bg-card border border-border rounded-lg p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Suggestions</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {suggestions.map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-foreground rounded-lg text-sm font-mono transition-colors"
-                >
-                  @{suggestion}
-                </button>
-              ))}
-            </div>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Suggested Usernames</h2>
+             {isLoadingSuggestions ? (
+                <p className="text-sm text-muted-foreground">Loading suggestions...</p>
+             ) : (
+                <div className="flex flex-wrap gap-2">
+                  {suggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-foreground rounded-lg text-sm font-mono transition-colors"
+                    >
+                      @{suggestion}
+                    </button>
+                  ))}
+                </div>
+             )}
           </div>
         )}
 
         {/* Info Box */}
         <div className="bg-accent border border-border rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <Lightbulb className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div className="text-sm text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">Important Notes</p>
-              <ul className="space-y-1 list-disc list-inside">
-                <li>You can change your username up to 3 times per month</li>
-                <li>Your old username will become available for others to use</li>
-                <li>Links to your old profile URL will redirect to your new one</li>
-                <li>Choose carefully - frequent changes may confuse your connections</li>
+              <p className="font-medium text-foreground mb-1">Username Guidelines</p>
+              <ul className="space-y-1">
+                <li>• Choose something professional and memorable</li>
+                <li>• You can change your username up to 3 times per month</li>
+                <li>• Your username will be part of your public profile URL</li>
               </ul>
             </div>
           </div>

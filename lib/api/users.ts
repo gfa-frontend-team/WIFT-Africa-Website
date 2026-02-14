@@ -66,7 +66,18 @@ export const usersApi = {
    * Get current user information
    */
   getCurrentUser: async (): Promise<{ user: User }> => {
-    return await apiClient.get<{ user: User }>('/users/me')
+    const response = await apiClient.get<any>('/users/me')
+    // Fix: Map backend userId to frontend id expected by types
+    if (response.user) {
+      if (response.user.userId && !response.user.id) {
+        response.user.id = response.user.userId
+      }
+      // Ensure other ID mismatches are handled
+      if (response.user._id && !response.user.id) {
+        response.user.id = response.user._id
+      }
+    }
+    return response as { user: User }
   },
 
   /**
@@ -111,6 +122,25 @@ export const usersApi = {
    */
   deleteProfilePhoto: async (): Promise<{ message: string }> => {
     return await apiClient.delete<{ message: string }>('/users/me/profile-photo')
+  },
+
+  /**
+   * Upload profile banner
+   * @param file - Image file (JPG, PNG, WebP, max 5MB)
+   */
+  uploadProfileBanner: async (file: File): Promise<{ message: string; photoUrl: string }> => {
+    const formData = new FormData()
+    formData.append('photo', file)
+
+    return await apiClient.patch<{ message: string; photoUrl: string }>(
+      '/users/me/banner/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
   },
 
   // ============================================
@@ -219,5 +249,19 @@ export const usersApi = {
     }
 
     return await response.blob()
+  },
+
+  // ============================================
+  // ACCOUNT MANAGEMENT
+  // ============================================
+
+  /**
+   * Delete user account permanently
+   * @param confirmationText - Must be "DELETE" to confirm
+   */
+  deleteAccount: async (confirmationText: string): Promise<{ message: string }> => {
+    return await apiClient.delete<{ message: string }>('/users/me', {
+      data: { confirmation: confirmationText }
+    })
   },
 }

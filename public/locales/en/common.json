@@ -1,0 +1,379 @@
+{
+  "welcome": "Welcome",
+  "settings": "Settings",
+  "nav": {
+    "home": "Home",
+    "directory": "Directory",
+    "messages": "Messages",
+    "events": "Events",
+    "chapters": "Chapters",
+    "opportunities": "Opportunities",
+    "opportunities_short": "Opps",
+    "resources": "Resources",
+    "profile": "Profile"
+  },
+  "coming_soon": "Coming Soon",
+  "common": {
+    "view_all": "View All"
+  },
+  "sidebar": {
+    "view_all": "View All",
+    "profile_views": "Profile views",
+    "connections": "Connections",
+    "posts": "Posts",
+    "verified_member": "Verified Member",
+    "membership_pending": "Membership Pending",
+    "saved_items": "Saved Items",
+    "quick_links": "Quick Links",
+    "my_profile": "My Profile",
+    "settings": "Settings",
+    "my_applications": "My Applications",
+    "my_events": "My Events",
+    "suggested_connections": "Suggested Connections",
+    "latest_news": "Latest News",
+    "upcoming_events": "Upcoming Events",
+    "trending_posts": "Trending Posts",
+    "latest_opportunities": "Latest Opportunities",
+    "recent_activity": "Recent Activity",
+    "welcome_msg": "Welcome to the WIFT Africa community!",
+    "first_post_msg": "Start by creating your first post to connect with other members.",
+    "explore_msg": "Explore profiles and build your network.",
+    "member_title": "WIFT Africa Member",
+    "footer": {
+      "about": "About",
+      "help": "Help",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    }
+  },
+  "onboarding": {
+    "common": {
+      "continue": "Continue",
+      "back": "Back",
+      "saving": "Saving...",
+      "loading": "Loading...",
+      "step_count": "Step {{current}} of {{total}}",
+      "required": "*"
+    },
+    "steps": {
+      "roles": "Roles",
+      "specialization": "Specialization",
+      "chapter": "Chapter",
+      "profile": "Profile",
+      "terms": "Terms"
+    },
+    "roles": {
+      "title": "What's your role in the industry?",
+      "subtitle": "Select all that apply to your professional work",
+      "multihyphenate_title": "Multihyphenate Professional",
+      "multihyphenate_msg": "You've selected multiple roles! This makes you a multihyphenate professional. Please select your primary role for search prioritization.",
+      "primary_role_label": "Primary Role (for search prioritization)",
+      "select_primary_placeholder": "Select primary role...",
+      "error_required": "Please select at least one role",
+      "error_primary_required": "Please select a primary role for search prioritization",
+      "options": {
+        "producer": "Producer",
+        "producer_desc": "Develop, finance, and oversee film/TV projects",
+        "director": "Director",
+        "director_desc": "Lead creative vision and guide production",
+        "writer": "Writer",
+        "writer_desc": "Create scripts for TV, film, or both",
+        "actress": "Actress",
+        "actress_desc": "Perform in films, TV shows, and productions",
+        "crew": "Crew",
+        "crew_desc": "Technical and creative support roles",
+        "business": "Entertainment Business",
+        "business_desc": "Legal, finance, marketing, and representation"
+      }
+    },
+    "specialization": {
+      "title": "Tell us more about your specialization",
+      "subtitle": "This helps us connect you with relevant opportunities",
+      "writer_title": "Writer Specialization",
+      "crew_title": "Crew Specializations",
+      "crew_subtitle": "Select all that apply - you can choose multiple specializations",
+      "business_title": "Business Specializations",
+      "business_subtitle": "Select all that apply - you can choose multiple specializations",
+      "selected_count": "{{count}} specialization selected",
+      "selected_count_plural": "{{count}} specializations selected",
+      "error_writer": "Please select your writer specialization",
+      "error_crew": "Please select at least one crew specialization",
+      "error_business": "Please select at least one business specialization"
+    },
+    "chapter": {
+      "title": "Choose your WIFT Chapter",
+      "subtitle": "WIFT Africa is a growing network of women shaping the future of film, television, and digital storytelling across the continent. Connect to your local WIFT chapter or join WIFT Africa HQ.",
+      "member_status_title": "Are you an active member of a chapter?",
+      "btn_existing": "I'm already a registered member",
+      "btn_new": "I'm new here",
+      "note_existing": "I want to sign up and connect with my chapter",
+      "note_new": "I want to create my profile and find a chapter",
+      "note_new_warning": "Note: Registration is intended for active chapter members. Users without an affiliated chapter may experience a longer verification period.",
+      "intro_text": "Choose the chapter closest to where you live or work. If there isn't one yet, you can join our WIFT Africa HQ network while new chapters form.",
+      "no_chapter_title": "No chapter yet?",
+      "no_chapter_msg": "Join WIFT Africa HQ to connect with members across regions.",
+      "member_id_label": "Membership ID",
+      "member_id_placeholder": "Enter your membership ID",
+      "phone_label": "Phone Number (Optional)",
+      "phone_placeholder": "+234 XXX XXX XXXX",
+      "additional_info_label": "Additional Information (Optional)",
+      "additional_info_placeholder": "Any additional information for verification...",
+      "important_info_title": "Important information:",
+      "verification_title": "Verification Process:",
+      "verification_text": "Chapter membership requires verification by local administrators. You'll receive confirmation within 24-48 hours.",
+      "hq_title": "WIFT Africa HQ Registration:",
+      "hq_text": "HQ registration provides access while verification is complete. Consider joining a local chapter for immediate full access.",
+      "welcome_modal": {
+        "title": "Welcome to WIFT Africa!",
+        "subtitle": "We're excited to have you join our growing community.",
+        "p1": "As a new member, you will be onboarded through a process managed by your chapter administrator. All memberships require verification by your local chapter team.",
+        "p2": "You can expect to receive an onboarding message from your chapter administrator within 48 hours, and your membership will be confirmed on the WIFT Africa platform within 24 hours thereafter.",
+        "p3": "We look forward to welcoming you into the network!",
+        "btn": "Continue"
+      }
+    },
+    "profile": {
+      "title": "Complete Your Professional Profile",
+      "subtitle": "Tell us about yourself and your work",
+      "professional_info_title": "Professional Information",
+      "headline_label": "Professional Headline",
+      "headline_placeholder": "e.g., Award-winning Film Producer | Storyteller",
+      "headline_hint": "A brief professional tagline",
+      "bio_label": "Bio",
+      "bio_placeholder": "Tell us about your experience, achievements, and what you're passionate about...",
+      "bio_hint": "Share your story and professional journey",
+      "location_label": "Location",
+      "location_placeholder": "e.g., Lagos, Nigeria",
+      "availability_label": "Availability Status",
+      "availability_options": {
+        "available": "Available for opportunities",
+        "busy": "Currently busy",
+        "not_looking": "Not looking"
+      },
+      "social_title": "Professional Links",
+      "social_subtitle": "Provide at least one link to your professional profiles to showcase your work",
+      "linkedin_label": "LinkedIn Profile",
+      "imdb_label": "IMDb Profile",
+      "website_label": "Website / Portfolio",
+      "social_media_title": "Social Media",
+      "instagram_label": "Instagram Handle",
+      "twitter_label": "Twitter Handle",
+      "cv_title": "CV / Resume (Optional)",
+      "cv_subtitle": "Upload your CV to showcase your experience and qualifications",
+      "cv_label": "Upload CV / Resume",
+      "cv_hint": "Accepted formats: PDF, DOC, DOCX (Max 10MB)",
+      "note_update": "Note: You can always update your profile information and CV later in your account settings.",
+      "errors": {
+        "headline_required": "Professional headline is required",
+        "location_required": "Location is required",
+        "links_required": "Please provide at least one professional link or social media handle",
+        "invalid_url": "Please enter a valid URL starting with http:// or https://"
+      }
+    },
+    "terms": {
+      "title": "Terms, Rules & Guidelines",
+      "subtitle": "Please review and accept our community guidelines",
+      "sections": {
+        "verification": "Verification Process",
+        "jobs": "Opportunity Posting Guidelines",
+        "community": "Community Standards",
+        "timeline": "What Happens Next"
+      },
+      "checkbox_label": "I have read and agree to the Terms of Service, Privacy Policy, and Community Guidelines. I understand the verification process and opportunity posting approval timeline.",
+      "final_note": "Almost there! Once you accept the terms, your profile will be submitted for review. You'll be able to access the platform with limited features while your membership is being verified.",
+      "complete_btn": "Complete Registration",
+      "completing_btn": "Completing..."
+    }
+  },
+  "feed": {
+    "create_post": {
+      "trigger_placeholder": "What's on your mind, {{name}}?",
+      "modal_title": "Create Post",
+      "placeholder": "What's on your mind, {{name}}?",
+      "photo_btn": "Photo",
+      "video_btn": "Video",
+      "post_btn": "Post",
+      "posting_btn": "Posting...",
+      "discard_title": "Discard Post?",
+      "discard_msg": "You have unsaved changes. Are you sure you want to discard them?",
+      "discard_btn": "Discard",
+      "error_create": "Failed to create post. Please try again.",
+      "error_invalid_type": "Please select valid {{type}} files.",
+      "error_file_size": "{{file}} is too large. Max size is {{size}}.",
+      "error_max_images": "You can only upload up to 10 images.",
+      "visibility": {
+        "public": "Public",
+        "public_desc": "Anyone can see this post",
+        "connections": "Connections",
+        "connections_desc": "Only your connections",
+        "chapter": "Chapter",
+        "chapter_desc": "Only your chapter members"
+      }
+    },
+    "post_card": {
+      "admin_badge": "Admin",
+      "like_btn": "Like",
+      "liked_btn": "Liked",
+      "comment_btn": "Comment",
+      "share_btn": "Share",
+      "report_btn": "Report Post",
+      "saved_success": "Post saved to your collection",
+      "saved_removed": "Post removed from saved",
+      "save_error": "Failed to update saved status",
+      "privacy_chapter": "👥 Chapter",
+      "privacy_connections": "🔒 Connections",
+      "time": {
+        "just_now": "Just now",
+        "mins_ago": "{{count}}m ago",
+        "hours_ago": "{{count}}h ago",
+        "days_ago": "{{count}}d ago"
+      },
+      "stats": {
+        "likes": "{{count}} like",
+        "likes_plural": "{{count}} likes",
+        "comments": "{{count}} comment",
+        "comments_plural": "{{count}} comments",
+        "shares": "{{count}} share",
+        "shares_plural": "{{count}} shares"
+      }
+    },
+    "filters": {
+      "all": "All",
+      "posts": "Posts",
+      "announcements": "Announcements"
+    }
+  },
+  "profile": {
+    "header": {
+      "edit_profile": "Edit Profile",
+      "message": "Message",
+      "pending": "Request Pending",
+      "accept": "Accept Request",
+      "decline": "Decline",
+      "connect": "Connect",
+      "connecting": "Connecting...",
+      "update_cover": "Update Cover Photo",
+      "update_photo": "Update Profile Photo",
+      "member": "Member",
+      "upload_error_type": "Invalid file type",
+      "upload_error_type_desc": "Please upload a JPG, PNG, or WebP image.",
+      "upload_error_size": "File too large",
+      "upload_error_size_desc": "Image must be less than 5MB.",
+      "upload_success": "Success",
+      "upload_success_desc": "Cover photo updated successfully.",
+      "upload_error": "Error",
+      "upload_error_desc": "Failed to upload cover photo. Please try again."
+    },
+    "about": {
+      "title": "About",
+      "edit_title": "Edit Bio",
+      "placeholder_owner": "Add a bio to tell others about yourself...",
+      "placeholder_visitor": "No bio available."
+    },
+    "experience": {
+      "title": "Experience",
+      "add_btn": "Add Experience",
+      "edit_title": "Edit Experience",
+      "add_title": "Add Experience",
+      "edit_desc": "Update your professional history details.",
+      "add_desc": "Add your professional work history.",
+      "role_label": "Job Title",
+      "role_placeholder": "e.g. Director",
+      "org_label": "Company / Organization",
+      "org_placeholder": "e.g. Independent",
+      "type_label": "Employment Type",
+      "types": {
+        "full_time": "Full-time",
+        "part_time": "Part-time",
+        "contract": "Contract",
+        "freelance": "Freelance",
+        "internship": "Internship"
+      },
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "current_work": "I currently work here",
+      "desc_label": "Description (Optional)",
+      "desc_placeholder": "Describe your role and achievements...",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "empty": "No experience added yet.",
+      "present": "Present",
+      "default_role": "Role",
+      "error_missing": "Missing fields",
+      "error_missing_desc": "Please fill in all required fields.",
+      "success_update": "Experience updated",
+      "success_add": "Experience added",
+      "success_delete": "Experience deleted",
+      "confirm_delete": "Are you sure you want to delete this experience?"
+    },
+    "portfolio": {
+      "title": "Portfolio",
+      "add_btn": "Add Work",
+      "edit_title": "Edit Work",
+      "add_title": "Add to Portfolio",
+      "edit_desc": "Update project details.",
+      "add_desc": "Showcase your best work.",
+      "project_title": "Project Title",
+      "project_placeholder": "e.g. The Untold Story",
+      "year": "Year",
+      "role_label": "My Role",
+      "role_placeholder": "e.g. Director",
+      "media_type": "Media Type",
+      "types": {
+        "video": "Video Link",
+        "image": "Image Link",
+        "external": "External Link"
+      },
+      "visibility": "Visibility",
+      "vis_options": {
+        "public": "Public",
+        "connections": "Connections Only"
+      },
+      "media_url": "Media URL",
+      "desc_label": "Description (Optional)",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "empty": "No portfolio items yet.",
+      "connections_badge": "Connections",
+      "confirm_delete": "Are you sure you want to delete this item?",
+      "success_delete": "Item deleted",
+      "error_missing": "Missing fields",
+      "error_missing_desc": "Please fill in all required fields.",
+      "success_update": "Portfolio item updated",
+      "success_add": "Work added to portfolio",
+      "error_save": "Failed to save work.",
+      "error_delete": "Failed to delete item."
+    },
+    "contact": {
+      "title": "Contact",
+      "linkedin": "LinkedIn",
+      "imdb": "IMDb"
+    },
+    "specializations": {
+      "title": "Specializations",
+      "writer": "Writer",
+      "crew": "Crew",
+      "business": "Business"
+    }
+  },
+  "dashboard": {
+    "header": {
+      "search_placeholder": "Search...",
+      "verification_tooltip": "Complete membership verification to access this feature",
+      "status": {
+        "pending": "Verification Pending",
+        "verified": "Verified Member",
+        "declined": "Application Declined",
+        "suspended": "Membership Suspended"
+      },
+      "menu": {
+        "profile": "My Profile",
+        "connections": "Connections",
+        "settings": "Settings",
+        "signout": "Sign out"
+      }
+    }
+  }
+}

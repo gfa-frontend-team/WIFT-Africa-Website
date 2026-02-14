@@ -1,0 +1,13 @@
+{
+  "welcome": "أهلاً بك",
+  "settings": "الإعدادات",
+  "nav": {
+    "home": "الرئيسية",
+    "messages": "الرسائل",
+    "opportunities": "الفرص",
+    "resources": "الموارد",
+    "chapters": "الفروع",
+    "directory": "الدليل",
+    "events": "الفعاليات"
+  }
+}

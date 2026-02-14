@@ -1,5 +1,6 @@
 import { apiClient } from './client'
 import type { User, Profile } from '@/types'
+import type { ProfileViewsResponse } from '@/types/analytics'
 
 // ============================================
 // PUBLIC PROFILES API
@@ -8,11 +9,14 @@ import type { User, Profile } from '@/types'
 export interface PublicProfileResponse {
   profile: {
     // User fields
+    id: string
+    _id?: string
     firstName: string
     lastName: string
     username?: string
     profileSlug: string
     profilePhoto?: string
+    bannerUrl?: string // Added bannerUrl
     email?: string
     accountType?: string
     membershipStatus?: string
@@ -43,6 +47,20 @@ export interface PublicProfileResponse {
     
     // Privacy
     privacySettings?: any
+
+    // Completeness
+    completeness?: {
+      completionPercentage: number
+      missingFields: string[]
+      isComplete: boolean
+    }
+
+    // Stats
+    stats?: {
+      postsCount: number
+      connectionsCount: number
+      viewsCount?: number
+    }
   }
 }
 
@@ -53,5 +71,43 @@ export const profilesApi = {
    */
   getPublicProfile: async (identifier: string): Promise<PublicProfileResponse> => {
     return await apiClient.get<PublicProfileResponse>(`/profiles/${identifier}`)
+  },
+
+  getProfileViews: async (identifier: string, lastMonth: boolean = false): Promise<ProfileViewsResponse> => {
+    const response = await apiClient.get<ProfileViewsResponse>(`/profiles/views/${identifier}`, {
+      params: { lastMonth },
+    })
+    return response
+  },
+
+  /**
+   * Get experience list
+   * @param identifier - Optional identifier (username, profileSlug, or user ID) to fetch experience for. If omitted, fetches current user's experience.
+   */
+  getExperience: async (identifier?: string): Promise<any[]> => {
+    // Note: The backend returns an array of experience objects
+    const endpoint = identifier ? `/profiles/${identifier}/experience` : '/profiles/experience'
+    return await apiClient.get<any[]>(endpoint)
+  },
+
+  /**
+   * Add experience
+   */
+  addExperience: async (data: any): Promise<any> => {
+    return await apiClient.post<any>('/profiles/experience', data)
+  },
+
+  /**
+   * Update experience
+   */
+  updateExperience: async (id: string, data: any): Promise<any> => {
+    return await apiClient.put<any>(`/profiles/experience/${id}`, data)
+  },
+
+  /**
+   * Delete experience
+   */
+  deleteExperience: async (id: string): Promise<void> => {
+    await apiClient.delete(`/profiles/experience/${id}`)
   },
 }

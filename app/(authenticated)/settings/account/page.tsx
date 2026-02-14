@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useAccount } from '@/lib/hooks/useSettings'
+import { onboardingApi, type Chapter } from '@/lib/api/onboarding'
 import { 
   User, 
   Mail, 
@@ -13,23 +15,49 @@ import {
   ArrowLeft,
   AlertTriangle,
   Building2,
-  CheckCircle2
+  CheckCircle2,
+  MapPin,
+  Users as UsersIcon,
+  ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AccountSettingsPage() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
+  const { deleteAccount, isDeleting } = useAccount()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [chapter, setChapter] = useState<Chapter | null>(null)
+  const [isLoadingChapter, setIsLoadingChapter] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login')
       return
     }
-  }, [isAuthenticated, router])
+
+    // Load chapter information
+    const loadChapterInfo = async () => {
+      if (!user?.chapterId) return
+
+      try {
+        setIsLoadingChapter(true)
+        const response = await onboardingApi.getChapters()
+        const userChapter = response.chapters.find(c => c.id === user.chapterId)
+        if (userChapter) {
+          setChapter(userChapter)
+        }
+      } catch (error) {
+        console.error('Failed to load chapter info:', error)
+      } finally {
+        setIsLoadingChapter(false)
+      }
+    }
+
+    loadChapterInfo()
+  }, [isAuthenticated, router, user?.chapterId])
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE') {
@@ -37,16 +65,17 @@ export default function AccountSettingsPage() {
     }
 
     try {
-      setIsDeleting(true)
-      // TODO: Implement account deletion API
-      // await usersApi.deleteAccount()
-      alert('Account deletion is not yet implemented')
-      setShowDeleteConfirm(false)
+      setDeleteError(null)
+      
+      await deleteAccount('DELETE')
+      
+      // Account deleted successfully, logout and redirect
+      await logout()
+      router.push('/login?message=Account deleted successfully')
     } catch (err: any) {
       console.error('Failed to delete account:', err)
-      alert('Failed to delete account')
-    } finally {
-      setIsDeleting(false)
+      const message = err.response?.data?.message || 'Failed to delete account. Please try again.'
+      setDeleteError(message)
     }
   }
 
@@ -192,16 +221,45 @@ export default function AccountSettingsPage() {
             </div>
 
             {user.chapterId && (
-              <div className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-muted-foreground" />
-                  <div>
+              <div className="flex items-start justify-between py-3">
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div className="flex-1">
                     <p className="text-sm text-muted-foreground">Chapter</p>
-                    <p className="font-medium text-foreground">Your Chapter</p>
+                    {isLoadingChapter ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm text-muted-foreground">Loading...</span>
+                      </div>
+                    ) : chapter ? (
+                      <div className="mt-1">
+                        <p className="font-medium text-foreground">{chapter.name}</p>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>
+                              {chapter.city ? `${chapter.city}, ${chapter.country}` : chapter.country}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <UsersIcon className="h-3 w-3" />
+                            <span>{chapter.memberCount.toLocaleString()} members</span>
+                          </div>
+                        </div>
+                        {chapter.description && (
+                          <p className="text-xs text-muted-foreground mt-1 italic">
+                            {chapter.description}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="font-medium text-foreground mt-1">Chapter information unavailable</p>
+                    )}
                   </div>
                 </div>
-                <button className="text-sm text-primary hover:underline">
+                <button className="text-sm text-primary hover:underline flex items-center gap-1">
                   Request Change
+                  <ExternalLink className="h-3 w-3" />
                 </button>
               </div>
             )}
@@ -218,12 +276,23 @@ export default function AccountSettingsPage() {
                 <Lock className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="font-medium text-foreground">Password</p>
-                  <p className="text-sm text-muted-foreground">••••••••</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.authProvider === 'GOOGLE' ? 'Managed by Google' : '••••••••'}
+                  </p>
                 </div>
               </div>
-              <button className="text-sm text-primary hover:underline">
-                Change Password
-              </button>
+              {user.authProvider === 'GOOGLE' ? (
+                <span className="text-sm text-muted-foreground">
+                  Google Account
+                </span>
+              ) : (
+                <Link
+                  href="/settings/password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Change Password
+                </Link>
+              )}
             </div>
 
             <div className="flex items-center justify-between py-3">
@@ -271,6 +340,24 @@ export default function AccountSettingsPage() {
             </button>
           ) : (
             <div className="space-y-4">
+              {deleteError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-800">{deleteError}</p>
+                    </div>
+                    <button
+                      onClick={() => setDeleteError(null)}
+                      className="ml-3 text-red-600 hover:text-red-800"
+                    >
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-800 mb-3">
                   <strong>Warning:</strong> This action cannot be undone. This will permanently delete
@@ -285,6 +372,7 @@ export default function AccountSettingsPage() {
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder="Type DELETE"
                   className="w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  disabled={isDeleting}
                 />
               </div>
               <div className="flex gap-3">
@@ -292,8 +380,10 @@ export default function AccountSettingsPage() {
                   onClick={() => {
                     setShowDeleteConfirm(false)
                     setDeleteConfirmText('')
+                    setDeleteError(null)
                   }}
-                  className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors"
+                  disabled={isDeleting}
+                  className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
