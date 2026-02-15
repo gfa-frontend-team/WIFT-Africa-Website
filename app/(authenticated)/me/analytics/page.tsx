@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useProfileAnalytics } from '@/lib/hooks/useProfileAnalytics'
+import { useProfileAnalytics, useProfileViewCount } from '@/lib/hooks/useProfileAnalytics'
 import { AnalyticsHeader } from '@/components/analytics/AnalyticsHeader'
 import { StatCard } from '@/components/analytics/StatCard'
 import { ViewersList } from '@/components/analytics/ViewersList'
@@ -9,9 +9,12 @@ import { PostsPerformance } from '@/components/analytics/PostsPerformance'
 import { ConnectionsSnapshot } from '@/components/analytics/ConnectionsSnapshot'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Eye, BarChart2, Users, Loader2 } from 'lucide-react'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { useProfileCountContext } from '@/hooks/useProfile'
 
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState('views')
+
   const { 
     timeframe, 
     setTimeframe, 
@@ -19,8 +22,13 @@ export default function AnalyticsPage() {
     postStats, 
     isLoading 
   } = useProfileAnalytics()
+  // const {user} = useAuth()
 
-  if (isLoading && !profileViews && !postStats) {
+  const {  viewCount } = useProfileCountContext()
+
+  console.log(viewCount,"profileViewCount")
+
+  if (isLoading && !viewCount && !postStats) {
       return (
           <div className="container mx-auto py-12 flex justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -28,7 +36,7 @@ export default function AnalyticsPage() {
       )
   }
 
-  const viewsCount = profileViews?.count || 0
+  // const viewsCount = profileViewCount || 0
   const impressionsCount = postStats?.totalImpressions || 0
   
   return (
@@ -39,7 +47,7 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard 
             title="Profile Views" 
-            value={viewsCount.toLocaleString()}
+            value={viewCount.toLocaleString()}
             icon={Eye}
             active={activeTab === 'views'}
             onClick={() => setActiveTab('views')}

@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { chaptersApi } from '@/lib/api/chapters'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 import ChapterCard from '@/components/shared/ChapterCard'
+// import { Input } from '@/components/ui/input'
 
 export default function ChaptersPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -29,7 +30,7 @@ export default function ChaptersPage() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="bg-primary/5 border-b border-border py-12 md:py-16">
-        <div className="max-w-screen-xl mx-auto px-4 text-center">
+        <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">WIFT Africa Chapters</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto ">
             Connect with our network of chapters across the continent. Find a chapter near you and join the community.
@@ -48,7 +49,7 @@ export default function ChaptersPage() {
       </div>
 
       {/* Chapters Grid */}
-      <div className="max-w-screen-xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-12">
         {isLoading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -78,6 +79,7 @@ export default function ChaptersPage() {
                 admin={chapter.adminName}
                 actionLink={`/chapters/${chapter.id}`}
                 actionLabel="View Chapter"
+                chapterId={chapter._id}
               />
             ))}
           </div>

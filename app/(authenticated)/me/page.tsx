@@ -22,6 +22,8 @@ export default function MeRedirectPage() {
     }
   }, [user, isAuthenticated, isLoading, router])
 
+  console.log(user,"user")
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">

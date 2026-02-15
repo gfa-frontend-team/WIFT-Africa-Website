@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { chaptersApi } from '@/lib/api/chapters'
 import { useChapterEvents, useChapterFunding, useChapterMentorships } from '@/lib/hooks/useChapter'
 import {
   ArrowLeft, Users, MapPin, Mail, Calendar, Briefcase, Crown,
-  Loader2, Globe
+  Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -16,11 +16,18 @@ import { EventCard } from '@/components/events/EventCard'
 import { FundingCard } from '@/components/funding/FundingCard'
 import { MentorshipCard } from '@/components/mentorship/MentorshipCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import Image from 'next/image'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { Chapter, Job } from '@/types'
+import { useJobs } from '@/hooks/useJobs'
+import { JobCard } from '@/components/jobs/JobCard'
 
 export default function ChapterDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const chapterId = params.id as string
+
+  const {user} = useAuth()
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'opportunities'>('about')
 
   const { data: chapterResponse, isLoading, isError } = useQuery({
@@ -28,13 +35,23 @@ export default function ChapterDetailsPage() {
     queryFn: () => chaptersApi.getChapter(chapterId),
     enabled: !!chapterId,
   })
-
-  const chapter = chapterResponse?.chapter
+  
+  const chapter: Chapter = chapterResponse?.chapter
+  const isUserChapterId = user?.chapter?._id === chapterId
+  // console.log(user,"user")
 
   // Fetch chapter-specific data
   const { data: eventsData, isLoading: isLoadingEvents } = useChapterEvents(chapterId)
   const { data: fundingData, isLoading: isLoadingFunding } = useChapterFunding(chapterId)
   const { data: mentorshipsData, isLoading: isLoadingMentorships } = useChapterMentorships(chapterId)
+  const {data:jobs,isLoading:isJobbing} = useJobs()
+
+  
+  const chapterJobs: Job[] = useMemo(() => {
+    if (!jobs?.data) return []
+    return jobs.data.filter(ele => ele?.chapterId === chapterId)
+  }, [jobs, chapterId])
+  // console.log(chapterJobs,"jobs")
 
   // Extract data arrays
   const events = eventsData?.events || []
@@ -43,7 +60,7 @@ export default function ChapterDetailsPage() {
 
   // Calculate counts
   const upcomingEventsCount = events.length
-  const opportunitiesCount = funding.length + mentorships.length
+  const opportunitiesCount = funding.length + mentorships.length + chapterJobs.length
 
   if (isLoading) {
     return (
@@ -91,7 +108,7 @@ export default function ChapterDetailsPage() {
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <div className="w-20 h-20 rounded bg-card shadow-sm flex items-center justify-center overflow-hidden">
-                      <img
+                      <Image
                         src={getCountryFlagUrl(chapter.code, chapter.country)}
                         alt={`${chapter.country} flag`}
                         className="w-full h-full object-cover"
@@ -101,6 +118,8 @@ export default function ChapterDetailsPage() {
                           e.currentTarget.parentElement!.innerHTML = '📍';
                           e.currentTarget.parentElement!.classList.add('text-3xl');
                         }}
+                        width={50}
+                        height={50}
                       />
                     </div>
                   )}
@@ -176,6 +195,7 @@ export default function ChapterDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2">
+            {/* ABOUT CONTENT  */}
             {activeTab === "about" && (
               <div className="bg-card border border-border rounded-lg p-6">
                 <h2 className="text-xl font-semibold text-foreground mb-4">
@@ -247,6 +267,7 @@ export default function ChapterDetailsPage() {
               </div>
             )}
 
+            {/* EVENTS CONTENT  */}
             {activeTab === "events" && (
               <div className="space-y-4">
                 {isLoadingEvents ? (
@@ -271,23 +292,29 @@ export default function ChapterDetailsPage() {
               </div>
             )}
 
+            {/* OPPO CONTENT  */}
             {activeTab === "opportunities" && (
               <div className="space-y-6">
-                {isLoadingFunding || isLoadingMentorships ? (
+                {isLoadingFunding || isLoadingMentorships || isJobbing ? (
                   <div className="bg-card border border-border rounded-lg p-12 text-center">
                     <Loader2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
                     <p className="text-muted-foreground">Loading opportunities...</p>
                   </div>
-                ) : funding.length === 0 && mentorships.length === 0 ? (
-                  <div className="bg-card border border-border rounded-lg p-12 text-center">
-                    <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      No opportunities available for this chapter.
-                    </p>
-                  </div>
-                ) : (
+                ) :
+                //  funding.length === 0 && mentorships.length === 0 ? (
+                //   <div className="bg-card border border-border rounded-lg p-12 text-center">
+                //     <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                //     <p className="text-muted-foreground">
+                //       No opportunities available for this chapter.
+                //     </p>
+                //   </div>
+                // ) :
+                 (
                   <Tabs defaultValue="funding" className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+                    <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
+                      <TabsTrigger value="jobs">
+                        Jobs ({chapterJobs.length})
+                      </TabsTrigger>
                       <TabsTrigger value="funding">
                         Grants ({funding.length})
                       </TabsTrigger>
@@ -296,6 +323,19 @@ export default function ChapterDetailsPage() {
                       </TabsTrigger>
                     </TabsList>
 
+                    <TabsContent value="jobs">
+                      {chapterJobs.length === 0 ? (
+                        <div className="bg-muted/30 border border-border rounded-xl p-12 text-center">
+                          <p className="text-muted-foreground">No jobs available.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {chapterJobs?.map((jobs) => (
+                            <JobCard key={jobs._id} job={jobs} />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
                     <TabsContent value="funding">
                       {funding.length === 0 ? (
                         <div className="bg-muted/30 border border-border rounded-xl p-12 text-center">

@@ -67,6 +67,8 @@ export const usersApi = {
    */
   getCurrentUser: async (): Promise<{ user: User }> => {
     const response = await apiClient.get<any>('/users/me')
+
+        
     // Fix: Map backend userId to frontend id expected by types
     if (response.user) {
       if (response.user.userId && !response.user.id) {

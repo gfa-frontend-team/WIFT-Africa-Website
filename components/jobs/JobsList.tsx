@@ -8,6 +8,7 @@ import type { JobFilters as FilterTypes } from '@/types/jobs'
 import SearchPagination from '@/components/search/SearchPagination'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useJobs } from '@/hooks/useJobs'
 
 export function JobsList() {
   const [filters, setFilters] = useState<FilterTypes>({})
@@ -19,11 +20,9 @@ export function JobsList() {
     setPage(1) // Reset to first page on filter change
   }
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['jobs', filters, page, limit],
-    queryFn: () => jobsApi.getJobs(filters, page, limit),
-  })
+  const {data,isLoading,isError} = useJobs(filters,page,limit)
 
+  // console.log(data,"data")
   // Calculate total pages if backend provides it, otherwise guess based on result count
   const totalResults = data?.results || 0
   const totalPages = Math.ceil(totalResults / limit) || 1

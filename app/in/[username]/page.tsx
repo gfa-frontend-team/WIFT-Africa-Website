@@ -18,6 +18,7 @@ import PrivateProfileSections from '@/components/profile/PrivateProfileSections'
 import { mapPrivateToPublicProfile } from '@/lib/utils/profile-mapper'
 import PublicProfileCTA from '@/components/profile/PublicProfileCTA'
 import { useAnalytics } from '@/lib/hooks/useAnalytics'
+import { useRecordProfileView } from '@/lib/hooks/useProfileAnalytics'
 
 export default function UnifiedProfilePage() {
   const params = useParams()
@@ -49,6 +50,8 @@ export default function UnifiedProfilePage() {
     isError: isOwnerError
   } = useProfile() 
 
+const { mutate } = useRecordProfileView()
+  
   // 2. Public Data Query
   const { 
     data: publicProfileData, 
@@ -58,6 +61,15 @@ export default function UnifiedProfilePage() {
   } = usePublicProfile(username, { 
     enabled: !isUsernameReserved(username) 
   })
+  
+  // console.log(publicProfileData,"publicProfileData",isOwnerError)
+
+  useEffect(() => {
+  if (!publicProfileData?.profile?.id) return
+  if (isOwner) return
+
+  mutate(publicProfileData?.profile?.id)
+}, [publicProfileData?.profile?.id,isOwner])
 
   // Handle Reserved Routes
   useEffect(() => {
@@ -102,6 +114,9 @@ export default function UnifiedProfilePage() {
   
   const connectionsCount = isOwner ? (myStats?.connectionsCount || 0) : (displayProfile?.profile?.stats?.connectionsCount || 0)
   const postsCount = isOwner ? (myPostsStats?.total || 0) : (displayProfile?.profile?.stats?.postsCount || 0) 
+
+
+  
 
 
   const connectionStatus = useMemo(() => {

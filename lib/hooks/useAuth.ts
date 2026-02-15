@@ -16,6 +16,7 @@ export function useAuth() {
   const onboardingComplete = useUserStore(selectOnboardingComplete)
   const currentUser = useUserStore((state) => state.currentUser)
 
+    // console.log(user,"currentUser")
   // Verify Email Mutation (kept local as it's specific)
   const verifyEmailMutation = useMutation({
     mutationFn: (token: string) => authApi.verifyEmail({ token }),
@@ -37,6 +38,7 @@ export function useAuth() {
     isAuthenticated,
     isEmailVerified,
     onboardingComplete,
+    chapterId:currentUser?.chapter?._id,
     
     // Roles
     isMember,

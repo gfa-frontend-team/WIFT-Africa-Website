@@ -14,6 +14,7 @@ export interface SalaryRange {
 }
 
 export interface Job {
+  chapterId: string;
   _id: string;
   title: string;
   description: string;

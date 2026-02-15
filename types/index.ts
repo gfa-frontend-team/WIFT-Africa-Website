@@ -43,6 +43,12 @@ export interface User {
   cvFileName?: string
   cvFileUrl?: string
   cvUploadedAt?: Date
+  chapter?:{
+    _id:string | undefined;
+    code:string;
+    country:string;
+    name:string
+  }
 
   username?: string
   profileSlug: string

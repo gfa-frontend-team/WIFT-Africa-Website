@@ -26,7 +26,6 @@ export default function LoginPage() {
   const isLoading = isAuthLoading || isGoogleLoading || isLocalLoading
 
 
-
   // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated && isEmailVerified && onboardingComplete) {

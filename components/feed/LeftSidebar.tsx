@@ -3,14 +3,15 @@
 import { useTranslation } from 'react-i18next'
 
 import Link from 'next/link'
-import { Eye, Users, TrendingUp, Bookmark, Briefcase, Calendar } from 'lucide-react'
+import { Eye, Users, TrendingUp, Bookmark, Briefcase, Calendar, BadgeCheck } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useSavedPostsCount } from '@/lib/hooks/useSavedPosts'
 import { useConnections } from '@/lib/hooks/useConnections'
-import { useProfileAnalytics } from '@/lib/hooks/useProfileAnalytics'
+// import { useProfileAnalytics, useProfileViewCount } from '@/lib/hooks/useProfileAnalytics'
 import { useAnalytics } from '@/lib/hooks/useAnalytics'
 import { getProfileUrl } from '@/lib/utils/routes'
+import { useProfileCountContext } from '@/hooks/useProfile'
 
 export default function LeftSidebar() {
   const { t } = useTranslation()
@@ -18,10 +19,15 @@ export default function LeftSidebar() {
   const { data: savedCount } = useSavedPostsCount()
   const { useStats } = useConnections()
   const { data: stats } = useStats()
-  const { profileViews, isLoading: isLoadingAnalytics } = useProfileAnalytics()
+  // const { profileViews, isLoading: isLoadingAnalytics } = useProfileAnalytics()
   const { useUserPostsStats } = useAnalytics()
   const { data: myPostsStats } = useUserPostsStats()
 
+  
+    const {  viewCount,isReady } = useProfileCountContext()
+
+  // console.log(viewCount,"profileViewCount")
+  
   if (!user) return null
 
   return (
@@ -29,7 +35,7 @@ export default function LeftSidebar() {
       {/* Profile Summary Card */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         {/* Header Banner */}
-        <div className="h-16 bg-gradient-to-r from-primary/20 to-primary/10"></div>
+        <div className="h-16 bg-linear-to-r from-primary/20 to-primary/10"></div>
 
         {/* Profile Info */}
         <div className="px-4 pb-4">
@@ -63,7 +69,7 @@ export default function LeftSidebar() {
                 {t('sidebar.profile_views')}
               </span>
               <span className="font-semibold text-primary">
-                {isLoadingAnalytics ? '—' : (profileViews?.count?.toLocaleString() || 0)}
+                {isReady ? '—' : (viewCount?.toLocaleString() || 0)}
               </span>
             </Link>
             <Link href="/connections" className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
@@ -89,8 +95,8 @@ export default function LeftSidebar() {
           {/* Membership Status */}
           {user.membershipStatus === 'APPROVED' && (
             <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-xs text-green-800 font-medium">
-                ✓ {t('sidebar.verified_member')}
+              <p className="text-xs text-green-800 font-medium flex gap-1 items-center">
+                <BadgeCheck/> {t('sidebar.verified_member')}
               </p>
             </div>
           )}
