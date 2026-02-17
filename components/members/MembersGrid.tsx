@@ -10,13 +10,15 @@ interface MembersGridProps {
   isLoading: boolean
   onConnect: (id: string) => void
   connectingId?: string | null
+  isConnectModalOpen:boolean
 }
 
 export default function MembersGrid({ 
   members, 
   isLoading, 
   onConnect,
-  connectingId
+  connectingId,
+  isConnectModalOpen
 }: MembersGridProps) {
   const { useRequests, respondToRequest, isResponding } = useConnections()
   const { data: incomingRequests } = useRequests('incoming')
@@ -64,6 +66,7 @@ export default function MembersGrid({
       {members.map((member) => (
         <MemberCard 
           key={member.id} 
+          isConnectModalOpen={isConnectModalOpen}
           member={member} 
           onConnect={onConnect}
           isConnecting={connectingId === member.id || isResponding}

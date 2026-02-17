@@ -59,6 +59,8 @@ function MembersPageContent() {
   const allUsers = data?.pages.flatMap((page) => page.users) || []
   const totalResults = data?.pages[0]?.total || 0
 
+    const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
+
   // 3. Infinite Scroll Trigger
   const observer = useRef<IntersectionObserver | null>(null)
   const lastElementRef = useCallback((node: HTMLDivElement | null) => {
@@ -87,6 +89,9 @@ function MembersPageContent() {
     try {
       setConnectingId(userId)
       await sendRequest(userId)
+
+          // Otherwise open modal
+    setIsConnectModalOpen(true)
     } catch (error) {
       console.error('Failed to connect:', error)
       alert('Failed to send request')
@@ -138,6 +143,7 @@ function MembersPageContent() {
             isLoading={isSearching}
             onConnect={handleConnect}
             connectingId={connectingId}
+            isConnectModalOpen={isConnectModalOpen}
           />
 
           {/* Infinite Scroll Loader */}

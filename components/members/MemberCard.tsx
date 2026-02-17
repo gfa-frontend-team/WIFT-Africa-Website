@@ -8,6 +8,7 @@ import { MapPin, Users, UserPlus, MessageCircle, Clock, UserCheck } from 'lucide
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getProfileUrl } from '@/lib/utils/routes'
+import ConnectModal from '../connections/ConnectModal'
 
 interface MemberCardProps {
   member: SearchUserResult
@@ -15,10 +16,13 @@ interface MemberCardProps {
   onAccept?: (requestId: string) => void
   incomingRequest?: ConnectionRequest
   isConnecting?: boolean
+  isConnectModalOpen?:boolean
 }
 
-export default function MemberCard({ member, onConnect, onAccept, incomingRequest, isConnecting }: MemberCardProps) {
+export default function MemberCard({ member, onConnect, onAccept, incomingRequest, isConnecting,isConnectModalOpen }: MemberCardProps) {
   const router = useRouter()
+
+  const targetId = member.id
   
   // Navigate to profile on click (unless clicking button)
   const handleCardClick = (e: React.MouseEvent) => {
@@ -90,6 +94,8 @@ export default function MemberCard({ member, onConnect, onAccept, incomingReques
   }
 
   return (
+
+    <>
     <div 
       onClick={handleCardClick}
       className="group bg-card hover:bg-accent/5 transition-colors border border-border rounded-xl p-5 flex flex-col items-center text-center cursor-pointer shadow-sm hover:shadow-md"
@@ -149,5 +155,16 @@ export default function MemberCard({ member, onConnect, onAccept, incomingReques
         {renderActionButton()}
       </div>
     </div>
+
+     {/* {targetId && (
+            <ConnectModal
+              isOpen={isConnectModalOpen}
+              onClose={() => setIsConnectModalOpen(false)}
+              onConfirm={onConnect}
+              recipientName={member?.firstName || 'User'}
+              isSending={isSending}
+            />
+          )} */}
+      </>
   )
 }
