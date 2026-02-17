@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
 import { MembershipStatus, type User } from '@/types';
 import { getProfileUrl } from '@/lib/utils/routes';
+import { useSize } from "react-haiku";
 import {
   Home,
   User as UserIcon,
@@ -33,6 +34,7 @@ import { useNotifications } from '@/lib/hooks/useNotifications';
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 import { ModeToggle } from '@/components/shared/ModeToggle';
 import { useEffect } from 'react';
+import { useNavbar } from '@/hooks/NavbarContext';
 
 interface DashboardHeaderProps {
   user: User;
@@ -63,6 +65,16 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const unreadCount = unreadData?.count || 0;
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+
+   const elementRef = useRef(null);
+    const { width, height } = useSize(elementRef);
+  
+  const {setSize} = useNavbar()
+
+     useEffect(() => {
+      setSize({ width, height });
+    }, [width, height]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -126,7 +138,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40 transition-all duration-200">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40 transition-all duration-200" ref={elementRef}>
         <div className="max-w-screen-xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}

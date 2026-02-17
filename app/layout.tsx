@@ -3,9 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import QueryProvider from "@/components/providers/QueryProvider";
 import LanguageProvider from "@/components/providers/LanguageProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
 import "./globals.css";
 import { ProfileProvider } from "@/hooks/useProfile";
+import { NavbarProvider } from "@/hooks/NavbarContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,22 +19,33 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'WIFT Africa - Join Africa\'s Premier Network for Women in Film & TV',
-  description: 'Connect with 300+ verified professionals across 10 countries. Join the community that champions women\'s voices in African storytelling.',
-  keywords: ['WIFT Africa', 'women in film', 'African cinema', 'film industry', 'television', 'media professionals', 'networking'],
+  title: "WIFT Africa - Join Africa's Premier Network for Women in Film & TV",
+  description:
+    "Connect with 300+ verified professionals across 10 countries. Join the community that champions women's voices in African storytelling.",
+  keywords: [
+    "WIFT Africa",
+    "women in film",
+    "African cinema",
+    "film industry",
+    "television",
+    "media professionals",
+    "networking",
+  ],
   openGraph: {
-    title: 'WIFT Africa - Women in Film, Television & Media',
-    description: 'Join Africa\'s premier network for women in film, television & media. Connect, collaborate, and grow with verified professionals.',
-    type: 'website',
-    locale: 'en_US',
+    title: "WIFT Africa - Women in Film, Television & Media",
+    description:
+      "Join Africa's premier network for women in film, television & media. Connect, collaborate, and grow with verified professionals.",
+    type: "website",
+    locale: "en_US",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'WIFT Africa - Women in Film, Television & Media',
-    description: 'Join Africa\'s premier network for women in film, television & media.',
+    card: "summary_large_image",
+    title: "WIFT Africa - Women in Film, Television & Media",
+    description:
+      "Join Africa's premier network for women in film, television & media.",
   },
   icons: {
-    icon: '/fav.png',
+    icon: "/fav.png",
   },
 };
 
@@ -56,8 +68,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <ProfileProvider>
-
-              {children}
+                <NavbarProvider>{children}</NavbarProvider>
               </ProfileProvider>
             </ThemeProvider>
           </LanguageProvider>

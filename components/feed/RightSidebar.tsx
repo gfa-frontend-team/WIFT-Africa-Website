@@ -3,6 +3,8 @@
 import { Clock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import dynamic from 'next/dynamic'
+import { useNavbar } from '@/hooks/NavbarContext'
+import { ScrollArea } from '../ui/scroll-area'
 
 // Dynamically import widgets to reduce initial bundle size
 const UpcomingEventsWidget = dynamic(() => import('./widgets/UpcomingEventsWidget'), { ssr: false })
@@ -13,8 +15,25 @@ const SuggestedConnectionsWidget = dynamic(() => import('./widgets/SuggestedConn
 export default function RightSidebar() {
   const { t } = useTranslation()
 
+    const {
+      size: { height: navbarHeight },
+    } = useNavbar();
+  
+    // Define the calculated height for reuse
+    const sidebarHeight = `calc(100dvh - ${navbarHeight + 40}px)`;
+  
+
   return (
-    <aside className="space-y-4">
+       <aside
+      className="hidden lg:block lg:col-span-3 sticky"
+      style={{
+        height: sidebarHeight,
+        top: `${navbarHeight + 10}px`,
+      }}
+    >
+      <ScrollArea className="h-full w-full pl-4">
+
+        <div className="space-y-4 ">
       {/* 1. Upcoming Events */}
       <UpcomingEventsWidget />
 
@@ -58,6 +77,9 @@ export default function RightSidebar() {
           © {new Date().getFullYear()} WIFT Africa
         </p>
       </div>
+      </div>
+      </ScrollArea>
+
     </aside>
   )
 }

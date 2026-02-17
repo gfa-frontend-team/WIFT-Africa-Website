@@ -13,6 +13,7 @@ import { FeedSkeleton } from '@/components/feed/FeedSkeleton'
 import PostCard from '@/components/feed/PostCard'
 import dynamic from 'next/dynamic'
 
+
 const LeftSidebar = dynamic(() => import('@/components/feed/LeftSidebar'))
 const RightSidebar = dynamic(() => import('@/components/feed/RightSidebar'))
 const CreatePostModal = dynamic(() => import('@/components/feed/CreatePostModal'))
@@ -211,7 +212,8 @@ export default function HomePage() {
   const { user } = useAuth()
   const { access, membershipStatus } = useFeatureAccess()
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false)
-
+  
+    if (!user) return null;
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -220,12 +222,13 @@ export default function HomePage() {
     )
   }
 
+
   const isApproved = membershipStatus === MembershipStatus.APPROVED
   const isPending = membershipStatus === MembershipStatus.PENDING
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-screen-xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Limited Access Banner for Pending Users */}
         {isPending && (
           <div className="mb-6">
@@ -241,9 +244,9 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar - 3 columns on desktop */}
-          <div className="hidden lg:block lg:col-span-3">
+          {/* <div className=""> */}
             <LeftSidebar />
-          </div>
+          {/* </div> */}
 
           {/* Main Feed - 6 columns on desktop */}
           <main className="lg:col-span-6 max-w-2xl mx-auto lg:max-w-none lg:mx-0 w-full">
