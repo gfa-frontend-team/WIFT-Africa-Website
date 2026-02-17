@@ -173,7 +173,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             {/* Right Side */}
             <div className="flex items-center space-x-2 sm:space-x-4">
               {/* Search Bar (Hidden on Mobile) */}
-              <div className="hidden md:block relative group">
+              <div className="hidden xl:block relative group">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <input
@@ -195,7 +195,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               {/* Mobile Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="md:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-colors"
+                className="xl:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-colors"
               >
                 <Search className="h-5 w-5" />
               </button>

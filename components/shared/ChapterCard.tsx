@@ -63,7 +63,7 @@ export default function ChapterCard({
         {/* Country & Flag */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 flex-shrink-0 overflow-hidden rounded-full border border-border/50">
+            <div className="relative w-12 h-12 shrink-0 overflow-hidden rounded-full border border-border/50">
               {flagCode === "AFRICA" ? (
                 <div className="flex h-full w-full items-center justify-center bg-primary/10 text-2xl">
                   🌍

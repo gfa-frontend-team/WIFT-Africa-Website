@@ -12,35 +12,32 @@ export default function LanguageProvider({ children }: { children: React.ReactNo
   const { updateUserLanguage } = useLanguage();
 
   useEffect(() => {
-    setMounted(true);
-    
-    // Listen for language changes to sync with backend
-    const handleLanguageChanged = (lng: string) => {
-      // 1. Update Document Attributes for RTL/LTR and Lang
-      document.documentElement.lang = lng;
-      document.documentElement.dir = i18n.dir(lng);
+  setMounted(true);
+  
+  const handleLanguageChanged = (lng: string) => {
+    document.documentElement.lang = lng;
+    // CHANGE THIS: Hardcode to 'ltr' instead of using i18n.dir(lng)
+    document.documentElement.dir = 'ltr'; 
 
-      if (isAuthenticated) {
-        // optimistically update backend (fire and forget mostly, handled by mutation)
-        updateUserLanguage({ language_code: lng }).catch(err => {
-            console.error('Failed to sync language preference', err);
-        });
-      }
-      // Persist to local storage is handled by i18next detector
-    };
-
-    // Initial setup on mount
-    if (i18n.resolvedLanguage) {
-        document.documentElement.lang = i18n.resolvedLanguage;
-        document.documentElement.dir = i18n.dir(i18n.resolvedLanguage);
+    if (isAuthenticated) {
+      updateUserLanguage({ language_code: lng }).catch(err => {
+          console.error('Failed to sync language preference', err);
+      });
     }
+  };
 
-    i18n.on('languageChanged', handleLanguageChanged);
+  if (i18n.resolvedLanguage) {
+      document.documentElement.lang = i18n.resolvedLanguage;
+      // CHANGE THIS: Hardcode to 'ltr' here too
+      document.documentElement.dir = 'ltr';
+  }
 
-    return () => {
-      i18n.off('languageChanged', handleLanguageChanged);
-    };
-  }, [isAuthenticated, updateUserLanguage]);
+  i18n.on('languageChanged', handleLanguageChanged);
+
+  return () => {
+    i18n.off('languageChanged', handleLanguageChanged);
+  };
+}, [isAuthenticated, updateUserLanguage]);
 
   if (!mounted) {
     return <>{children}</>; // Render children without translation to avoid hydration mismatch if possible, or blocking

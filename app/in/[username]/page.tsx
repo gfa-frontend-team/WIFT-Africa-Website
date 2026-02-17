@@ -19,6 +19,7 @@ import { mapPrivateToPublicProfile } from '@/lib/utils/profile-mapper'
 import PublicProfileCTA from '@/components/profile/PublicProfileCTA'
 import { useAnalytics } from '@/lib/hooks/useAnalytics'
 import { useRecordProfileView } from '@/lib/hooks/useProfileAnalytics'
+import { useProfileCountContext } from '@/hooks/useProfile'
 
 export default function UnifiedProfilePage() {
   const params = useParams()
@@ -103,11 +104,13 @@ const { mutate } = useRecordProfileView()
   const { data: myStats } = useStats()
 
   // Fetch Views for Owner (align with Analytics page default of 90 days)
-  const { data: profileViews } = useQuery({
-    queryKey: ['profile-views', user?.id, '90days'],
-    queryFn: () => profilesApi.getProfileViews(user!.id, false),
-    enabled: !!isOwner && !!user?.id,
-  })
+  // const { data: profileViews } = useQuery({
+  //   queryKey: ['profile-views', user?.id, '90days'],
+  //   queryFn: () => profilesApi.getProfileViews(user!.id, false),
+  //   enabled: !!isOwner && !!user?.id,
+  // })
+
+  const {  viewCount:profileViews } = useProfileCountContext()
   
   const { useUserPostsStats } = useAnalytics()
   const { data: myPostsStats } = useUserPostsStats()

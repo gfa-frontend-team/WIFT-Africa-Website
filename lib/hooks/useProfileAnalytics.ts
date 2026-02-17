@@ -54,7 +54,6 @@ export const useProfileViewCount = (
   lastMonth = false,
 ) => {
 
-  console.log(profileOwnerId,'lol')
   return useQuery({
     queryKey: ["profileViewCount", profileOwnerId, lastMonth],
     queryFn: () => getViewCount(profileOwnerId!,lastMonth),

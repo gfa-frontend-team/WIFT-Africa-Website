@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { chaptersApi } from '@/lib/api/chapters'
@@ -21,6 +21,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { Chapter, Job } from '@/types'
 import { useJobs } from '@/hooks/useJobs'
 import { JobCard } from '@/components/jobs/JobCard'
+import { useRecordChapterView } from '@/lib/hooks/useChapterView'
 
 export default function ChapterDetailsPage() {
   const params = useParams()
@@ -29,6 +30,8 @@ export default function ChapterDetailsPage() {
 
   const {user} = useAuth()
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'opportunities'>('about')
+
+  const { mutate } = useRecordChapterView()
 
   const { data: chapterResponse, isLoading, isError } = useQuery({
     queryKey: ['chapter', chapterId],
@@ -45,6 +48,15 @@ export default function ChapterDetailsPage() {
   const { data: fundingData, isLoading: isLoadingFunding } = useChapterFunding(chapterId)
   const { data: mentorshipsData, isLoading: isLoadingMentorships } = useChapterMentorships(chapterId)
   const {data:jobs,isLoading:isJobbing} = useJobs()
+
+    useEffect(() => {
+    if (!chapterId) return
+    if (isUserChapterId) return
+
+    console.log("shipped")
+  
+    mutate(chapterId)
+  }, [chapterId,isUserChapterId])
 
   
   const chapterJobs: Job[] = useMemo(() => {

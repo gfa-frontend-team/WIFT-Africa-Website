@@ -55,7 +55,7 @@ export default function RightSidebar() {
           <a href="/terms" className="hover:text-primary">{t('sidebar.footer.terms')}</a>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          © 2025 WIFT Africa
+          © {new Date().getFullYear()} WIFT Africa
         </p>
       </div>
     </aside>

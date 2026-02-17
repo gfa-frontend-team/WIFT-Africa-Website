@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { Eye, Users, TrendingUp, Bookmark, Briefcase, Calendar, BadgeCheck } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
-import { useAuth } from '@/lib/hooks/useAuth'
 import { useSavedPostsCount } from '@/lib/hooks/useSavedPosts'
 import { useConnections } from '@/lib/hooks/useConnections'
 // import { useProfileAnalytics, useProfileViewCount } from '@/lib/hooks/useProfileAnalytics'
@@ -15,7 +14,7 @@ import { useProfileCountContext } from '@/hooks/useProfile'
 
 export default function LeftSidebar() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  // const { user } = useAuth()
   const { data: savedCount } = useSavedPostsCount()
   const { useStats } = useConnections()
   const { data: stats } = useStats()
@@ -24,7 +23,7 @@ export default function LeftSidebar() {
   const { data: myPostsStats } = useUserPostsStats()
 
   
-    const {  viewCount,isReady } = useProfileCountContext()
+    const {  viewCount,isReady,user } = useProfileCountContext()
 
   // console.log(viewCount,"profileViewCount")
   
@@ -69,7 +68,7 @@ export default function LeftSidebar() {
                 {t('sidebar.profile_views')}
               </span>
               <span className="font-semibold text-primary">
-                {isReady ? '—' : (viewCount?.toLocaleString() || 0)}
+                {isReady ? '—' : (viewCount?.count?.toLocaleString() || 0)}
               </span>
             </Link>
             <Link href="/connections" className="flex items-center justify-between text-sm hover:bg-accent/50 p-1.5 rounded-md transition-colors group">
@@ -182,13 +181,16 @@ export default function LeftSidebar() {
           <Link
             href="/opportunities"
             className="block text-sm text-muted-foreground hover:text-primary hover:bg-accent p-2 rounded-lg transition-colors"
-          >
+            >
             {t('nav.opportunities')}
           </Link>
-          <div className="block text-sm text-muted-foreground p-2 rounded-lg opacity-50">
+            <Link
+              href="/events"
+               className="block text-sm text-muted-foreground p-2 rounded-lg">
+
             {t('sidebar.my_events')}
-            <span className="text-xs ml-2">{t('coming_soon')}</span>
-          </div>
+            {/* <span className="text-xs ml-2">{t('coming_soon')}</span> */}
+               </Link>
         </div>
       </div>
     </aside>

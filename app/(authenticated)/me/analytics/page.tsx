@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useProfileAnalytics, useProfileViewCount } from '@/lib/hooks/useProfileAnalytics'
+import { useProfileAnalytics } from '@/lib/hooks/useProfileAnalytics'
 import { AnalyticsHeader } from '@/components/analytics/AnalyticsHeader'
 import { StatCard } from '@/components/analytics/StatCard'
 import { ViewersList } from '@/components/analytics/ViewersList'
@@ -14,21 +14,23 @@ import { useProfileCountContext } from '@/hooks/useProfile'
 
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState('views')
+    
 
   const { 
-    timeframe, 
-    setTimeframe, 
-    profileViews, 
+    // timeframe, 
+    // setTimeframe, 
+    // profileViews, 
     postStats, 
     isLoading 
   } = useProfileAnalytics()
   // const {user} = useAuth()
 
-  const {  viewCount } = useProfileCountContext()
+  const {  viewCount,isReady,timeframe,setTimeframe } = useProfileCountContext()
+  
+const profileViewCount = viewCount?.count
+  // console.log(viewCount,"profileViewCount")
 
-  console.log(viewCount,"profileViewCount")
-
-  if (isLoading && !viewCount && !postStats) {
+  if (isLoading && !profileViewCount && !postStats) {
       return (
           <div className="container mx-auto py-12 flex justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -47,7 +49,7 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard 
             title="Profile Views" 
-            value={viewCount.toLocaleString()}
+            value={profileViewCount.toLocaleString()}
             icon={Eye}
             active={activeTab === 'views'}
             onClick={() => setActiveTab('views')}
@@ -81,7 +83,7 @@ export default function AnalyticsPage() {
 
         <TabsContent value="views" className="space-y-4">
             <h2 className="text-xl font-semibold">Who viewed your profile</h2>
-            <ViewersList viewers={profileViews?.viewers || []} isLoading={isLoading} />
+            <ViewersList viewers={viewCount?.viewers || []} isLoading={isReady} />
         </TabsContent>
 
         <TabsContent value="posts" className="space-y-4">
