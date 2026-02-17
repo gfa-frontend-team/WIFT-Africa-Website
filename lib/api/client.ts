@@ -32,7 +32,7 @@ class ApiClient {
         'Content-Type': 'application/json',
       },
       withCredentials: true, // Important for cookies
-      timeout: 25000, // 25 second timeout
+      timeout: 35000, // 35 second timeout
     })
 
     // Request interceptor - add auth token
