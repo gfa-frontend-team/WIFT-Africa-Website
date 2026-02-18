@@ -36,7 +36,8 @@ export default function MemberCard({
 }: MemberCardProps) {
   const router = useRouter();
 
-  const { sendRequest, useConnectionStatus,isSending,isResponding } = useConnections();
+  const { sendRequest, useConnectionStatus, isSending, isResponding } =
+    useConnections();
 
   const targetId = member.id;
   const { isAuthenticated } = useAuth();
@@ -45,7 +46,9 @@ export default function MemberCard({
   const { data: connectionStatusData, refetch: refetchStatus } =
     useConnectionStatus(targetId);
 
-      const [localConnectionStatus, setLocalConnectionStatus] = useState<'PENDING' | null>(null)
+  const [localConnectionStatus, setLocalConnectionStatus] = useState<
+    "PENDING" | null
+  >(null);
   // Navigate to profile on click (unless clicking button)
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent navigation if clicking buttons/links
@@ -72,14 +75,9 @@ export default function MemberCard({
     }
 
     return "NONE";
-  }, [
-    isAuthenticated,
-    targetId,
-    connectionStatusData,
-    localConnectionStatus,
-  ]);
+  }, [isAuthenticated, targetId, connectionStatusData, localConnectionStatus]);
 
-  const handleConnect = async (message?: string) => {
+  const handleModalOpen = () => {
     if (!isAuthenticated) {
       router.push("/login");
       return;
@@ -88,22 +86,35 @@ export default function MemberCard({
     if (!targetId) return;
 
     // If we have a message, it's a confirmed send from the modal
-    if (message !== undefined) {
-      try {
-        await sendRequest(targetId, message);
-        setLocalConnectionStatus("PENDING");
-        setIsConnectModalOpen(false);
-        toast.success("Connection request sent");
-      } catch (error) {
-        console.error("Connection request failed", error);
-        toast.error("Failed to send connection request");
-      }
-      return;
-    }
+    // // if (message !== undefined) {
+    //   try {
+    //     await sendRequest(targetId, message);
+    //     setLocalConnectionStatus("PENDING");
+    //     setIsConnectModalOpen(false);
+    //     toast.success("Connection request sent");
+    //   } catch (error) {
+    //     console.error("Connection request failed", error);
+    //     toast.error("Failed to send connection request");
+    //   }
+    // return;
+    // }
 
     // Otherwise open modal
     setIsConnectModalOpen(true);
   };
+
+  async function handleConnect(message: string | undefined) {
+    // if (message !== undefined) {
+    try {
+      await sendRequest(targetId, message);
+      setLocalConnectionStatus("PENDING");
+      setIsConnectModalOpen(false);
+      toast.success("Connection request sent");
+    } catch (error) {
+      console.error("Connection request failed", error);
+      toast.error("Failed to send connection request");
+    }
+  }
 
   const renderActionButton = () => {
     if (member.connectionStatus === "connected") {
@@ -152,7 +163,7 @@ export default function MemberCard({
     return (
       <Button
         className="w-full gap-2"
-        onClick={() => handleConnect?.()}
+        onClick={() => handleModalOpen?.()}
         disabled={isConnecting}
       >
         {isConnecting ? (
@@ -235,14 +246,14 @@ export default function MemberCard({
       </div>
 
       {targetId && (
-            <ConnectModal
-              isOpen={isConnectModalOpen}
-              onClose={() => setIsConnectModalOpen(false)}
-              onConfirm={handleConnect}
-              recipientName={member?.firstName || 'User'}
-              isSending={isSending}
-            />
-          )}
+        <ConnectModal
+          isOpen={isConnectModalOpen}
+          onClose={() => setIsConnectModalOpen(false)}
+          onConfirm={handleConnect}
+          recipientName={member?.firstName || "User"}
+          isSending={isSending}
+        />
+      )}
     </>
   );
 }

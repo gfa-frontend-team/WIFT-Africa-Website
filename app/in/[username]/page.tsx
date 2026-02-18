@@ -5,13 +5,12 @@ import { useParams, useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { isUsernameReserved } from '@/lib/constants/reserved-usernames'
-import { useAuth } from '@/lib/hooks/useAuth'
 import { useConnections } from '@/lib/hooks/useConnections'
 import ConnectModal from '@/components/connections/ConnectModal'
 import { usePublicProfile } from '@/lib/hooks/usePublicProfile'
 import { useProfile } from '@/lib/hooks/useProfile'
-import { useQuery } from '@tanstack/react-query'
-import { profilesApi } from '@/lib/api/profiles'
+// import { useQuery } from '@tanstack/react-query'
+// import { profilesApi } from '@/lib/api/profiles'
 import ProfileLayout from '@/components/layout/ProfileLayout'
 import ProfileContent from '@/components/profile/ProfileContent'
 import PrivateProfileSections from '@/components/profile/PrivateProfileSections'
@@ -24,11 +23,13 @@ import { useProfileCountContext } from '@/hooks/useProfile'
 export default function UnifiedProfilePage() {
   const params = useParams()
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  // const { user, isAuthenticated } = useAuth()
+  const {  viewCount:profileViews, user, isAuthenticated } = useProfileCountContext()
   const username = params.username as string
+
   
   const { sendRequest, respondToRequest, useConnectionStatus, useStats, isSending, isResponding } = useConnections()
-
+  
   // Determine ownership
   const isOwner = !!(user && (
     (user.username && user.username === username) || 
@@ -110,7 +111,6 @@ const { mutate } = useRecordProfileView()
   //   enabled: !!isOwner && !!user?.id,
   // })
 
-  const {  viewCount:profileViews } = useProfileCountContext()
   
   const { useUserPostsStats } = useAnalytics()
   const { data: myPostsStats } = useUserPostsStats()
