@@ -31,7 +31,7 @@ export default function RightSidebar() {
         top: `${navbarHeight + 10}px`,
       }}
     >
-      <ScrollArea className="h-full w-full pl-4">
+      <ScrollArea className="h-full w-full block">
 
         <div className="space-y-4 ">
       {/* 1. Upcoming Events */}

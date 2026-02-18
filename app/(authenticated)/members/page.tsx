@@ -11,6 +11,8 @@ import MembersFilterSidebar from '@/components/members/MembersFilterSidebar'
 import MembersGrid from '@/components/members/MembersGrid'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { useRouter } from 'next/navigation'
 
 // Main component wrapped in Suspense for useSearchParams
 export default function MembersPage() {
@@ -34,7 +36,7 @@ function MembersPageContent() {
   } = useUrlSearch()
 
   const { useInfiniteSearchMembers, useSearchFilters } = useSearch()
-  const { sendRequest } = useConnections()
+
   const [showFilters, setShowFilters] = useState(false)
   const [connectingId, setConnectingId] = useState<string | null>(null)
 
@@ -54,12 +56,14 @@ function MembersPageContent() {
   })
 
   const { data: filterOptions } = useSearchFilters()
+    // const router = useRouter()
 
-  // Flatten pages into a single array of users
-  const allUsers = data?.pages.flatMap((page) => page.users) || []
-  const totalResults = data?.pages[0]?.total || 0
-
-    const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
+    
+    // Flatten pages into a single array of users
+    const allUsers = data?.pages.flatMap((page) => page.users) || []
+    const totalResults = data?.pages[0]?.total || 0
+    
+ 
 
   // 3. Infinite Scroll Trigger
   const observer = useRef<IntersectionObserver | null>(null)
@@ -85,22 +89,25 @@ function MembersPageContent() {
     setFilter('roles', newRoles)
   }
 
-  const handleConnect = async (userId: string) => {
-    try {
-      setConnectingId(userId)
-      await sendRequest(userId)
+  // const handleConnect = async (userId: string) => {
+  //   try {
+  //     setConnectingId(userId)
+  //     await sendRequest(userId)
 
-          // Otherwise open modal
-    setIsConnectModalOpen(true)
-    } catch (error) {
-      console.error('Failed to connect:', error)
-      alert('Failed to send request')
-    } finally {
-      setConnectingId(null)
-    }
-  }
+  //         // Otherwise open modal
+  //   setIsConnectModalOpen(true)
+  //   } catch (error) {
+  //     console.error('Failed to connect:', error)
+  //     alert('Failed to send request')
+  //   } finally {
+  //     setConnectingId(null)
+  //   }
+  // }
 
-  console.log(allUsers.filter(ele=>(ele.chapter?.name === chapter)),"chapter",chapter)
+    // Actions
+    
+
+  // console.log(allUsers.filter(ele=>(ele.chapter?.name === chapter)),"chapter",chapter)
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -115,7 +122,7 @@ function MembersPageContent() {
       <div className="flex flex-col md:flex-row gap-8">
 
         {/* Sidebar */}
-        <div className={`${showFilters ? 'block' : 'hidden'} md:block flex-shrink-0`}>
+        <div className={`${showFilters ? 'block' : 'hidden'} md:block shrink-0`}>
           <MembersFilterSidebar
             filters={filterOptions}
             selectedRoles={roles}
@@ -141,9 +148,9 @@ function MembersPageContent() {
           <MembersGrid
             members={allUsers}
             isLoading={isSearching}
-            onConnect={handleConnect}
+            // onConnect={handleConnect}
             connectingId={connectingId}
-            isConnectModalOpen={isConnectModalOpen}
+            // isConnectModalOpen={isConnectModalOpen}
           />
 
           {/* Infinite Scroll Loader */}
