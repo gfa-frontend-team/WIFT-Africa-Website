@@ -64,6 +64,7 @@ export interface FilterOptions {
     id: string
     name: string
     memberCount: number
+    code:string
   }>
   locationSuggestions: string[]
 }

@@ -3,6 +3,18 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { FilterOptions } from "@/lib/api/search";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Image from "next/image";
+import {
+  getCountryFlagUrl,
+  getCountryIsoCode,
+} from "@/lib/utils/countryMapping";
 
 interface MembersFilterSidebarProps {
   filters?: FilterOptions;
@@ -40,7 +52,8 @@ export default function MembersFilterSidebar({
     { value: "NOT_LOOKING", label: "Not Looking" },
   ];
 
-//   console.log(filters, "filters");
+  //   console.log(filters, "filters");
+
 
   return (
     <aside className={`w-full md:w-64 space-y-8 ${className}`}>
@@ -130,26 +143,61 @@ export default function MembersFilterSidebar({
         <h3 className="text-sm font-semibold mb-3 uppercase tracking-wider text-muted-foreground">
           Chapter
         </h3>
-        <select
-          className="w-full text-sm rounded-md border border-input bg-background px-3 py-2"
-          value={selectedChapter || ""}
-          onChange={(e) => setChapter(e.target.value || null)}
+        <Select
+          value={selectedChapter || "all"}
+          onValueChange={(value) => setChapter(value === "all" ? null : value)}
         >
-          <option value="">All Chapters</option>
-          {/* 
-                   Ideally we map over filters.availableChapters if provided 
-                   For now, let's assume some common ones or wait for data integration 
-                */}
-          {filters?.availableChapters.map((ele) => (
-            <option key={ele.id} value={ele.name}>
-              {ele.name}
-            </option>
-          ))}
-          <option value="nigeria">WIFT Nigeria</option>
-          <option value="kenya">WIFT Kenya</option>
-          <option value="cameroon">WIFT Cameroon</option>
-          <option value="south-africa">WIFT South Africa</option>
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All Chapters" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <div className="flex items-center gap-2">
+                {/* <span>🌍</span> */}
+                <span>All Chapters</span>
+              </div>
+            </SelectItem>
+
+            {filters?.availableChapters.map((ele) => (
+              <SelectItem key={ele.id} value={ele.name}>
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const flagCode = getCountryIsoCode(ele?.code, ele?.name);
+                    if (flagCode === "AFRICA") {
+                      return (
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-lg shrink-0">
+                          🌍
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="relative w-8 h-8 shrink-0 overflow-hidden">
+                        <Image
+                          src={`https://flagsapi.com/${flagCode}/flat/64.png`}
+                          alt={`${ele?.name} flag`}
+                          className="w-8 h-8 rounded-full object-cover border border-border/50"
+                          onError={(e) => {
+                            // Fallback to initials if flag fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                            const fallback =
+                              target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = "flex";
+                          }}
+                          sizes="32px"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                    );
+                  })()}
+                  <span>{ele.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </aside>
   );
