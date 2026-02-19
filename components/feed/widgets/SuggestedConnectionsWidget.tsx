@@ -35,7 +35,7 @@ export default function SuggestedConnectionsWidget() {
     if (error || (!isLoading && users.length === 0)) return null
 
     return (
-        <div className="bg-card border border-border rounded-lg p-4">
+        <div className="bg-card border border-border rounded-lg p-4 overflow-hidden min-w-0">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-foreground text-sm">
                     {t('sidebar.suggested_connections')}
@@ -58,7 +58,7 @@ export default function SuggestedConnectionsWidget() {
                     ))
                 ) : (
                     users.map((user) => (
-                        <div key={user.id} className="flex items-start gap-3">
+                        <div key={user.id} className="flex items-start gap-3 min-w-0 w-full">
                             <Link href={getProfileUrl(user)}>
                                 <Avatar
                                     src={user.profilePhoto}

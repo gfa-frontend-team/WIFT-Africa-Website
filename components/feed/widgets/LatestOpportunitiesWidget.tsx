@@ -34,7 +34,7 @@ export default function LatestOpportunitiesWidget() {
     if (error || (!isLoading && opportunities.length === 0)) return null
 
     return (
-        <div className="bg-card border border-border rounded-lg p-4">
+        <div className="bg-card border border-border rounded-lg p-4 overflow-hidden min-w-0">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Briefcase className="h-4 w-4 text-muted-foreground" />
@@ -77,7 +77,7 @@ export default function LatestOpportunitiesWidget() {
                                 <h4 className="font-medium text-sm text-foreground group-hover:text-primary line-clamp-1">
                                     {title}
                                 </h4>
-                                <p className="text-xs text-muted-foreground mb-1">{subtitle}</p>
+                                <p className="text-xs text-muted-foreground mb-1 truncate">{subtitle}</p>
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <MapPin className="h-3 w-3" />
                                     <span className="line-clamp-1">{location}</span>

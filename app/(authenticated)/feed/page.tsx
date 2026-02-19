@@ -242,14 +242,14 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Left Sidebar - 3 columns on desktop */}
           {/* <div className=""> */}
             <LeftSidebar />
           {/* </div> */}
 
           {/* Main Feed - 6 columns on desktop */}
-          <main className="lg:col-span-6 max-w-2xl mx-auto lg:max-w-none lg:mx-0 w-full">
+          <main className="md:col-span-8 lg:col-span-6 max-w-2xl mx-auto md:max-w-none md:mx-0 w-full">
             <FeatureGate
               feature="canViewFeed"
               showRestrictionMessage={false}
@@ -281,10 +281,8 @@ export default function HomePage() {
             </FeatureGate>
           </main>
 
-          {/* Right Sidebar - 3 columns on desktop */}
-          <div className="hidden lg:block lg:col-span-3">
-            <RightSidebar />
-          </div>
+          {/* Right Sidebar - 4 columns on tablet, 3 on desktop */}
+          <RightSidebar />
         </div>
       </div>
 

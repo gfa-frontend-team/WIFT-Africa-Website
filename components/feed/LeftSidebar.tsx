@@ -44,16 +44,16 @@ export default function LeftSidebar() {
 
   return (
     <aside
-      className="hidden lg:block lg:col-span-3 sticky"
+      className="hidden lg:block lg:col-span-3 sticky min-w-0"
       style={{
         height: sidebarHeight,
         top: `${navbarHeight + 10}px`,
       }}
     >
       <ScrollArea className="h-full w-full pr-4">
-        <div className="space-y-4 ">
+        <div className="space-y-4 w-full">
           {/* Profile Summary Card */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="bg-card border border-border rounded-lg overflow-hidden min-w-0">
             {/* Header Banner */}
             <div className="h-16 bg-linear-to-r from-primary/20 to-primary/10"></div>
 
@@ -141,7 +141,7 @@ export default function LeftSidebar() {
           </div>
 
           {/* Saved Items Card */}
-          <div className="bg-card border border-border rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4 overflow-hidden min-w-0">
             <div className="flex items-center gap-2 mb-3">
               <Bookmark className="h-4 w-4 text-muted-foreground" />
               <h3 className="font-semibold text-foreground text-sm">
@@ -186,7 +186,7 @@ export default function LeftSidebar() {
           </div>
 
           {/* Quick Links Card */}
-          <div className="bg-card border border-border rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4 overflow-hidden min-w-0">
             <h3 className="font-semibold text-foreground text-sm mb-3">
               {t("sidebar.quick_links")}
             </h3>
