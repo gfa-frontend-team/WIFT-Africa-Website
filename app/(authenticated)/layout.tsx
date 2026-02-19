@@ -73,7 +73,7 @@ export default function AuthenticatedLayout({
 
   // Don't render if not authenticated (will redirect)
   // Also block render if suspended to prevent flash of content
-  if (!isAuthenticated || !isEmailVerified || !onboardingComplete || !user || user.membershipStatus === 'SUSPENDED') {
+  if (!isAuthenticated || !isEmailVerified || !onboardingComplete || !user ) {
     return null
   }
 

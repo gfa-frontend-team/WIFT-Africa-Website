@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import dynamic from 'next/dynamic'
 import { useNavbar } from '@/hooks/NavbarContext'
 import { ScrollArea } from '../ui/scroll-area'
+import { ModernScrollArea } from '../TestScroll'
 
 // Dynamically import widgets to reduce initial bundle size
 const UpcomingEventsWidget = dynamic(() => import('./widgets/UpcomingEventsWidget'), { ssr: false })
@@ -31,7 +32,7 @@ export default function RightSidebar() {
         top: `${navbarHeight + 10}px`,
       }}
     >
-      <ScrollArea className="h-full w-full">
+      <ModernScrollArea className="h-full w-full">
 
         <div className="space-y-4 min-w-0 w-full">
           {/* 1. Upcoming Events */}
@@ -78,7 +79,7 @@ export default function RightSidebar() {
             </p>
           </div>
         </div>
-      </ScrollArea>
+      </ModernScrollArea>
 
     </aside>
   )

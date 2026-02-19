@@ -102,10 +102,10 @@ export default function RestrictedFeatureMessage({
   const currentVariant = variantClasses[variant]
 
   return (
-    <div className={`${currentVariant} ${currentSize.padding}`}>
+    <div className={`${currentVariant} ${currentSize.padding} mt-10`}>
       <div className="flex items-start gap-3">
         {/* Status Icon */}
-        <div className="flex-shrink-0 mt-0.5">
+        <div className="shrink-0 mt-0.5">
           <StatusIcon className={`${currentSize.iconSize} ${statusConfig.iconColor}`} />
         </div>
 
