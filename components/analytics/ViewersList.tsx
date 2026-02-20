@@ -36,7 +36,7 @@ export function ViewersList({ viewers, isLoading }: ViewersListProps) {
   return (
     <div className="grid gap-4">
       {viewers.map((viewer, index) => (
-        <Link href={getProfileUrl({ username: viewer.username, profileSlug: viewer.profileSlug, id: viewer.viewerId })} key={`${viewer.viewerId}-${viewer.viewedAt}-${index}`}>
+        <Link href={getProfileUrl({ profileSlug: viewer.profileSlug, id: viewer.viewerId })} key={`${viewer.viewerId}-${viewer.viewedAt}-${index}`}>
           <Card className="hover:bg-muted/30 transition-colors">
             <CardContent className="p-4 flex items-start gap-4">
               <Avatar 
