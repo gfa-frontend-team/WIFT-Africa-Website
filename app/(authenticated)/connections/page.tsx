@@ -40,22 +40,24 @@ export default function ConnectionsPage() {
   const connections = (connectionsData?.connections || []) as any[] 
   const stats = statsData
   const isLoading = activeTab === 'connections' ? isConnectionsLoading : isRequestsLoading
-
+  
+  
   // Deduplicate requests to prevent key errors
   const uniqueRequests = useMemo(() => {
-    const seen = new Set()
-    return requests.filter((request) => {
-      if (!request || typeof request.id === 'undefined') return false
-      
-      const id = String(request.id) // Ensure string
-      if (seen.has(id)) {
-        console.warn('Duplicate connection request found:', request)
-        return false
-      }
-      seen.add(id)
-      return true
-    })
-  }, [requests])
+      const seen = new Set()
+      return requests.filter((request) => {
+          if (!request || typeof request.id === 'undefined') return false
+          
+          const id = String(request.id) // Ensure string
+          if (seen.has(id)) {
+              console.warn('Duplicate connection request found:', request)
+              return false
+            }
+            seen.add(id)
+            return true
+        })
+    }, [requests])
+    console.log(uniqueRequests,"uniqueRequests");
 
   return (
     <div className="min-h-screen bg-background">

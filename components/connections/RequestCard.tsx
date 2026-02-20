@@ -16,6 +16,15 @@ export default function RequestCard({ request, type }: RequestCardProps) {
   
   const user = type === 'incoming' ? request.sender : request.receiver
 
+    if (!user) {
+    return (
+      <div className="bg-card border border-border rounded-lg p-4">
+        <p className="text-muted-foreground">User information unavailable</p>
+      </div>
+    )
+  }
+
+
   const handleAction = async (action: 'accept' | 'decline' | 'cancel') => {
     try {
       await respondToRequest(request.id, action)
@@ -23,6 +32,7 @@ export default function RequestCard({ request, type }: RequestCardProps) {
       console.error(`Failed to ${action} request:`, error)
     }
   }
+
 
   return (
     <div className="bg-card border border-border rounded-lg p-4 flex items-center justify-between gap-4">

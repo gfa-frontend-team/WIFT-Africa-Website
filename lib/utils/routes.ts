@@ -10,24 +10,27 @@ import { User } from "@/types"
  * @param user - User object with username, profileSlug, or id
  * @returns Profile URL (e.g., /in/jane-doe)
  */
-export function getProfileUrl(user: { username?: string; profileSlug?: string; id?: string } | string): string {
+export function getProfileUrl(user: {profileSlug?: string; id?: string } | string): string {
+
+  
+  console.log(user,"user", "test")
   // Handle legacy string parameter
   if (typeof user === 'string') {
     return `/in/${user}`
   }
   
   // Prefer username, fallback to profileSlug, then id
-  const identifier = user.username || user.profileSlug || user.id
+  const identifier =user.profileSlug || user.id
   if (!identifier) {
     console.warn('getProfileUrl: No valid identifier found', user)
     return '/feed'
   }
   
   // Warn if falling back to ID (indicates backend data is incomplete)
-  if (!user.username && !user.profileSlug && user.id && isIdBasedUrl(user.id)) {
+  if (!user.profileSlug && user.id && isIdBasedUrl(user.id)) {
     console.warn(
       `[Profile URL] Using ID-based URL for user. Backend should include username/profileSlug.`,
-      { id: user.id, hasUsername: !!user.username, hasProfileSlug: !!user.profileSlug }
+      { id: user.id, hasProfileSlug: !!user.profileSlug }
     )
   }
   
