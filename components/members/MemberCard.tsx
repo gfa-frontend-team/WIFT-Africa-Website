@@ -20,7 +20,7 @@ import { useMemo, useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { toast } from "sonner";
 import { useConnections } from "@/lib/hooks/useConnections";
-import { useIsUserOnline, useSocket } from "@/lib/socket";
+import { useIsUserOnline } from "@/lib/socket";
 
 interface MemberCardProps {
   member: SearchUserResult;
@@ -38,7 +38,6 @@ export default function MemberCard({
   const router = useRouter();
 
 
-  // const socket = useSocket(token);
    const isOnline = useIsUserOnline(member.id);
   const { sendRequest, useConnectionStatus, isSending, isResponding } =
     useConnections();

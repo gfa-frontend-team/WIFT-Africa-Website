@@ -17,7 +17,7 @@ export const useMentorshipSocket = () => {
         }
     }, [user]) // Re-fetch token when user changes (login/logout)
 
-    const socket = useSocket(token)
+    const socket = useSocket()
     const queryClient = useQueryClient()
     const router = useRouter()
 
