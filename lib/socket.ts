@@ -1,6 +1,7 @@
 // lib/socket.ts - Add online users tracking
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
+import { useProfileCountContext } from '@/hooks/useProfile';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -60,7 +61,7 @@ export const getSocket = (token: string) => {
 
     // 🔥 IMPORTANT: Listen for online users list
     socket.on('online:users-list', (data) => {
-      console.log('📋 Online users received:', data);
+      // console.log('📋 Online users received:', data);
       globalOnlineUsers.clear();
       data.userIds.forEach((userId: string) => {
         globalOnlineUsers.add(userId);
@@ -70,7 +71,7 @@ export const getSocket = (token: string) => {
 
     // 🔥 IMPORTANT: Listen for real-time status changes
     socket.on('user:status-change', (data) => {
-      console.log(`👤 User ${data.userId} is ${data.isOnline ? 'online' : 'offline'}`);
+      // console.log(`👤 User ${data.userId} is ${data.isOnline ? 'online' : 'offline'}`);
       
       if (data.isOnline) {
         globalOnlineUsers.add(data.userId);
@@ -131,8 +132,16 @@ export const disconnectSocket = () => {
 /**
  * Hook to manage socket connection with lifecycle handling.
  */
-export const useSocket = (token: string | null) => {
+export const useSocket = () => {
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
+   const { user } = useProfileCountContext();
+    const [token, setToken] = useState<string | null>(null);
+  
+    useEffect(() => {
+      if (typeof window !== "undefined") {
+        setToken(localStorage.getItem("accessToken"));
+      }
+    }, [user]); // Re-fetch token when user changes (login/logout)
 
   useEffect(() => {
     if (token) {

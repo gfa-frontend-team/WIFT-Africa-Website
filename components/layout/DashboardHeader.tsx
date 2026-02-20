@@ -35,6 +35,7 @@ import { ModeToggle } from "@/components/shared/ModeToggle";
 import { useEffect } from "react";
 import { useNavbar } from "@/hooks/NavbarContext";
 import { SocketDebug } from "../SocketTest";
+import { NotificationBell } from "./Bell";
 
 interface DashboardHeaderProps {
   user: User;
@@ -259,7 +260,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               </div>
 
               {/* remove  */}
-              <SocketDebug />
+              {/* <SocketDebug /> */}
               {/* Mobile Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -269,18 +270,20 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               </button>
 
               {/* Notifications */}
-              <div className="relative">
+
+              <NotificationBell/>
+                {/* Notification Badge */}
+              {/* <div className="relative">
                 <Link
                   href="/notifications"
                   className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-colors block"
                 >
                   <Bell className="h-5 w-5" />
-                  {/* Notification Badge */}
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
                   )}
                 </Link>
-              </div>
+              </div> */}
 
               <div className="relative flex items-center gap-2">
                 <ModeToggle />
