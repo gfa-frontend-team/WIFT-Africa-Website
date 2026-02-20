@@ -20,6 +20,7 @@ import { useMemo, useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { toast } from "sonner";
 import { useConnections } from "@/lib/hooks/useConnections";
+import { useIsUserOnline, useSocket } from "@/lib/socket";
 
 interface MemberCardProps {
   member: SearchUserResult;
@@ -36,6 +37,9 @@ export default function MemberCard({
 }: MemberCardProps) {
   const router = useRouter();
 
+
+  // const socket = useSocket(token);
+   const isOnline = useIsUserOnline(member.id);
   const { sendRequest, useConnectionStatus, isSending, isResponding } =
     useConnections();
 
@@ -191,12 +195,18 @@ export default function MemberCard({
             />
           </div>
           {/* Availability dot could go here */}
-          {member.availabilityStatus === "AVAILABLE" && (
+          {isOnline && (
             <div
               className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-card rounded-full"
               title="Available for work"
             />
           )}
+          {/* {member.availabilityStatus === "AVAILABLE" && (
+            <div
+              className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-card rounded-full"
+              title="Available for work"
+            />
+          )} */}
         </div>
 
         <div className="space-y-1 mb-4 w-full">

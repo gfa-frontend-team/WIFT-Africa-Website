@@ -1,14 +1,13 @@
+import { useTranslation } from "react-i18next";
 
-import { useTranslation } from 'react-i18next';
-
-import { useState, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useAuth } from '@/lib/hooks/useAuth';
-import { useFeatureAccess } from '@/lib/hooks/useFeatureAccess';
-import { MembershipStatus, type User } from '@/types';
-import { getProfileUrl } from '@/lib/utils/routes';
+import { useState, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { useFeatureAccess } from "@/lib/hooks/useFeatureAccess";
+import { MembershipStatus, type User } from "@/types";
+import { getProfileUrl } from "@/lib/utils/routes";
 import { useSize } from "react-haiku";
 import {
   Home,
@@ -28,26 +27,62 @@ import {
   AlertTriangle,
   Lock,
   UserPlus,
-  Globe
-} from 'lucide-react';
-import { useNotifications } from '@/lib/hooks/useNotifications';
-import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
-import { ModeToggle } from '@/components/shared/ModeToggle';
-import { useEffect } from 'react';
-import { useNavbar } from '@/hooks/NavbarContext';
+  Globe,
+} from "lucide-react";
+import { useNotifications } from "@/lib/hooks/useNotifications";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
+import { ModeToggle } from "@/components/shared/ModeToggle";
+import { useEffect } from "react";
+import { useNavbar } from "@/hooks/NavbarContext";
+import { SocketDebug } from "../SocketTest";
 
 interface DashboardHeaderProps {
   user: User;
 }
 
 const navigationItems = [
-  { name: 'nav.home', href: '/feed', icon: Home, requiredFeature: 'canViewFeed' as const },
-  { name: 'nav.messages', href: '/messages', icon: MessageCircle, requiredFeature: 'canSendMessages' as const },
-  { name: 'nav.opportunities', href: '/opportunities', icon: Briefcase, requiredFeature: 'canViewOpportunities' as const },
-  { name: 'nav.resources', href: '/resources', icon: BookOpen, requiredFeature: 'canViewResources' as const },
-  { name: 'nav.chapters', href: '/chapters', icon: Globe, requiredFeature: 'canViewDirectory' as const },
-  { name: 'nav.directory', href: '/members', icon: Users, requiredFeature: 'canViewDirectory' as const },
-  { name: 'nav.events', href: '/events', icon: Calendar, requiredFeature: 'canViewEvents' as const },
+  {
+    name: "nav.home",
+    href: "/feed",
+    icon: Home,
+    requiredFeature: "canViewFeed" as const,
+  },
+  {
+    name: "nav.messages",
+    href: "/messages",
+    icon: MessageCircle,
+    requiredFeature: "canSendMessages" as const,
+  },
+  {
+    name: "nav.opportunities",
+    href: "/opportunities",
+    icon: Briefcase,
+    requiredFeature: "canViewOpportunities" as const,
+  },
+  {
+    name: "nav.resources",
+    href: "/resources",
+    icon: BookOpen,
+    requiredFeature: "canViewResources" as const,
+  },
+  {
+    name: "nav.chapters",
+    href: "/chapters",
+    icon: Globe,
+    requiredFeature: "canViewDirectory" as const,
+  },
+  {
+    name: "nav.directory",
+    href: "/members",
+    icon: Users,
+    requiredFeature: "canViewDirectory" as const,
+  },
+  {
+    name: "nav.events",
+    href: "/events",
+    icon: Calendar,
+    requiredFeature: "canViewEvents" as const,
+  },
 ];
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
@@ -59,43 +94,45 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const { useUnreadCount } = useNotifications();
   const { data: unreadData } = useUnreadCount();
   const unreadCount = unreadData?.count || 0;
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const elementRef = useRef(null);
+  const { width, height } = useSize(elementRef);
 
-   const elementRef = useRef(null);
-    const { width, height } = useSize(elementRef);
-  
-  const {setSize} = useNavbar()
+  const { setSize } = useNavbar();
 
-     useEffect(() => {
-      setSize({ width, height });
-    }, [width, height]);
+  useEffect(() => {
+    setSize({ width, height });
+  }, [width, height]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setIsUserMenuOpen(false);
         setIsSearchOpen(false);
       }
     };
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsUserMenuOpen(false);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -104,7 +141,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   };
 
   const isActiveRoute = (href: string) => {
-    return pathname === href || pathname.startsWith(href + '/');
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   const getVerificationStatusIcon = () => {
@@ -124,25 +161,31 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const getVerificationStatusText = () => {
     switch (user.membershipStatus) {
       case MembershipStatus.PENDING:
-        return t('dashboard.header.status.pending');
+        return t("dashboard.header.status.pending");
       case MembershipStatus.APPROVED:
-        return t('dashboard.header.status.verified');
+        return t("dashboard.header.status.verified");
       case MembershipStatus.REJECTED:
-        return t('dashboard.header.status.declined');
+        return t("dashboard.header.status.declined");
       case MembershipStatus.SUSPENDED:
-        return t('dashboard.header.status.suspended');
+        return t("dashboard.header.status.suspended");
       default:
-        return '';
+        return "";
     }
   };
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40 transition-all duration-200" ref={elementRef}>
+      <header
+        className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40 transition-all duration-200"
+        ref={elementRef}
+      >
         <div className="max-w-screen-xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/feed" className="flex items-center shrink-0 group mr-4">
+            <Link
+              href="/feed"
+              className="flex items-center shrink-0 group mr-4"
+            >
               <div className="relative h-10 w-10">
                 <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Image
@@ -165,17 +208,26 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 return (
                   <Link
                     key={item.name}
-                    href={hasAccess ? item.href : '/verification'}
-                    className={`relative flex items-center space-x-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 group ${isActive && hasAccess
-                      ? 'bg-primary/10 text-primary'
-                      : hasAccess
-                        ? 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                        : 'text-muted-foreground/40 cursor-help'
-                      }`}
-                    title={!hasAccess ? t('dashboard.header.verification_tooltip') : undefined}
+                    href={hasAccess ? item.href : "/verification"}
+                    className={`relative flex items-center space-x-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 group ${
+                      isActive && hasAccess
+                        ? "bg-primary/10 text-primary"
+                        : hasAccess
+                          ? "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                          : "text-muted-foreground/40 cursor-help"
+                    }`}
+                    title={
+                      !hasAccess
+                        ? t("dashboard.header.verification_tooltip")
+                        : undefined
+                    }
                   >
-                    <Icon className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${!hasAccess ? 'opacity-50' : ''}`} />
-                    <span className={!hasAccess ? 'opacity-50' : ''}>{t(item.name)}</span>
+                    <Icon
+                      className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${!hasAccess ? "opacity-50" : ""}`}
+                    />
+                    <span className={!hasAccess ? "opacity-50" : ""}>
+                      {t(item.name)}
+                    </span>
                     {!hasAccess && <Lock className="h-3 w-3 ml-1 opacity-50" />}
                   </Link>
                 );
@@ -190,13 +242,15 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <input
                     type="text"
-                    placeholder={t('dashboard.header.search_placeholder')}
+                    placeholder={t("dashboard.header.search_placeholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        router.push(
+                          `/search?query=${encodeURIComponent(searchQuery)}`,
+                        );
                       }
                     }}
                     className="pl-10 pr-4 py-2 w-64 bg-accent/30 border border-transparent hover:border-border/50 focus:border-primary/30 focus:bg-background rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
@@ -204,6 +258,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 </div>
               </div>
 
+              {/* remove  */}
+              <SocketDebug />
               {/* Mobile Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -246,11 +302,14 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                       />
                     ) : (
                       <span className="text-sm font-medium text-primary">
-                        {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                        {user.firstName.charAt(0)}
+                        {user.lastName.charAt(0)}
                       </span>
                     )}
                   </div>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${isUserMenuOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
 
                 {/* User Dropdown */}
@@ -260,7 +319,9 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                       <p className="text-sm font-semibold text-foreground">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
                       {/* Verification Status */}
                       <div className="flex items-center gap-1.5 mt-2 bg-background/50 py-1 px-2 rounded-full w-fit">
                         {getVerificationStatusIcon()}
@@ -276,7 +337,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <UserIcon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <span>{t('dashboard.header.menu.profile')}</span>
+                        <span>{t("dashboard.header.menu.profile")}</span>
                       </Link>
                       <Link
                         href="/connections"
@@ -284,7 +345,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <UserPlus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <span>{t('dashboard.header.menu.connections')}</span>
+                        <span>{t("dashboard.header.menu.connections")}</span>
                       </Link>
                       <Link
                         href="/settings"
@@ -292,7 +353,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <Settings className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <span>{t('dashboard.header.menu.settings')}</span>
+                        <span>{t("dashboard.header.menu.settings")}</span>
                       </Link>
                     </div>
                     <div className="border-t border-border/50 p-2 bg-accent/10">
@@ -301,7 +362,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         className="flex items-center space-x-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg w-full text-left transition-colors"
                       >
                         <LogOut className="h-4 w-4" />
-                        <span>{t('dashboard.header.menu.signout')}</span>
+                        <span>{t("dashboard.header.menu.signout")}</span>
                       </button>
                     </div>
                   </div>
@@ -322,10 +383,12 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    router.push(`/search?query=${encodeURIComponent(searchQuery)}`)
-                    setIsSearchOpen(false)
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    router.push(
+                      `/search?query=${encodeURIComponent(searchQuery)}`,
+                    );
+                    setIsSearchOpen(false);
                   }
                 }}
                 autoFocus

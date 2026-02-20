@@ -63,7 +63,7 @@ function MembersPageContent() {
     const allUsers = data?.pages.flatMap((page) => page.users) || []
     const totalResults = data?.pages[0]?.total || 0
     
- 
+//  console.log(allUsers,"allUsers")
 
   // 3. Infinite Scroll Trigger
   const observer = useRef<IntersectionObserver | null>(null)

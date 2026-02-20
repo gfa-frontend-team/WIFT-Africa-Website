@@ -13,7 +13,6 @@ import { User } from "@/types"
 export function getProfileUrl(user: {profileSlug?: string; id?: string } | string): string {
 
   
-  console.log(user,"user", "test")
   // Handle legacy string parameter
   if (typeof user === 'string') {
     return `/in/${user}`
