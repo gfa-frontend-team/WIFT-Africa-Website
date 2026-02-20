@@ -139,9 +139,9 @@ function ResetPasswordContent() {
       <div className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <Link href="/" className="inline-flex items-center space-x-2 mb-8">
+          <Link href="/" className="flex items-center justify-center mx-auto space-x-2 mb-8">
             <Logo className="h-10 w-auto" />
-            <span className="text-xl font-bold text-foreground">WIFT Africa</span>
+            {/* <span className="text-xl font-bold text-foreground">WIFT Africa</span> */}
           </Link>
 
           {/* Error Card */}
@@ -181,9 +181,9 @@ function ResetPasswordContent() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <Link href="/" className="inline-flex items-center space-x-2 mb-8">
+        <Link href="/" className="flex items-center justify-center space-x-2 mb-8">
           <Logo className="h-10 w-auto" />
-          <span className="text-xl font-bold text-foreground">WIFT Africa</span>
+          {/* <span className="text-xl font-bold text-foreground">WIFT Africa</span> */}
         </Link>
 
         {/* Back to Login */}

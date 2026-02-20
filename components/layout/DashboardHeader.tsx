@@ -260,7 +260,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               </div>
 
               {/* remove  */}
-              {/* <SocketDebug /> */}
+              <SocketDebug />
               {/* Mobile Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
