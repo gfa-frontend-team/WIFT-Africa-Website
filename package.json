@@ -60,11 +60,16 @@
     "@vitejs/plugin-react": "^5.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "baseline-browser-mapping": "^2.9.19",
-    "eslint": "^4.1.1",
+    "eslint": "^10.0.1",
     "eslint-config-next": "^0.2.4",
     "jsdom": "^27.3.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.16"
+  },
+  "overrides": {
+    "minimatch": "^10.2.1",
+    "glob": "^11.0.0",
+    "rimraf": "^6.0.0"
   }
 }
