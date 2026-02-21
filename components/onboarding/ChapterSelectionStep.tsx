@@ -219,7 +219,7 @@ export default function ChapterSelectionStep({
               country={chapter.country}
               city={chapter.city}
               description={chapter.description}
-              memberCount={chapter.fixedMemberCount || 0}
+              memberCount={chapter.memberCount || 0}
               president={chapter.presidentName} // Mapped from provided structure in prompts (though prompt said presidentName, checking existing usage)
               // The user prompt said: "presidentName" for Onboarding vs "currentPresident" for General.
               // However, the interface in `lib/api/onboarding.ts` (implied) or usage in `ChapterSelectionStep` line 298 shows `chapter.currentPresident`.

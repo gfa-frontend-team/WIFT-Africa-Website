@@ -1,5 +1,5 @@
 import { FundingOpportunity } from '@/types'
-import { Calendar, DollarSign, ExternalLink, Globe, FileText, Info } from 'lucide-react'
+import { Calendar, DollarSign, ExternalLink, Globe, FileText, Info, MapPin } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -53,6 +53,14 @@ export function FundingCard({ opportunity }: FundingCardProps) {
                                 <div className="flex items-center text-foreground font-medium">
                                     <span className="w-20 shrink-0">Amount:</span>
                                     <span>{formattedAmount}</span>
+                                </div>
+                            )}
+
+                            {opportunity.region && (
+                                <div className="flex items-center">
+                                    <MapPin className="w-4 h-4 mr-2 text-primary" />
+                                    <span className="w-20 shrink-0">Region:</span>
+                                    <span className="text-foreground">{opportunity.region}</span>
                                 </div>
                             )}
 
@@ -123,6 +131,13 @@ export function FundingCard({ opportunity }: FundingCardProps) {
                                 <span className="text-sm text-muted-foreground">Type:</span>
                                 <span className="text-sm font-medium">{opportunity.applicationType}</span>
                             </div>
+                            {opportunity.region && (
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-primary" />
+                                    <span className="text-sm text-muted-foreground">Region:</span>
+                                    <span className="text-sm font-medium">{opportunity.region}</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Full Description */}

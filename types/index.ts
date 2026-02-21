@@ -43,11 +43,11 @@ export interface User {
   cvFileName?: string
   cvFileUrl?: string
   cvUploadedAt?: Date
-  chapter?:{
-    _id:string | undefined;
-    code:string;
-    country:string;
-    name:string
+  chapter?: {
+    _id: string | undefined;
+    code: string;
+    country: string;
+    name: string
   }
 
   username?: string
@@ -543,6 +543,7 @@ export interface FundingOpportunity {
   applicationLink?: string
   eligibility?: string
   criteria?: string
+  region?: string
   status: 'Open' | 'Closed' | 'Coming Soon'
   chapterId?: string
   createdAt: string
