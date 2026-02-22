@@ -4,9 +4,6 @@ import { FileText, Video, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
-import { useState,useEffect } from 'react'
-import { getThumbnails } from 'video-metadata-thumbnails';
-
 interface ResourceCardProps {
     resource: Resource
 }

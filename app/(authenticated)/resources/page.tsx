@@ -13,7 +13,6 @@ export default function ResourcesPage() {
   })
 
 
-  console.log(data,"data");
   
   // Handle Loading
   if (isLoading) {
