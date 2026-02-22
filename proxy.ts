@@ -1,8 +1,25 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isVercelDomain } from './lib/vercel';
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const host = request.headers.get('host');
+  const isVercel = isVercelDomain(host);  
+
+  const isOfficialDomain = !isVercel && !host?.includes('localhost')
+
+  console.log(isOfficialDomain,"isOfficialDomain")
+
+  // 1. LIST OF LOCKED ROUTES (Only restricted on Official Domain)
+  const lockedOnProduction = ["/messages","/resources","/chapters","/events","/opportunities"]
+
+  // If on Official Domain and trying to access a locked route, send to landing
+  if (isOfficialDomain && lockedOnProduction.some(route => pathname.startsWith(route))) {
+    return NextResponse.redirect(new URL('/feed', request.url))
+  }
+
+  // -
 
   // List of reserved routes that should NOT be treated as usernames
   const reservedRoutes = [
@@ -67,16 +84,16 @@ export function proxy(request: NextRequest) {
       return response
     }
   }
-  // 1. Define routes you want to "lock" completely for now
-  const lockedRoutes = ["/messages","/resources","/chapters"];
+  // // 1. Define routes you want to "lock" completely for now
+  // const lockedRoutes = ["/messages","/resources","/chapters"];
   
-  // 2. Check if the user is trying to access a locked route
-  const isLocked = lockedRoutes.some(route => pathname.startsWith(route));
+  // // 2. Check if the user is trying to access a locked route
+  // const isLocked = lockedRoutes.some(route => pathname.startsWith(route));
 
-  if (isLocked) {
-    // Redirect them to landing or a "coming soon" page
-    return NextResponse.redirect(new URL('/feed', request.url));
-  }
+  // if (!isVercel && isLocked) {
+  //   // Redirect them to landing or a "coming soon" page
+  //   return NextResponse.redirect(new URL('/feed', request.url));
+  // }
 
   // Since we use localStorage for tokens (not cookies), middleware can't check auth state
   // All auth checks are handled at the page level in useEffect hooks

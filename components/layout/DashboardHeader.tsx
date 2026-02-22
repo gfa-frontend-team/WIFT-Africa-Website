@@ -90,6 +90,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  // console.log(router)
   const { logout } = useAuth();
   const { access } = useFeatureAccess();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -106,6 +107,16 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const { width, height } = useSize(elementRef);
 
   const restrictTemp = (val:string)=>(["/messages","/opportunities","/resources","/chapters","/events"].includes(val))
+
+  const [isLocked, setIsLocked] = useState(false)
+
+  useEffect(() => {
+    const host = window.location.host
+    // Lock UI if it's the official domain (no 'vercel' and no 'localhost')
+    if (!host.includes('vercel') && !host.includes('localhost')) {
+      setIsLocked(true)
+    }
+  }, [])
   
 
   const { setSize } = useNavbar();
@@ -208,7 +219,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 const Icon = item.icon;
                 const isActive = isActiveRoute(item.href);
                 const hasAccess = access[item.requiredFeature];
-                const tempAcess = restrictTemp(item.href)
+                const tempAcess = restrictTemp(item.href) && isLocked
                 
 
                 return (

@@ -6,11 +6,16 @@ import { usePathname } from "next/navigation";
 import { Menu, X, Linkedin, Facebook, Instagram, Youtube } from "lucide-react";
 import { ModeToggle } from "@/components/shared/ModeToggle";
 import { Logo } from "@/components/shared/Logo";
+import { useProfileCountContext } from "@/hooks/useProfile";
 
 export default function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const isHome = pathname === '/';
+  const isHome = pathname === "/";
+
+  const { isAuthenticated } = useProfileCountContext();
+
+  console.log(isAuthenticated, "isAuthenticated");
 
   const navItems = [
     { path: "/about", label: "About Us" },
@@ -18,15 +23,18 @@ export default function LandingNavbar() {
     { path: "#benefits", label: "Benefits" },
   ];
 
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+  const handleSmoothScroll = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    path: string,
+  ) => {
     // If it's a page navigation (doesn't start with #), let it behave normally or use router
-    if (!path.startsWith('#')) {
+    if (!path.startsWith("#")) {
       setIsMobileMenuOpen(false);
       return;
     }
 
     e.preventDefault();
-    const targetId = path.replace('#', '');
+    const targetId = path.replace("#", "");
     const element = document.getElementById(targetId);
 
     if (element) {
@@ -36,7 +44,7 @@ export default function LandingNavbar() {
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
 
@@ -57,7 +65,7 @@ export default function LandingNavbar() {
           {/* Navigation Links - Desktop */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => {
-              const isHashLink = item.path.startsWith('#');
+              const isHashLink = item.path.startsWith("#");
 
               if (isHashLink && isHome) {
                 return (
@@ -138,12 +146,21 @@ export default function LandingNavbar() {
                 <Youtube className="h-4 w-4" />
               </a>
             </div>
-            <Link
-              href="/login"
-              className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors sm:px-4"
-            >
-              Sign In
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href="/feed"
+                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors sm:px-4"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors sm:px-4"
+              >
+                Sign In
+              </Link>
+            )}
             <Link
               href="/register"
               className="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors sm:px-4"
@@ -170,7 +187,7 @@ export default function LandingNavbar() {
           <div className="md:hidden border-t border-border py-4">
             <div className="space-y-2">
               {navItems.map((item) => {
-                const isHashLink = item.path.startsWith('#');
+                const isHashLink = item.path.startsWith("#");
 
                 if (isHashLink && isHome) {
                   return (
@@ -213,13 +230,22 @@ export default function LandingNavbar() {
 
               {/* Mobile Auth Links */}
               <div className="border-t border-border pt-4 mt-4 space-y-2">
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  Sign In
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    href={"/feed"}
+                    className="block px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                )}
                 <Link
                   href="/register"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -231,7 +257,9 @@ export default function LandingNavbar() {
 
               {/* Social Icons - Mobile */}
               <div className="border-t border-border pt-4 mt-4">
-                <p className="text-xs font-medium text-muted-foreground mb-3 px-4">Follow Us</p>
+                <p className="text-xs font-medium text-muted-foreground mb-3 px-4">
+                  Follow Us
+                </p>
                 <div className="flex items-center justify-center space-x-3 px-4">
                   <a
                     href="https://www.linkedin.com/company/wift-africa"

@@ -60,7 +60,7 @@ export function usePostMutations() {
       // 1. Cancel related queries
       await queryClient.cancelQueries({ queryKey: feedKeys.list(filters) })
       await queryClient.cancelQueries({ queryKey: ['saved-posts'] })
-      await queryClient.cancelQueries({ queryKey: ['saved-posts-count'] })
+      // await queryClient.cancelQueries({ queryKey: ['saved-posts-count'] })
 
       // 2. Snapshot previous values
       const previousFeed = queryClient.getQueryData(feedKeys.list(filters))
@@ -120,24 +120,28 @@ export function usePostMutations() {
       })
 
        // Optimistic Count Update
-       queryClient.setQueryData(['saved-posts-count'], (old: number | undefined) => {
-           if (typeof old === 'number') {
-                // Find post in feed to check current state, or assume toggle
-                // Since we don't have previous state easily here without looking it up,
-                // we might risk being off by 1 if we guess wrong. 
-                // A safer bet is to wait for invalidation, but user asked for optimistic.
-                // We'll trust the feed's previous state if available.
-                const feed: any = queryClient.getQueryData(feedKeys.list(filters))
-                let wasSaved = false
-                feed?.pages?.forEach((p: any) => p.posts?.forEach((post: Post) => {
-                    if (post.id === postId) wasSaved = post.isSaved
-                }))
-                return wasSaved ? old - 1 : old + 1
-           }
-           return old
-       })
+      //  queryClient.setQueryData(['saved-posts-count'], (old: number | undefined) => {
+      //      if (typeof old === 'number') {
+      //           // Find post in feed to check current state, or assume toggle
+      //           // Since we don't have previous state easily here without looking it up,
+      //           // we might risk being off by 1 if we guess wrong. 
+      //           // A safer bet is to wait for invalidation, but user asked for optimistic.
+      //           // We'll trust the feed's previous state if available.
+      //           const feed: any = queryClient.getQueryData(feedKeys.list(filters))
+      //           let wasSaved = false
+      //           feed?.pages?.forEach((p: any) => p.posts?.forEach((post: Post) => {
+      //               if (post.id === postId) wasSaved = post.isSaved
+      //           }))
+      //           return wasSaved ? old - 1 : old + 1
+      //      }
+      //      return old
+      //  })
 
       return { previousFeed }
+    },
+    onSuccess: ()=>{
+      // queryClient.invalidateQueries({ queryKey: ["saved-posts-count"] });
+      queryClient.invalidateQueries({ queryKey: ["saved-posts-count"] });
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(feedKeys.list(filters), context?.previousFeed)
@@ -146,7 +150,7 @@ export function usePostMutations() {
         // Invalidate everything to ensure eventual consistency
         queryClient.invalidateQueries({ queryKey: feedKeys.list(filters) })
         queryClient.invalidateQueries({ queryKey: ['saved-posts'] })
-        queryClient.invalidateQueries({ queryKey: ['saved-posts-count'] })
+        // queryClient.invalidateQueries({ queryKey: ['saved-posts-count'] })
      },
   })
 
