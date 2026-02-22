@@ -54,16 +54,16 @@ export function EventHero({ event }: EventHeroProps) {
                     {event.status === 'DRAFT' && <Badge variant="outline">Draft</Badge>}
                 </div>
 
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{event.title}</h1>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">{event.title}</h1>
 
                 <div className="grid gap-3 text-sm md:text-base">
                     <div className="flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-primary shrink-0" />
-                        <div>
+                        <div className='text-white'>
                             <div className="font-semibold">
                                 {format(startDate, 'EEEE, MMMM d, yyyy')}
                             </div>
-                            <div className="text-muted-foreground">
+                            <div className="text-white/80">
                                 {format(startDate, 'h:mm a')} - {format(endDate, 'h:mm a')}
                             </div>
                         </div>
@@ -72,10 +72,10 @@ export function EventHero({ event }: EventHeroProps) {
                     <div className="flex items-start gap-3">
                         <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
-                            <div className="font-semibold">
+                            <div className="font-semibold text-white">
                                 {isVirtual ? 'Virtual Event' : (event.location.address || 'Physical Location')}
                             </div>
-                            <div className="text-muted-foreground">
+                            <div className="text-white/80">
                                 {isVirtual 
                                     ? 'Link provided upon registration' 
                                     : [event.location.city, event.location.country].filter(Boolean).join(', ')

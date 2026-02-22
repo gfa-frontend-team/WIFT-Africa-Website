@@ -67,6 +67,16 @@ export function proxy(request: NextRequest) {
       return response
     }
   }
+  // 1. Define routes you want to "lock" completely for now
+  const lockedRoutes = ["/messages","/resources","/chapters"];
+  
+  // 2. Check if the user is trying to access a locked route
+  const isLocked = lockedRoutes.some(route => pathname.startsWith(route));
+
+  if (isLocked) {
+    // Redirect them to landing or a "coming soon" page
+    return NextResponse.redirect(new URL('/feed', request.url));
+  }
 
   // Since we use localStorage for tokens (not cookies), middleware can't check auth state
   // All auth checks are handled at the page level in useEffect hooks

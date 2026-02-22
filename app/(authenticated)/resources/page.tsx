@@ -12,6 +12,9 @@ export default function ResourcesPage() {
     queryFn: resourcesApi.getResources
   })
 
+
+  console.log(data,"data");
+  
   // Handle Loading
   if (isLoading) {
     return (

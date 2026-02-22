@@ -15,6 +15,8 @@ export function FundingList() {
         queryKey: ['funding-opportunities'],
         queryFn: () => fundingApi.getFundingOpportunities()
     })
+    console.log(data,"data");
+    
 
     // Handle Loading
     if (isLoading) {

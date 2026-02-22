@@ -48,6 +48,9 @@ export default function EventsPage() {
     chapterId: selectedChapterId !== 'all' ? selectedChapterId : undefined
   })
 
+  console.log(events);
+  
+
   const handlePrevious = () => {
     if (page > 1) setPage(p => p - 1)
   }

@@ -173,15 +173,13 @@ export default function LeftSidebar() {
                 </span>
               </Link>
 
-              <div className="flex items-center justify-between text-sm p-2 rounded-lg opacity-50">
-                <span className="text-muted-foreground flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {t("nav.events")}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {t("coming_soon")}
-                </span>
-              </div>
+                <Link
+                href="/events"
+                className="block text-sm text-muted-foreground p-2 rounded-lg"
+              >
+                {t("nav.events")}
+                {/* <span className="text-xs ml-2">{t('coming_soon')}</span> */}
+              </Link>
             </div>
           </div>
 

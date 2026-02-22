@@ -548,6 +548,7 @@ export interface FundingOpportunity {
   chapterId?: string
   createdAt: string
   updatedAt?: string
+  role?:string
 }
 
 export interface FundingListResponse {

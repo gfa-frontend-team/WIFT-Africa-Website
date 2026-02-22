@@ -1,8 +1,11 @@
+"use client"
 import { Resource, ResourceType } from '@/types'
 import { FileText, Video, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
+import { useState,useEffect } from 'react'
+import { getThumbnails } from 'video-metadata-thumbnails';
 
 interface ResourceCardProps {
     resource: Resource
@@ -11,13 +14,28 @@ interface ResourceCardProps {
 export function ResourceCard({ resource }: ResourceCardProps) {
     const Icon = resource.resourceType === ResourceType.VIDEO ? Video : FileText
 
+    // const [thumb, setThumb] = useState<string | null>(null);
+
+    const url = resource.fileUrl
+
+   const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+  
+  let thumbSrc = '';
+
+if (isYouTube) {
+  const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+  thumbSrc = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+} 
+
+    console.log(thumbSrc,"resource.thumbnailUrl")
+
     return (
         <div className="bg-card border border-border rounded-lg overflow-hidden flex flex-col hover:shadow-md transition-shadow group">
             {/* Thumbnail / Icon Area */}
             <div className="aspect-video bg-muted flex items-center justify-center relative">
-                {resource.thumbnailUrl ? (
+                {resource.thumbnailUrl ||thumbSrc ? (
                     <img
-                        src={resource.thumbnailUrl}
+                        src={resource.thumbnailUrl || thumbSrc}
                         alt={resource.title}
                         className="w-full h-full object-cover"
                     />

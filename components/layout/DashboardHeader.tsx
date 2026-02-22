@@ -105,6 +105,9 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const elementRef = useRef(null);
   const { width, height } = useSize(elementRef);
 
+  const restrictTemp = (val:string)=>(["/messages","/opportunities","/resources","/chapters","/events"].includes(val))
+  
+
   const { setSize } = useNavbar();
 
   useEffect(() => {
@@ -205,6 +208,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 const Icon = item.icon;
                 const isActive = isActiveRoute(item.href);
                 const hasAccess = access[item.requiredFeature];
+                const tempAcess = restrictTemp(item.href)
+                
 
                 return (
                   <Link
@@ -226,10 +231,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                     <Icon
                       className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${!hasAccess ? "opacity-50" : ""}`}
                     />
-                    <span className={!hasAccess ? "opacity-50" : ""}>
+                    <span className={(tempAcess || !hasAccess) ? "opacity-50" : ""}>
                       {t(item.name)}
                     </span>
-                    {!hasAccess && <Lock className="h-3 w-3 ml-1 opacity-50" />}
+                    {(tempAcess || !hasAccess) && <Lock className="h-3 w-3 ml-1 opacity-50" />}
                   </Link>
                 );
               })}
