@@ -23,7 +23,7 @@ export default function EventsPage() {
   const [view, setView] = useState<'list' | 'calendar'>('list')
 
   // Filtering
-  const [selectedMonth, setSelectedMonth] = useState<Date | null>(new Date()) // Current month by default
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(null) // Current month by default
   const [selectedChapterId, setSelectedChapterId] = useState<string>('all')
 
   // Generate next 12 months for the filter
@@ -48,7 +48,7 @@ export default function EventsPage() {
     chapterId: selectedChapterId !== 'all' ? selectedChapterId : undefined
   })
 
-  console.log(events);
+  console.log(month,year);
   
 
   const handlePrevious = () => {
@@ -122,7 +122,7 @@ export default function EventsPage() {
           {/* Month Filter */}
           <div className="w-full sm:w-[200px]">
             <Select
-              value={selectedMonth ? selectedMonth.toISOString() : 'all'}
+              value={selectedMonth?.toISOString()}
               onValueChange={handleMonthChange}
             >
               <SelectTrigger>
