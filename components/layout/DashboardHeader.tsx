@@ -242,10 +242,13 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                     <Icon
                       className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${!hasAccess ? "opacity-50" : ""}`}
                     />
-                    <span className={(tempAcess || !hasAccess) ? "opacity-50" : ""}>
+
+                    {/* later change to tempAccess instead of false */}
+                    <span className={(false || !hasAccess) ? "opacity-50" : ""}>
                       {t(item.name)}
                     </span>
-                    {(tempAcess || !hasAccess) && <Lock className="h-3 w-3 ml-1 opacity-50" />}
+                    {/* later change to tempAccess instead of false */}
+                    {(false || !hasAccess) && <Lock className="h-3 w-3 ml-1 opacity-50" />}
                   </Link>
                 );
               })}

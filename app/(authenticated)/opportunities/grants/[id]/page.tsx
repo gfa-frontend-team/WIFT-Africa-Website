@@ -25,13 +25,27 @@ function formatRoleName(role: TargetRole): string {
 }
 
 export default function FundingDetailsPage() {
+<<<<<<< Updated upstream
     const params = useParams()
     const id = params.id as string
     
     const { data: response, isLoading, isError, error } = useFundingOpportunity(id)
 
+=======
+
+     const params = useParams()
+       const id = params.id as string
+    const { data: response, isLoading, isError, error } = useQuery<FundingDetailResponse>({
+        queryKey: ['funding-opportunity', params.id],
+        queryFn: () => fundingApi.getFundingOpportunity(id)
+    })
+
+    
+    
+>>>>>>> Stashed changes
     // Extract the opportunity from the response
     const opportunity = response?.data
+    console.log(opportunity,"param");
 
     // Loading state
     if (isLoading) {

@@ -38,7 +38,7 @@ export default function MemberCard({
   const router = useRouter();
 
 
-   const isOnline = useIsUserOnline(member.id);
+   const isOnline = useIsUserOnline(member?.id);
   const { sendRequest, useConnectionStatus, isSending, isResponding } =
     useConnections();
 

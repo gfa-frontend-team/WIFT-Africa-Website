@@ -217,8 +217,10 @@ export const useNotifications = () => {
     useQuery({
       queryKey: ["unreadCount"],
       queryFn: notificationsApi.getUnreadCount,
+      
       refetchInterval: 1000 * 60 * 5, // 5 minutes
       staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus:true
     });
 
   const markAsRead = useMutation({

@@ -22,16 +22,16 @@ export function EventHero({ event }: EventHeroProps) {
     <div className="relative bg-muted/30">
         {/* Cover Image Background (simulated) */}
         <div className="absolute inset-0 overflow-hidden">
-             {event.coverImage && (
                 <>
-                <div className="absolute inset-0 bg-black/50 z-10" />
+                <div className="absolute inset-0 bg-black/70 z-10" />
+             {event.coverImage && (
                 <img 
                     src={event.coverImage} 
                     alt="Background" 
                     className="w-full h-full object-cover blur-sm"
                 />
+            )}
                 </>
-             )}
         </div>
 
       <div className="relative z-20 container mx-auto px-4 py-8 md:py-12 max-w-7xl">

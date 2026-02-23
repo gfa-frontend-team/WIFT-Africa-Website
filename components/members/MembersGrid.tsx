@@ -19,6 +19,9 @@ export default function MembersGrid({
   const { useRequests, respondToRequest, isResponding } = useConnections()
   const { data: incomingRequests } = useRequests('incoming')
 
+  console.log(incomingRequests,"incomingRequests");
+  
+
   const handleAccept = async (requestId: string) => {
     try {
         await respondToRequest(requestId, 'accept')
@@ -59,14 +62,14 @@ export default function MembersGrid({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {members.map((member) => (
+      {members?.map((member) => (
         <MemberCard 
           key={member.id} 
           member={member} 
           isConnecting={connectingId === member.id || isResponding}
           onAccept={handleAccept}
           incomingRequest={incomingRequests?.requests?.find(
-            r => r.sender.id === member.id && r.status === 'PENDING'
+            r => r?.sender.id === member.id && r.status === 'PENDING'
           )}
         />
       ))}

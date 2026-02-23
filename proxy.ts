@@ -7,17 +7,17 @@ export function proxy(request: NextRequest) {
   const host = request.headers.get('host');
   const isVercel = isVercelDomain(host);  
 
-  const isOfficialDomain = !isVercel && !host?.includes('localhost')
+  // const isOfficialDomain = !isVercel && !host?.includes('localhost')
 
-  console.log(isOfficialDomain,"isOfficialDomain")
+  // console.log(isOfficialDomain,"isOfficialDomain")
 
-  // 1. LIST OF LOCKED ROUTES (Only restricted on Official Domain)
-  const lockedOnProduction = ["/messages","/resources","/chapters","/events","/opportunities"]
+  // // 1. LIST OF LOCKED ROUTES (Only restricted on Official Domain)
+  // const lockedOnProduction = ["/messages","/resources","/chapters","/events","/opportunities"]
 
-  // If on Official Domain and trying to access a locked route, send to landing
-  if (isOfficialDomain && lockedOnProduction.some(route => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL('/feed', request.url))
-  }
+  // // If on Official Domain and trying to access a locked route, send to landing
+  // if (isOfficialDomain && lockedOnProduction.some(route => pathname.startsWith(route))) {
+  //   return NextResponse.redirect(new URL('/feed', request.url))
+  // }
 
   // -
 
