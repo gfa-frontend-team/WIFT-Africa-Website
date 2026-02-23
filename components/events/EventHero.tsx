@@ -1,8 +1,8 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Calendar, Clock, MapPin } from 'lucide-react'
-import { Event, LocationType } from '@/types'
+import { Calendar, MapPin } from 'lucide-react'
+import { Event, LocationType, EventStatus } from '@/types'
 import { EventTypeBadge } from './EventTypeBadge'
 import { Badge } from '@/components/ui/badge'
 
@@ -14,6 +14,9 @@ export function EventHero({ event }: EventHeroProps) {
   const startDate = new Date(event.startDate)
   const endDate = new Date(event.endDate)
   const isVirtual = event.location.type === LocationType.VIRTUAL
+  
+  const isCancelled = event.status === EventStatus.CANCELLED || event.isCancelled
+  const isCompleted = event.status === EventStatus.COMPLETED
 
   return (
     <div className="relative bg-muted/30">
@@ -50,8 +53,16 @@ export function EventHero({ event }: EventHeroProps) {
             <div className="flex-1 space-y-4 text-foreground md:text-foreground">
                 <div className="flex flex-wrap gap-2">
                     <EventTypeBadge type={event.type} />
-                    {event.status === 'CANCELLED' && <Badge variant="destructive">Cancelled</Badge>}
-                    {event.status === 'DRAFT' && <Badge variant="outline">Draft</Badge>}
+                    {isCancelled && (
+                      <Badge variant="destructive" className="font-semibold">
+                        CANCELLED
+                      </Badge>
+                    )}
+                    {isCompleted && (
+                      <Badge variant="secondary" className="font-semibold">
+                        COMPLETED
+                      </Badge>
+                    )}
                 </div>
 
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">{event.title}</h1>

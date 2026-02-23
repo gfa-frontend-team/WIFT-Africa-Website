@@ -1,10 +1,16 @@
 import { apiClient } from './client'
-import { FundingListResponse, FundingDetailResponse } from '@/types'
+import { FundingListResponse, FundingDetailResponse, TargetRole } from '@/types'
 
 export const fundingApi = {
-    // Get all funding opportunities
-    getFundingOpportunities: async (chapterId?: string): Promise<FundingListResponse> => {
-        const params = chapterId ? { chapterId } : {}
+    // Get all funding opportunities with optional filters
+    getFundingOpportunities: async (filters?: {
+        chapterId?: string
+        targetRole?: TargetRole
+    }): Promise<FundingListResponse> => {
+        const params: Record<string, string> = {}
+        if (filters?.chapterId) params.chapterId = filters.chapterId
+        if (filters?.targetRole) params.targetRole = filters.targetRole
+        
         return apiClient.get<FundingListResponse>('/funding-opportunities', { params })
     },
 

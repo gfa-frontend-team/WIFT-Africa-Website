@@ -22,7 +22,7 @@ export function useChapterEvents(chapterId: string) {
 export function useChapterFunding(chapterId: string) {
     return useQuery({
         queryKey: chapterKeys.funding(chapterId),
-        queryFn: () => fundingApi.getFundingOpportunities(chapterId),
+        queryFn: () => fundingApi.getFundingOpportunities({ chapterId }),
         enabled: !!chapterId,
         staleTime: 1000 * 60 * 5, // 5 minutes
     })
