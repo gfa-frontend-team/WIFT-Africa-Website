@@ -8,7 +8,13 @@ export function useEventRSVP(eventId: string) {
   const queryClient = useQueryClient()
 
   const rsvpMutation = useMutation({
-    mutationFn: (status: RSVPStatus) => eventsApi.rsvpEvent(eventId, status),
+    mutationFn: (status: RSVPStatus) => {
+      // Validate status is only GOING or INTERESTED
+      if (status !== RSVPStatus.GOING && status !== RSVPStatus.INTERESTED) {
+        throw new Error('Invalid RSVP status. Use GOING or INTERESTED.')
+      }
+      return eventsApi.rsvpEvent(eventId, status)
+    },
     onMutate: async (newStatus) => {
       // Cancel refetches to avoid overwriting optimism
       await queryClient.cancelQueries({ queryKey: eventKeys.detail(eventId) })
@@ -23,18 +29,17 @@ export function useEventRSVP(eventId: string) {
             if (!old) return old
             
             // Calculate attendance change
-            const isLeaving = newStatus === RSVPStatus.NOT_GOING
             const wasGoing = old.myRSVP === RSVPStatus.GOING
             const isNowGoing = newStatus === RSVPStatus.GOING
             
             let attendeesDelta = 0
-            if (wasGoing && !isNowGoing) attendeesDelta = -1
-            if (!wasGoing && isNowGoing) attendeesDelta = 1
+            if (wasGoing && !isNowGoing) attendeesDelta = -1  // GOING → INTERESTED
+            if (!wasGoing && isNowGoing) attendeesDelta = 1   // INTERESTED → GOING or null → GOING
             
             return {
                 ...old,
                 myRSVP: newStatus,
-                currentAttendees: (old.currentAttendees || 0) + attendeesDelta
+                currentAttendees: Math.max(0, (old.currentAttendees || 0) + attendeesDelta)
             }
         })
       }
@@ -51,14 +56,14 @@ export function useEventRSVP(eventId: string) {
     onSuccess: (data, newStatus) => {
       const messages = {
         [RSVPStatus.GOING]: "You're going to this event!",
-        [RSVPStatus.INTERESTED]: "Added to your interested events.",
-        [RSVPStatus.NOT_GOING]: "RSVP removed."
+        [RSVPStatus.INTERESTED]: "Added to your interested events."
       }
       toast.success(messages[newStatus] || "RSVP updated successfully")
       
       // Invalidate to ensure sync
       queryClient.invalidateQueries({ queryKey: eventKeys.detail(eventId) })
       queryClient.invalidateQueries({ queryKey: eventKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: ['my-events-count'] })
     }
   })
 
@@ -91,6 +96,8 @@ export function useEventRSVP(eventId: string) {
     onSuccess: () => {
         toast.success("RSVP cancelled")
         queryClient.invalidateQueries({ queryKey: eventKeys.detail(eventId) })
+        queryClient.invalidateQueries({ queryKey: eventKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: ['my-events-count'] })
     }
   })
 

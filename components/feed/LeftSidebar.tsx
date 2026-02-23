@@ -15,6 +15,7 @@ import {
 import Avatar from "@/components/ui/Avatar";
 import { useSavedPostsCount } from "@/lib/hooks/useSavedPosts";
 import { useConnections } from "@/lib/hooks/useConnections";
+import { useMyEventsCount } from "@/lib/hooks/useMyEvents";
 // import { useProfileAnalytics, useProfileViewCount } from '@/lib/hooks/useProfileAnalytics'
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import { getProfileUrl } from "@/lib/utils/routes";
@@ -28,6 +29,7 @@ export default function LeftSidebar() {
   const { data: savedCount } = useSavedPostsCount();
   const { useStats } = useConnections();
   const { data: stats } = useStats();
+  const { data: myEventsCount } = useMyEventsCount();
   // const { profileViews, isLoading: isLoadingAnalytics } = useProfileAnalytics()
   const { useUserPostsStats } = useAnalytics();
   const { data: myPostsStats } = useUserPostsStats();
@@ -173,12 +175,17 @@ export default function LeftSidebar() {
                 </span>
               </Link>
 
-                <Link
-                href="/events"
-                className="block text-sm text-muted-foreground p-2 rounded-lg"
+              <Link
+                href="/events/my-rsvps"
+                className="flex items-center justify-between text-sm hover:bg-accent p-2 rounded-lg transition-colors"
               >
-                {t("nav.events")}
-                {/* <span className="text-xs ml-2">{t('coming_soon')}</span> */}
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  {t("nav.events")}
+                </span>
+                <span className="font-semibold text-foreground">
+                  {myEventsCount?.total ?? "—"}
+                </span>
               </Link>
             </div>
           </div>

@@ -273,8 +273,7 @@ export enum LocationType {
 
 export enum RSVPStatus {
   GOING = 'GOING',
-  INTERESTED = 'INTERESTED',
-  NOT_GOING = 'NOT_GOING'
+  INTERESTED = 'INTERESTED'
 }
 
 export interface EventLocation {
@@ -284,6 +283,14 @@ export interface EventLocation {
   country?: string
   virtualUrl?: string  // Changed from virtualLink to match API
   instructions?: string
+}
+
+export enum EventStatus {
+  DRAFT = 'DRAFT',
+  WAITING = 'WAITING',
+  PUBLISHED = 'PUBLISHED',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED'
 }
 
 export interface Event {
@@ -318,9 +325,10 @@ export interface Event {
   currentAttendees?: number
   tags?: string[]
   myRSVP?: RSVPStatus | null
-  status?: string
+  status: EventStatus  // Now required with proper enum
   isPublished?: boolean
   isCancelled?: boolean
+  cancellationReason?: string
   createdAt: string
   updatedAt: string
   __v?: number  // MongoDB version field
@@ -530,25 +538,49 @@ export interface SavedMentorshipListResponse {
 // FUNDING & GRANTS
 // ============================================
 
+export enum TargetRole {
+  PRODUCER = 'PRODUCER',
+  DIRECTOR = 'DIRECTOR',
+  WRITER = 'WRITER',
+  ACTRESS = 'ACTRESS',
+  CREW = 'CREW',
+  BUSINESS = 'BUSINESS',
+  ALL = 'ALL'
+}
+
+export enum FundingType {
+  GRANT = 'Grant',
+  FUND = 'Fund'
+}
+
+export enum ApplicationType {
+  REDIRECT = 'Redirect',
+  INTERNAL = 'Internal'
+}
+
+export enum FundingStatus {
+  OPEN = 'Open',
+  CLOSED = 'Closed'
+}
+
 export interface FundingOpportunity {
   id?: string
   _id?: string
+  targetRoles: TargetRole[]
+  customRoles?: string[]
+  fundingType: FundingType
   name: string
-  fundingType: string // e.g., 'Grant', 'Residency'
-  applicationType: 'Direct' | 'Redirect'
+  description: string
   deadline: string
-  description?: string
-  amount?: string
-  currency?: string
+  region: string
+  applicationType: ApplicationType
   applicationLink?: string
-  eligibility?: string
-  criteria?: string
-  region?: string
-  status: 'Open' | 'Closed' | 'Coming Soon'
+  notes?: string
   chapterId?: string
+  createdBy?: string
+  status: FundingStatus
   createdAt: string
-  updatedAt?: string
-  role?:string
+  updatedAt: string
 }
 
 export interface FundingListResponse {

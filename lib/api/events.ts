@@ -17,6 +17,13 @@ export interface EventFilters {
   year?: number
 }
 
+export interface MyRSVPsResponse {
+  events?: Event[]
+  total: number
+  going: number
+  interested: number
+}
+
 export const eventsApi = {
   // Get list of events with filters
   getEvents: async (filters: EventFilters = {}): Promise<EventsListResponse> => {
@@ -41,5 +48,14 @@ export const eventsApi = {
   // Cancel RSVP
   cancelRsvp: async (id: string): Promise<{ message: string }> => {
     return apiClient.delete(`/events/${id}/rsvp`)
+  },
+
+  // Get user's RSVP'd events
+  getMyRSVPs: async (countOnly = true, status?: RSVPStatus): Promise<MyRSVPsResponse> => {
+    const params = new URLSearchParams()
+    if (countOnly) params.append('countOnly', 'true')
+    if (status) params.append('status', status)
+    
+    return apiClient.get<MyRSVPsResponse>(`/events/my-rsvps?${params}`)
   }
 }
